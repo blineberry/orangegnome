@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Additional items that pop up
+.DS_Store
+.vscode/

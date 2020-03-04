@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<link rel="icon" href="{{ card.photoUrl }}" />
+<link rel="apple-touch-icon-precomposed" href="{{ card.photoUrl }}" />
+<meta name="mobile-web-app-capable" content="yes" />
+{% endblock %}
+
+{% block body %}
+<div class="h-card">
+    <img class="u-photo" src="{{ card.photoUrl }}" alt="{{ card.name }}" />
+    <h1 class="p-name">{{ card.name }}</h1>
+    <a rel="me" href="{{ card.url }}" class="u-url u-uid">{{ card.urlDisplay }}</h2>
+    {% if card.otherProfiles %}    
+    <ul>
+    {% for profile in card.otherProfiles %}
+        <li><a rel="me" href="{{ profile.url }}">{{ profile.urlDisplay }}</a></li>
+    {% endfor %} 
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}
