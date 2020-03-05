@@ -15,10 +15,40 @@ Install dependencies:
 pip3 install -r requirements.txt
 ```
 
+Copy `example.env` and rename to `.env`. Supply values in accordance with [django-environ](https://django-environ.readthedocs.io/en/latest/).
+
 # Deploying
 
 ## Dreamhost
-1. Follow the instructions to enable Passenger on the domain.
-2. Install Python 3.7.6 following these instructions.
-3. Install a virtual environment following these instructions.
-4. Follow the instructions here to get Django going on Dreamhost, but instead of installing Django and creating a new project, `git clone` this repository and `pip3 install -r requirements.txt`
+
+### Initial deploy
+[Follow these instructions to create a Django 2 project](https://help.dreamhost.com/hc/en-us/articles/216385637-How-do-I-enable-Passenger-on-my-domain-), but instead of installing Django and creating a new project, `git clone` this repository and `pip3 install - r requirements.txt`.
+
+A working `passenger_wsgi.py` file looks something like this
+```
+import sys, os
+INTERP = "/home/USERNAME/SITENAME.com/venv/bin/python3"
+#INTERP is present twice so that the new python interpreter 
+#knows the actual executable path 
+if sys.executable != INTERP: os.execl(INTERP, INTERP, *sys.argv)
+
+cwd = os.getcwd()
+sys.path.append(cwd)
+sys.path.append(cwd + '/PROJECTNAME')  #You must add your project here
+
+sys.path.insert(0,cwd+'/venv/bin')
+sys.path.insert(0,cwd+'/venv/lib/python3.7/site-packages')
+
+os.environ['DJANGO_SETTINGS_MODULE'] = "PROJECTNAME.settings"
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+```
+
+### Updates
+To deploy updates:
+1. `git fetch` and `git pull` to update the codebase on the server
+2. Activate the virtual environment
+3. Change to the project directory 
+4. Run `python3 manage.py collectstatic` (is this a required step?)
+5. Change to the site directory
+6. Run `touch tmp/restart.txt` to restart Passenger
