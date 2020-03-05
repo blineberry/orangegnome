@@ -44,6 +44,8 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 ```
 
+In the project directory, copy `example.env` to `.env` and supply the production values.
+
 ### Updates
 To deploy updates:
 1. `git fetch` and `git pull` to update the codebase on the server
