@@ -10,9 +10,9 @@
 <div class="h-card">
     <img width="128" height="128" class="u-photo" src="{{ owner.photo.url }}" alt="{{ owner.name }}" />
     <h1 class="p-name">{{ owner.name }}</h1>
-    <a rel="me" href="{{ owner.url }}" class="u-url u-uid">{{ owner.urlDisplay }}</a>
+    <a rel="me" href="{{ owner.url }}" class="u-url u-uid">{{ owner.url_display }}</a>
     <ul>
-    {% for profile in owner.profile_set.all %}
+    {% for profile in owner.linkedprofile_set.all %}
         <li><a rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
     {% endfor %} 
     </ul>

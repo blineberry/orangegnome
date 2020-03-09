@@ -1,13 +1,13 @@
 from django.contrib import admin
-from .models import Person, Profile
+from .models import Profile, LinkedProfile
 
-class ProfileInline(admin.TabularInline):
-    model = Profile
+class LinkedProfileInline(admin.TabularInline):
+    model = LinkedProfile
 #    extra = 3
 
-class PersonAdmin(admin.ModelAdmin):
-    inlines = [ProfileInline]
+class ProfileAdmin(admin.ModelAdmin):
+    inlines = [LinkedProfileInline]
 
 
 # Register your models here.
-admin.site.register(Person, PersonAdmin)
+admin.site.register(Profile, ProfileAdmin)
