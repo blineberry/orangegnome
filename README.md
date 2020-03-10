@@ -50,7 +50,7 @@ In the project directory, copy `example.env` to `.env` and supply the production
 To deploy updates:
 1. `git fetch` and `git pull` to update the codebase on the server
 2. Activate the virtual environment
-3. Change to the project directory 
-4. Run `python3 manage.py collectstatic` (is this a required step?)
-5. Change to the site directory
-6. Run `touch tmp/restart.txt` to restart Passenger
+3. Update `.env` as necessary from the update
+4. Run `manage.py migrate` from the project directory
+4. Run `manage.py collectstatic` from the project directory (is this a required step?)
+6. Run `touch tmp/restart.txt` from the site root to restart Passenger
