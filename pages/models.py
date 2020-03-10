@@ -15,6 +15,7 @@ class Profile(models.Model):
     url_display = models.CharField(max_length=80, null=True)
     photo = models.ImageField(null=True)
     is_owner = models.BooleanField(default=False)
+    short_bio = models.CharField(max_length=160, null=True)
 
     objects = ProfileManager()
 
