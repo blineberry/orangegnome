@@ -1,22 +1,20 @@
 {% extends 'base.html' %}
 
 {% block meta %}
-<link rel="icon" href="{{ card.photoUrl }}" />
-<link rel="apple-touch-icon-precomposed" href="{{ card.photoUrl }}" />
+<link rel="icon" href="{{ owner.photo.url }}" />
+<link rel="apple-touch-icon-precomposed" href="{{ owner.photo.url }}" />
 <meta name="mobile-web-app-capable" content="yes" />
 {% endblock %}
 
 {% block body %}
 <div class="h-card">
-    <img class="u-photo" src="{{ card.photoUrl }}" alt="{{ card.name }}" />
-    <h1 class="p-name">{{ card.name }}</h1>
-    <a rel="me" href="{{ card.url }}" class="u-url u-uid">{{ card.urlDisplay }}</h2>
-    {% if card.otherProfiles %}    
+    <img width="128" height="128" class="u-photo" src="{{ owner.photo.url }}" alt="{{ owner.name }}" />
+    <h1 class="p-name">{{ owner.name }}</h1>
+    <a rel="me" href="{{ owner.url }}" class="u-url u-uid">{{ owner.url_display }}</a>
     <ul>
-    {% for profile in card.otherProfiles %}
-        <li><a rel="me" href="{{ profile.url }}">{{ profile.urlDisplay }}</a></li>
+    {% for profile in owner.linkedprofile_set.all %}
+        <li><a rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
     {% endfor %} 
     </ul>
-    {% endif %}
 </div>
 {% endblock %}
