@@ -1,5 +1,5 @@
 from django.db import models
-from pages.models import Profile
+from profiles.models import Profile
 from django.urls import reverse
 
 # Create your models here.
