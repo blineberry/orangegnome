@@ -5,6 +5,8 @@ django-environ==0.4.5
 isort==4.3.21
 lazy-object-proxy==1.4.3
 mccabe==0.6.1
+mysqlclient==1.4.6
+persisting-theory==0.2.1
 Pillow==7.0.0
 pylint==2.4.4
 pytz==2019.3
