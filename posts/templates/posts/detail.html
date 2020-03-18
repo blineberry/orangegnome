@@ -2,13 +2,13 @@
 
 {% block body %}
 <article id="post-{{post.id}}" class="h-entry post post-{{post.id}}">
-    <h1 class="post-title p-name">{{ post.name }}</h1>
-    <div class="post-meta">Published <time class="dt-published" datetime="{{ post.published }}">{{ post.published }}</time> in: <a href="{{ post.category.get_absolute_url }}" rel="category tag">{{ post.category.title }}</a></div>
-    <div class="e-content post-content">{{ post.content }}</div>
+    <h1 class="post-title p-name">{{ post.title }}</h1>
+    <div class="post-meta">Published <time class="dt-published" datetime="{{ post.published }}">{{ post.published }}</time> in: <a href="{{ post.category.get_absolute_url }}" rel="category tag">{{ post.category.name }}</a></div>
+    <div class="e-content post-content">{{ post.content|safe }}</div>
     <div class="post-meta">Tags:
         <ul>
         {% for tag in post.tags.all %}
-            <li><a href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.title }}</a></li>
+            <li><a href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
         {% endfor %}
         </ul>
     </div>

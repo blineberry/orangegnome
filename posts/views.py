@@ -37,10 +37,10 @@ def detail(request, id, slug):
     return render_or_redirect(id, slug, Post, lambda post: render(request, 'posts/detail.html', { 'post': post }))
 
 def category(request, id, slug):
-    return render_or_redirect(id, slug, Category, lambda category: render_index(request, category.posts.order_by('-published').all(), category.title))
+    return render_or_redirect(id, slug, Category, lambda category: render_index(request, category.posts.order_by('-published').all(), category.name))
 
 def tag(request, id, slug):
-    return render_or_redirect(id, slug, Tag, lambda tag: render_index(request, tag.posts.order_by('-published').all(), tag.title))
+    return render_or_redirect(id, slug, Tag, lambda tag: render_index(request, tag.posts.order_by('-published').all(), tag.name))
 
 def day(request, year, month, day):
     try:
