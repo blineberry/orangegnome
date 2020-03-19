@@ -2,12 +2,30 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>{{page_title|default:"Orange Gnome"}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <link rel="icon" href="{{ site_owner.photo.url }}" />
+    <link rel="apple-touch-icon-precomposed" href="{{ site_owner.photo.url }}" />
     {% block meta %}
     {% endblock %}
 </head>
 <body>
+    <header>
+        <div class="h-card {% block hcard_class %}{% endblock %}">
+            <a rel="me" href="{% url 'home' %}" class="u-url u-uid"><img width="128" height="128" class="u-photo" src="{{ site_owner.photo.url }}" alt="{{ site_owner.name }}" /></a>
+            <h1 class="p-name">{{ site_owner.name }}</h1>
+            {% block hcard %}
+            {% endblock %}
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'posts:index' %}">Posts</a></li>
+            </ul>
+        </nav>
+    </header>
     {% block body %}
     {% endblock %}
 </body>

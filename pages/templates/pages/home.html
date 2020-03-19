@@ -1,21 +1,20 @@
 {% extends 'base.html' %}
 
 {% block meta %}
-<link rel="icon" href="{{ owner.photo.url }}" />
-<link rel="apple-touch-icon-precomposed" href="{{ owner.photo.url }}" />
-<meta name="mobile-web-app-capable" content="yes" />
+<link rel="icon" href="{{ site_owner.photo.url }}" />
+<link rel="apple-touch-icon-precomposed" href="{{ site_owner.photo.url }}" />
 {% endblock %}
 
 {% block body %}
-<div class="h-card">
-    <img width="128" height="128" class="u-photo" src="{{ owner.photo.url }}" alt="{{ owner.name }}" />
-    <h1 class="p-name">{{ owner.name }}</h1>
-    <p class="p-note">{{ owner.short_bio }}</p>
-    <a rel="me" href="{{ owner.url }}" class="u-url u-uid">{{ owner.url_display }}</a>
-    <ul>
-    {% for profile in owner.linkedprofile_set.all %}
-        <li><a rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
-    {% endfor %} 
-    </ul>
-</div>
+    <div class="h-card">
+        <img width="128" height="128" class="u-photo" src="{{ site_owner.photo.url }}" alt="{{ site_owner.name }}" />
+        <h1 class="p-name">{{ site_owner.name }}</h1>
+        <p class="p-note">{{ site_owner.short_bio }}</p>
+        <a rel="me" href="{{ site_owner.url }}" class="u-url u-uid">{{ site_owner.url_display }}</a>
+        <ul>
+        {% for profile in site_owner.linkedprofile_set.all %}
+            <li><a rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
+        {% endfor %} 
+        </ul>
+    </div>
 {% endblock %}

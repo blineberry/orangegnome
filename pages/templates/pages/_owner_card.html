@@ -1,0 +1,11 @@
+<div class="h-card">
+    <img width="128" height="128" class="u-photo" src="{{ owner.photo.url }}" alt="{{ owner.name }}" />
+    <h1 class="p-name">{{ owner.name }}</h1>
+    <p class="p-note">{{ owner.short_bio }}</p>
+    <a rel="me" href="{{ owner.url }}" class="u-url u-uid">{{ owner.url_display }}</a>
+    <ul>
+    {% for profile in owner.linkedprofile_set.all %}
+        <li><a rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
+    {% endfor %} 
+    </ul>
+</div>
