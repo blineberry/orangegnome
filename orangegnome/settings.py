@@ -37,6 +37,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 # Application definition
 
 INSTALLED_APPS = [
+    'home.apps.HomeConfig',
     'pages.apps.PagesConfig',
     'profiles.apps.ProfilesConfig',
     'posts.apps.PostsConfig',
