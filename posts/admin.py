@@ -4,9 +4,11 @@ from django.utils import timezone
 
 class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = { 'slug': ('title',)}
+    readonly_fields = ('published',)
 
     def save_model(self, request, obj, form, change):
         if not obj.is_published:
+            obj.published = None
             return super().save_model(request, obj, form, change)
         
         if 'is_published' not in form.changed_data:
