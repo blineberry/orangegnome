@@ -3,12 +3,13 @@
 {% block body %}
 <article id="post-{{post.id}}" class="h-entry post post-{{post.id}}">
     <h1 class="post-title p-name">{{ post.title }}</h1>
-    <div class="post-meta">Published <time class="dt-published" datetime="{{ post.published|date:'c' }}">{{ post.published }}</time> in: <a href="{{ post.category.get_absolute_url }}" rel="category tag">{{ post.category.name }}</a></div>
     <div class="e-content post-content">{{ post.content|safe }}</div>
+    <div class="post-meta">Permalink: <a class="u-url" href="{{ post.get_absolute_url }}">{{ request.get_host }}{{ post.get_absolute_url }}</a></div>
+    <div class="post-meta">Published by <span class="p-author h-card">{{ site_owner.name }}</span> on <time class="dt-published" datetime="{{ post.published|date:'c' }}"><a class="p-category" href="{% url 'posts:month' post.published|date:'Y' post.published|date:'m' %}">{{ post.published|date:'F' }}</a> <a href="{% url 'posts:day' post.published|date:'Y' post.published|date:'m' post.published|date:'d' %}">{{ post.published|date:'j' }}</a>, <a href="{% url 'posts:year' post.published|date:'Y' %}">{{ post.published|date:'Y' }}</a></time> in <a href="{{ post.category.get_absolute_url }}" rel="category tag">{{ post.category.name }}</a></div>
     <div class="post-meta">Tags:
         <ul>
         {% for tag in post.tags.all %}
-            <li><a href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
+            <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
         {% endfor %}
         </ul>
     </div>
