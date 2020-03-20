@@ -3,6 +3,8 @@ from .models import Post, Category, Tag
 from django.utils import timezone
 
 class PostAdmin(admin.ModelAdmin):
+    prepopulated_fields = { 'slug': ('title',)}
+
     def save_model(self, request, obj, form, change):
         if not obj.is_published:
             return super().save_model(request, obj, form, change)
