@@ -14,7 +14,11 @@ import environ
 import os
 
 env = environ.Env(
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    SECURE_SSL_REDIRECT=(bool, False),
+    SESSION_COOKIE_SECURE=(bool, False),
+    CSRF_COOKIE_SECURE=(bool,False),
+    SECURE_HSTS_SECONDS=(int,0),
 )
 
 environ.Env.read_env()
@@ -124,6 +128,12 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT')
+SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE')
+CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE')
+SECURE_REFERRER_POLICY = 'same-origin'
+SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS')
 
 
 # Static files (CSS, JavaScript, Images)
