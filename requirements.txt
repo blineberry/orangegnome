@@ -2,8 +2,10 @@ asgiref==3.2.3
 astroid==2.3.3
 Django==3.0.4
 django-environ==0.4.5
+django-sass==1.0.0
 isort==4.3.21
 lazy-object-proxy==1.4.3
+libsass==0.19.4
 mccabe==0.6.1
 mysqlclient==1.4.6
 persisting-theory==0.2.1

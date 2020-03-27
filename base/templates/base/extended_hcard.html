@@ -1,0 +1,14 @@
+{% extends 'base/base.html' %}
+
+{% block hcard_class %} is-extended{% endblock %}
+
+{% block hcard %}
+
+<p class="p-note profile-bio">{{ site_owner.short_bio }}</p>
+<ul class="linked-profiles profile-linkedprofilelist">
+{% for profile in site_owner.linkedprofile_set.all %}
+    <li class="profile-linkedprofileitem"><a class="profile-linkedprofilelink" rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
+{% endfor %} 
+</ul>
+
+{% endblock %}

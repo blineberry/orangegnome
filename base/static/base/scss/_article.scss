@@ -1,0 +1,37 @@
+.article .meta {
+    font-size: $fontSmall;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.article {
+    overflow-x: scroll;
+}
+
+.article-header + .article-content {
+    margin-top: 1em;
+}
+
+.article-content + .article-footer {
+    margin-top: 1em;
+}
+
+.article .tags {
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: inline;
+    }
+
+    li {
+        display: inline;
+
+        &::after {
+            content: ',';
+        }
+
+        &:last-child::after {
+            content: '';
+        }
+    }
+}

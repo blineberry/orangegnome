@@ -1,6 +1,7 @@
 from django.db import models
 from profiles.models import Profile
 from django.urls import reverse
+from feed.models import FeedItem
 
 # Create your models here.
 class Category(models.Model):
@@ -29,7 +30,7 @@ class Tag(models.Model):
 def get_default_author():
     return Profile.objects.get()[0]
 
-class Post(models.Model):
+class Post(FeedItem):
     # h-entry properties
     title = models.CharField(max_length=100, unique=True)
     summary = models.CharField(max_length=120)

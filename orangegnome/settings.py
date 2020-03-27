@@ -37,10 +37,13 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 # Application definition
 
 INSTALLED_APPS = [
+    'base.apps.BaseConfig',
+    'feed.apps.FeedConfig',
     'home.apps.HomeConfig',
     'pages.apps.PagesConfig',
     'profiles.apps.ProfilesConfig',
     'posts.apps.PostsConfig',
+    'django_sass',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -65,7 +68,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR + '/templates/',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
