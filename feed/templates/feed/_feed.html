@@ -1,0 +1,21 @@
+<section class="feed {{feedclass}} h-feed">
+{% if feed_title %}
+<h1 class="feed-title p-name">{{ feed_title }}</h1>
+{% endif %}
+
+<ul class="feed-list">
+    {% for item in feed %}
+        <li class="feed-item">
+            {% include 'feed/_feed_item.html' with linkTitle=True %}
+        </li>
+    {% endfor %}
+</ul>
+<nav class="feed-nav">
+{% if feed.has_next %}
+    <a class="feed-nav-older" href="?page={{ feed.next_page_number }}">older</a>
+{% endif %}
+{% if feed.has_previous %}
+    <a class="feed-nav-newer" href="?page={{ feed.previous_page_number }}">newer</a>
+{% endif %}
+</div>
+</section>

@@ -1,0 +1,42 @@
+.profile {
+    text-align: center;
+}
+
+.profile-image {
+    border-radius: 50%;
+    display: block;
+    margin: 0 auto;
+}
+
+.profile-bio, .profile-linkedprofilelist {
+    font-size: $fontSmall;
+}
+
+.profile-link + .profile-name {
+    margin-top: 0.4284em;
+}
+
+.profile-name + .profile-bio {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+.profile-linkedprofilelist {
+    margin: 0.5em 0 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.profile-bio {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.profile-linkedprofileitem {
+    font-family: 'Open Sans', sans-serif;
+
+    display: inline-block;
+    margin-left: 0.5em;
+
+    &:first-child {
+        margin-left: 0;
+    }
+}

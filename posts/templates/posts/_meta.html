@@ -1,0 +1,9 @@
+<div class="postmeta-published">Published by <span class="p-author h-card">{{ site_owner.name }}</span> on <time class="dt-published" datetime="{{ item.published|date:'c' }}"><a class="p-category" href="{% url 'posts:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a> <a href="{% url 'posts:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, <a href="{% url 'posts:year' item.published|date:'Y' %}">{{ item.published|date:'Y' }}</a></time> in <a href="{{ item.category.get_absolute_url }}" rel="category tag">{{ item.category.name }}</a></div>
+<div class="postmeta-tags">Tags:
+    <ul>
+    {% for tag in item.tags.all %}
+        <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+<div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ item.get_absolute_url }}">{{ request.get_host }}{{ item.get_absolute_url }}</a></div>

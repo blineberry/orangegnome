@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>{{page_title|default:"Orange Gnome"}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <link rel="stylesheet" href={% static 'base/css/style.css' %} />
+    <link rel="icon" href="{{ site_owner.photo.url }}" />
+    <link rel="apple-touch-icon-precomposed" href="{{ site_owner.photo.url }}" />
+    {% block meta %}
+    {% endblock %}
+</head>
+<body>
+    <header class="siteheader">
+        <div class="h-card profile {% block hcard_class %}{% endblock %}">
+            <a rel="me" href="{% url 'home' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ site_owner.photo.url }}" alt="{{ site_owner.name }}" /></a>
+            <h1 class="p-name profile-name">{{ site_owner.name }}</h1>
+            {% block hcard %}
+            {% endblock %}
+        </div>
+        <nav class="sitenav">
+            <ul class="sitenav-list">
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'home' %}">Home</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'posts:index' %}">Posts</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="sitemain">
+    {% block body %}
+    {% endblock %}
+    </div>
+    <footer class="sitefooter">
+        <div class="sitefooter-content">Copyright &copy; {% now 'Y' %} Brent Lineberry</div>
+        <div class="sitefooter-content">Previous version: <a href="http://2011.orangegnome.com">2011</a></div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,97 @@
+@import 'colors';
+
+body {
+    padding: 0.5em;
+
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: 'EB Garamond', serif;
+    background: $lightBackground;
+    color: $darkText;
+    font-weight: normal;
+}
+
+h1,h2,h3,h4,h5,h6,
+.display1, .display2, .display3, .display4, .display5, .display6 {
+    font-weight: normal;
+    line-height: 1;
+    margin-top: 1em;
+    margin-bottom: 0;
+}
+
+h1, .display1 {
+    font-size: $font6;
+}
+h2, .display2 {
+    font-size: $font5;
+}
+h3, .display3 {
+    font-size: $font4;
+}
+h4, .display4 {
+    font-size: $font3;
+}
+h5, .display5 {
+    font-size: $font2;
+}
+h6, .display6 {
+    font-size: $font1;
+}
+
+a:link, a:visited, a:hover, a:active {
+    color: $darkAccent;
+    text-decoration: none;
+
+    &:hover, &:active {
+        text-decoration: underline;
+    }
+}
+
+a.alt {
+    &:link, &:visited, &:hover, &:active {
+        color: inherit;
+        font-weight: bold;
+        border-bottom: 1px solid transparent;
+    }
+
+    &:hover, &:active {
+        border-bottom-color: $darkText;
+        text-decoration: none;
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.display1,
+.display2,
+.display3,
+.display4,
+.display5,
+.display6 {
+    a.alt {
+        &:link, &:visited, &:hover, &:active {
+            font-weight: normal;
+        }
+    }
+}
+
+hr {
+    margin: 1em;
+    opacity: 0.5;
+}
+
+@media screen and (min-width: 360px) {
+    body {
+        font-size: 16px;
+    }
+}
+
+@media screen and (min-width: 410px) {
+    body {
+        font-size: 18px;
+    }
+}

@@ -1,0 +1,50 @@
+@import 'profile';
+@import 'colors';
+
+.siteheader, .sitemain, .sitefooter {
+    margin: 2em auto;
+}
+
+.siteheader {
+    margin-top: 0;
+
+    .profile + .sitenav {
+        margin-top: 1em;
+    }
+}
+
+.sitenav {
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+}
+
+.sitenav-list {
+    list-style:none;
+    margin: 0;
+    padding: 0; 
+}
+
+.sitenav-listitem {
+    display: inline-block;
+    margin-left: 0.5em;
+
+    &:first-child {
+        margin-left: 0;
+    }
+}
+
+.sitemain, .sitefooter {
+    max-width: 33em;
+}
+
+.sitefooter {
+    margin-bottom: 0;
+    padding-left: 3em;
+    box-sizing: border-box;
+    background: url("../images/logo_361x294.png") center left no-repeat;
+    background-size: contain;
+}
+
+.sitefooter-content {
+    font-size: $fontSmall;
+}

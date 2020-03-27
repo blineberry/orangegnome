@@ -13,8 +13,7 @@ def render_index(request, posts, title):
 
     context = {
         'title': title,
-        'posts': posts,
-        'page_obj': page_obj,
+        'feed': page_obj,
     }
 
     return render(request, 'posts/index.html', context)
