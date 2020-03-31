@@ -1,0 +1,13 @@
+{% extends 'admin/change_form.html' %}
+
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+    <div class="submit-row">
+        <input type="submit" value="Syndicate to Twitter" name="_syndicate_twitter">
+        {% if original.is_published %}
+        <input class="default" type="submit" value="Unpublish" name="_unpublish">
+        {% else %}
+        <input class="default" type="submit" value="Publish" name="_publish">
+        {% endif %}
+    </div>
+{% endblock %}
