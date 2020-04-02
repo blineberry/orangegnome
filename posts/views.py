@@ -13,7 +13,7 @@ def render_index(request, posts, title):
 
     context = {
         'title': title,
-        'feed': page_obj,
+        'feed': page_obj
     }
 
     return render(request, 'posts/index.html', context)
@@ -33,7 +33,7 @@ def render_or_redirect(id, slug, model, render_func):
     #return render(request, template, get_context(item))
 
 def detail(request, id, slug):
-    return render_or_redirect(id, slug, Post, lambda post: render(request, 'posts/detail.html', { 'post': post }))
+    return render_or_redirect(id, slug, Post, lambda post: render(request, 'posts/detail.html', { 'post': post, 'permalink': request.build_absolute_uri(post.get_absolute_url()) }))
 
 def category(request, id, slug):
     return render_or_redirect(id, slug, Category, lambda category: render_index(request, category.posts.order_by('-published').all(), category.name))

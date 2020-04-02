@@ -54,7 +54,7 @@ class Post(FeedItem):
 
     def get_absolute_url(self):
         return reverse('posts:detail', args=[self.id, self.slug])
-
+    
     def is_syndicated_to_twitter(self):
         return self.syndicated_to_twitter != None
 
