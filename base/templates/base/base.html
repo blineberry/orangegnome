@@ -10,6 +10,12 @@
     <link rel="stylesheet" href={% static 'base/css/style.css' %} />
     <link rel="icon" href="{{ site_owner.photo.url }}" />
     <link rel="apple-touch-icon-precomposed" href="{{ site_owner.photo.url }}" />
+
+    <meta property="og:title" content="{{page_title}}">
+    <meta property="og:url" content="{{ permalink }}">
+    <meta property="og:site_name" content="Orange Gnome">
+    <meta name="twitter:site" content="@BrentLineberry" />
+
     {% block meta %}
     {% endblock %}
 </head>
