@@ -3,10 +3,15 @@
 {% block submit_buttons_bottom %}
     {{ block.super }}
     <div class="submit-row">
-        <input type="submit" value="Syndicate to Twitter" name="_syndicate_twitter">
         {% if original.is_published %}
+            {% if not original.is_syndicated_to_twitter %}
+            <input type="submit" value="Syndicate to Twitter" name="_syndicate_to_twitter">
+            {% endif %}
         <input class="default" type="submit" value="Unpublish" name="_unpublish">
         {% else %}
+            {% if not original.is_syndicated_to_twitter %}
+            <label><input type="checkbox" name="_syndicate" value="twitter"> Syndicate to Twitter</label>
+            {% endif %}        
         <input class="default" type="submit" value="Publish" name="_publish">
         {% endif %}
     </div>
