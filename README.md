@@ -15,6 +15,11 @@ Install dependencies:
 pip3 install -r requirements.txt
 ```
 
+`mysqlclient` depends on `mysql-client` being available.
+```
+brew install mysql-client
+```
+
 Copy `example.env` and rename to `.env`. Supply values in accordance with [django-environ](https://django-environ.readthedocs.io/en/latest/).
 
 # Deploying
