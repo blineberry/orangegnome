@@ -1,6 +1,10 @@
 from .models import Profile
 
 def owner(request):
-    owner = Profile.objects.get_owner()   
+    owner = Profile.objects.get_owner()
 
-    return { 'site_owner': owner }
+    return { 'profiles': 
+        {
+            'site_owner': owner 
+        }
+    }

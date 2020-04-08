@@ -2,6 +2,8 @@ from django.shortcuts import render
 from profiles.models import Profile
 from posts.models import Post
 from django.core.paginator import Paginator
+from django.conf import settings
+from django.urls import reverse
 
 def postToFeedItem(post):
     return { 
@@ -20,6 +22,8 @@ def home(request):
 
     context = {
         'feed': page_obj,
+        'permalink': request.build_absolute_uri(reverse('home')),
+        'page_title': settings.SITE_NAME,
     }
 
     return render(request, 'home/home.html', context)

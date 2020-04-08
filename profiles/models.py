@@ -16,6 +16,7 @@ class Profile(models.Model):
     photo = models.ImageField(null=True)
     is_owner = models.BooleanField(default=False)
     short_bio = models.CharField(max_length=160, null=True)
+    twitter_screenname = models.CharField(max_length=15, null=True, blank=True)
 
     objects = ProfileManager()
 

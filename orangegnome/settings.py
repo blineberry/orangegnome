@@ -81,6 +81,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'profiles.context_processors.owner',
+                'base.context_processors.site',
             ],
         },
     },
@@ -155,3 +156,7 @@ TWITTER_CONSUMER_KEY = env('TWITTER_CONSUMER_KEY')
 TWITTER_CONSUMER_SECRET = env('TWITTER_CONSUMER_SECRET')
 TWITTER_ACCESS_TOKEN_KEY = env('TWITTER_ACCESS_TOKEN_KEY')
 TWITTER_ACCESS_TOKEN_SECRET = env('TWITTER_ACCESS_TOKEN_SECRET')
+
+# Site Settings
+SITE_NAME = "Orange Gnome"
+SITE_URL = env('SITE_URL')
