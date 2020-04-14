@@ -33,14 +33,7 @@ class Syndication():
     class Meta:
         abstract = True
 
-class TwitterSyndication(models.Model):
-
-    
-
-    class Meta:
-        abstract = True
-
-class Tweet(TwitterSyndication):
+class Tweet(models.Model):
     id_str = models.TextField(max_length=40)
     created_at = models.DateTimeField()
     screen_name = models.CharField(max_length=30)
