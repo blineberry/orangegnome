@@ -2,6 +2,8 @@ from django.db import models
 import twitter
 from django.conf import settings
 import json
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 
 # Create your models here.
 class Syndication():
