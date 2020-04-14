@@ -35,11 +35,7 @@ class Syndication():
 
 class TwitterSyndication(models.Model):
 
-    def get_url(self):
-        return f'https://twitter.com/{self.screen_name}/status/{self.id_str}'
-
-    def to_syndication(self):
-        return Syndication(name='Twitter',url=self.get_url())
+    
 
     class Meta:
         abstract = True
@@ -51,6 +47,12 @@ class Tweet(TwitterSyndication):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+
+    def get_url(self):
+        return f'https://twitter.com/{self.screen_name}/status/{self.id_str}'
+
+    def to_syndication(self):
+        return Syndication(name='Twitter',url=self.get_url())
 
 class TwitterSyndicatable(models.Model):
     syndicated_to_twitter = models.DateTimeField(null=True)
