@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Category, Tag, TwitterSyndication
+from .models import Post, Category, Tag
 from django.utils.html import format_html
 from urllib.parse import quote as urlquote
 from django.utils.translation import gettext as _
@@ -14,6 +14,20 @@ class PostAdmin(SyndicatableAdmin):
     prepopulated_fields = { 'slug': ('title',)}
     readonly_fields = SyndicatableAdmin.readonly_fields + ('published',)
     #exclude = ('is_published',)
+    fieldsets = (
+        (None, {
+            'fields': ('title','slug','summary','content','author')
+        }),
+        ('Metadata', {
+            'fields': ('category','tags',)
+        }),
+        ('Syndication', {
+            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
+        }),
+        ('Publishing', {
+            'fields': ('is_published','published')
+        })
+    )
 
     def _handle_publish(self, obj, form):
         if not obj.is_published:

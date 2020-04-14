@@ -41,6 +41,8 @@ class SyndicatableAdmin(admin.ModelAdmin):
         except TwitterError as e:
             self.message_user(request, f"Error desyndicating to Twitter: { str(e) }")
             return obj
+        except Exception as e:
+            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }")
 
         try:
             ts = obj.tweet.get()

@@ -58,7 +58,8 @@ class TwitterSyndicatable(models.Model):
     tweet = GenericRelation(Tweet)
     
     def is_syndicated_to_twitter(self):
-        return self.syndicated_to_twitter != None
+        print(self.tweet.all().exists())
+        return self.tweet.all().exists()
 
     class Meta:
         abstract = True
