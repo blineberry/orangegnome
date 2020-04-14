@@ -2,7 +2,7 @@ from django.db import models
 from profiles.models import Profile
 from django.urls import reverse
 from feed.models import FeedItem
-from syndications.models import Syndication, TwitterSyndicatable, TwitterSyndication as SyndTwitterSyndication
+from syndications.models import Syndication, TwitterSyndicatable
 
 # Create your models here.
 class Category(models.Model):
