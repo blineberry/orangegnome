@@ -34,9 +34,6 @@ class Syndication():
         abstract = True
 
 class TwitterSyndication(models.Model):
-    id_str = models.TextField(max_length=40)
-    created_at = models.DateTimeField()
-    screen_name = models.CharField(max_length=30)
 
     def get_url(self):
         return f'https://twitter.com/{self.screen_name}/status/{self.id_str}'
@@ -48,6 +45,9 @@ class TwitterSyndication(models.Model):
         abstract = True
 
 class Tweet(TwitterSyndication):
+    id_str = models.TextField(max_length=40)
+    created_at = models.DateTimeField()
+    screen_name = models.CharField(max_length=30)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
