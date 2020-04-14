@@ -49,3 +49,14 @@ class Tweet(TwitterSyndication):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+
+class TwitterSyndicatable(models.Model):
+    syndicated_to_twitter = models.DateTimeField(null=True)
+    syndicate_to_twitter = models.BooleanField(default=False)
+    tweet = GenericRelation(Tweet)
+    
+    def is_syndicated_to_twitter(self):
+        return self.syndicated_to_twitter != None
+
+    class Meta:
+        abstract = True
