@@ -44,3 +44,6 @@ class TwitterSyndication(models.Model):
 
     class Meta:
         abstract = True
+
+class Tweet(TwitterSyndication):
+    pass
