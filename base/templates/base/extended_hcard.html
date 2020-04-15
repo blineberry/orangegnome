@@ -6,7 +6,7 @@
 
 <p class="p-note profile-bio">{{ profiles.site_owner.short_bio }}</p>
 <ul class="linked-profiles profile-linkedprofilelist">
-{% for profile in site.owner.linkedprofile_set.all %}
+{% for profile in profiles.site_owner.linkedprofile_set.all %}
     <li class="profile-linkedprofileitem"><a class="profile-linkedprofilelink" rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
 {% endfor %} 
 </ul>
