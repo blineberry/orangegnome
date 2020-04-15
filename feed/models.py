@@ -14,5 +14,14 @@ class FeedItem(models.Model):
     def meta_template(self):
         return f'{ self._meta.app_label }/_meta.html'
 
+    def feed_item_template(self):
+        return None
+
+    def feed_item_header(self):
+        return None
+    
+    def feed_item_content(self):
+        return None
+
     class Meta:
         abstract = True

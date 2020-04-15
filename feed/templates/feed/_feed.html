@@ -6,7 +6,11 @@
 <ul class="feed-list">
     {% for item in feed %}
         <li class="feed-item">
+            {% if item.feed_item_template %}
+            {% include item.feed_item_template with linkTitle=True %}
+            {% else %}
             {% include 'feed/_feed_item.html' with linkTitle=True %}
+            {% endif %}
         </li>
     {% endfor %}
 </ul>

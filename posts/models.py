@@ -1,8 +1,8 @@
 from django.db import models
-from profiles.models import Profile
 from django.urls import reverse
 from feed.models import FeedItem
-from syndications.models import Syndication, TwitterSyndicatable
+from syndications.models import TwitterSyndicatable
+from notes.models import NoteBase
 
 # Create your models here.
 class Category(models.Model):
@@ -28,27 +28,27 @@ class Tag(models.Model):
     def get_absolute_url(self):
         return reverse('posts:tag', args=[self.id, self.slug])
 
-def get_default_author():
-    return Profile.objects.get()[0]
-
-
-class Post(FeedItem, TwitterSyndicatable):
+class Post(FeedItem, TwitterSyndicatable, NoteBase):
     # h-entry properties
     title = models.CharField(max_length=100, unique=True)
-    summary = models.CharField(max_length=120)
-    content = models.TextField()
-    published = models.DateTimeField(null=True)
-    updated = models.DateTimeField(auto_now=True)
-    author = models.ForeignKey(Profile, on_delete=models.PROTECT)
+    long_content = models.TextField()    
     category = models.ForeignKey(Category, on_delete=models.PROTECT,related_name='posts', null=True)
     
     # extra properties
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
     tags = models.ManyToManyField(Tag, related_name='posts')
-    is_published = models.BooleanField(default=False)
     
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         return reverse('posts:detail', args=[self.id, self.slug])
+
+    def feed_item_content(self):
+        return self.long_content
+
+    def feed_item_header(self):
+        return self.title
+
+    def to_twitter_status(self):
+        return f'{obj.short_content} {request.build_absolute_uri(obj.get_absolute_url())}'

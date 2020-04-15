@@ -55,5 +55,8 @@ class TwitterSyndicatable(models.Model):
     def is_syndicated_to_twitter(self):
         return self.tweet.all().exists()
 
+    def to_twitter_status(self):
+        pass
+
     class Meta:
         abstract = True

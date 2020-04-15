@@ -1,0 +1,16 @@
+<article class="article h-entry">
+    {% if item.feed_item_content %}
+    <h1 class="article-content e-content">
+        {% if linkTitle %}
+            <a class="article-link alt" href="{{ item.get_absolute_url }}">{{ item.feed_item_content }}</a>
+        {% else %}
+            {{ item.feed_item_content }}
+        {% endif %}
+    </h1>
+    {% endif %}
+    <footer class="article-footer">
+        {% block feeditemfooter %}
+        <div class="meta">{% include "notes/_meta.html" %}</div>
+        {% endblock %}
+    </footer>
+</article>

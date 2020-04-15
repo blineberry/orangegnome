@@ -17,7 +17,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
    
         try:
-            response = Syndication.syndicate_to_twitter(f'{obj.summary} {request.build_absolute_uri(obj.get_absolute_url())}')
+            response = Syndication.syndicate_to_twitter(obj.to_twitter_status())
         except TwitterError as e:
             self.message_user(request, f"Error syndicating to Twitter: { str(e) }")
             return obj
