@@ -1,12 +1,19 @@
 from django.urls import path, include
 from feed.urlpatterns import date as date_pattern
 from . import views
+from django.views.generic import RedirectView
 
 app_name = 'posts'
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('<int:id>/<slug:slug>', views.detail, name='detail'),
-    path('category/<int:id>/<slug:slug>', views.category, name='category'),
-    path('tag/<int:id>/<slug:slug>', views.tag, name='tag'),    
-    path('date/', include(date_pattern(views))),
+    path('', views.IndexView.as_view(), name='index'),
+    path('<int:pk>/<slug:slug>', views.DetailView.as_view(), name='detail'),
+    path('category/<int:id>/<slug:slug>', views.CategoryView.as_view(), name='category'),
+    path('tag/<int:id>/<slug:slug>', views.TagView.as_view(), name='tag'),    
+    path('date/<int:year>/', include([
+        path('', RedirectView.as_view(pattern_name='feed:year')),
+        path('<int:month>/', include([
+            path('', RedirectView.as_view(pattern_name='feed:month')),
+            path('<int:day>', RedirectView.as_view(pattern_name='feed:day'))
+        ])),
+    ])),
 ]

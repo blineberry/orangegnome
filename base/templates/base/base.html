@@ -22,14 +22,14 @@
 <body>
     <header class="siteheader">
         <div class="h-card profile {% block hcard_class %}{% endblock %}">
-            <a rel="me" href="{% url 'home' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="{{ profiles.site_owner.name }}" /></a>
+            <a rel="me" href="{% url 'feed:index' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="{{ profiles.site_owner.name }}" /></a>
             <h1 class="p-name profile-name">{{ profiles.site_owner.name }}</h1>
             {% block hcard %}
             {% endblock %}
         </div>
         <nav class="sitenav">
             <ul class="sitenav-list">
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'home' %}">Home</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:index' %}">Home</a></li>
                 <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'posts:index' %}">Posts</a></li>
             </ul>
         </nav>

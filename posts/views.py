@@ -21,52 +21,62 @@ def render_index(request, posts, title, permalink):
 
     return render(request, 'posts/index.html', context)
 
-def index(request):
-    posts = Post.objects.order_by('-published')
+class IndexView(generic.ListView):
+    queryset = Post.objects.filter(is_published=True).order_by('-published')
+    extra_context = {
+        'title': 'Posts',
+        'page_title': 'Posts'
+    }
+    paginate_by = 5
 
-    return render_index(request, posts, 'Posts', request.build_absolute_uri(reverse('posts:index')))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['permalink'] = self.request.build_absolute_uri(reverse('posts:index'))
+        return context
 
-def render_or_redirect(id, slug, model, render_func):
-    item = get_object_or_404(model, pk=id)
+class ForceSlugView(generic.View):
+    def render_to_response(self, context, **response_kwargs):
+        if context['object'].slug == self.kwargs['slug']:
+            return super().render_to_response(context, **response_kwargs)
+    
+        return redirect(context['object'], permanent=True)
 
-    if item.slug != slug:
-        return redirect(item, permanent=True)
+class DetailView(ForceSlugView, generic.DetailView):
+    model = Post
 
-    return render_func(item)
-    #return render(request, template, get_context(item))
+    def get_object(self, queryset=None):
+        return super().get_object(Post.objects.filter(is_published=True))
 
-def detail(request, id, slug):
-    return render_or_redirect(id, slug, Post, lambda post: render(request, 'posts/detail.html', { 'post': post, 'permalink': request.build_absolute_uri(post.get_absolute_url()) }))
+class CategoryView(ForceSlugView, generic.detail.SingleObjectMixin, generic.ListView):
+    paginate_by = 5
 
-def category(request, id, slug):
-    return render_or_redirect(id, slug, Category, lambda category: render_index(request, category.posts.order_by('-published').all(), category.name, request.build_absolute_uri(reverse('posts:category', args=[id,slug]))))
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Category.objects.all())
+        return super().get(request, *args, **kwargs)
 
-def tag(request, id, slug):
-    return render_or_redirect(id, slug, Tag, lambda tag: render_index(request, tag.posts.order_by('-published').all(), tag.name, request.build_absolute_uri(reverse('posts:tag', args=[id,slug]))))
+    def get_queryset(self):
+        return self.object.posts.filter(is_published=True).order_by('published')
 
-def day(request, year, month, day):
-    try:
-        d = date(year, month, day)
-    except ValueError:
-        raise Http404("Date does not exist")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['permalink'] = self.request.build_absolute_uri(reverse('posts:category', args=[context['object'].id,context['object'].slug]))
+        context['page_title'] = context['object'].name
+        context['title'] = context['object'].name
+        return context
 
-    posts = Post.objects.filter(published__year=year, published__month=month, published__day=day).order_by('-published')
-    return render_index(request, posts, '{d:%B} {d.day}, {d.year} Archives'.format(d = d), request.build_absolute_uri(reverse('posts:day', args=[year,month,day])))
+class TagView(ForceSlugView, generic.detail.SingleObjectMixin, generic.ListView):
+    paginate_by = 5
 
-def month(request, year, month):
-    try:
-        d = date(year, month, 1)
-    except ValueError:
-        raise Http404("Month does not exist")
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Tag.objects.all())
+        return super().get(request, *args, **kwargs)
 
-    posts = Post.objects.filter(published__year=year, published__month=month).order_by('-published')
-    return render_index(request, posts, '{d:%B} {d.year} Archives'.format(d = d), request.build_absolute_uri(reverse('posts:month', args=[year,month])))
+    def get_queryset(self):
+        return self.object.posts.filter(is_published=True).order_by('published')
 
-def year(request, year):
-    try:
-        d = date(year, 1, 1)
-    except ValueError:
-        raise Http404("Year does not exist")
-
-    posts = Post.objects.filter(published__year=year).order_by('-published')
-    return render_index(request, posts, '{d.year} Archives'.format(d = d), request.build_absolute_uri(reverse('posts:year', args=[year])))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['permalink'] = self.request.build_absolute_uri(reverse('posts:tag', args=[context['object'].id,context['object'].slug]))
+        context['page_title'] = context['object'].name
+        context['title'] = context['object'].name
+        return context

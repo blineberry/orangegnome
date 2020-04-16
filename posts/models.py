@@ -42,6 +42,7 @@ class Post(FeedItem, TwitterSyndicatable, NoteBase):
         return self.title
 
     def get_absolute_url(self):
+        print(reverse('posts:detail', args=[self.id, self.slug]))
         return reverse('posts:detail', args=[self.id, self.slug])
 
     def feed_item_content(self):
