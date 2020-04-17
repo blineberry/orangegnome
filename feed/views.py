@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from posts.models import Post
 from notes.models import Note
-from django.views.generic import ListView
+from django.views.generic import ListView, detail
 from django.db.models import Value, CharField
 from itertools import chain
 from django.core.paginator import Paginator
 from datetime import date
+from .models import Tag
 
 def get_combined_recent(paginate_by, **kwargs):
     recent = Post.objects.filter(is_published=True,**kwargs).annotate(
@@ -145,3 +146,17 @@ class MonthView(DateArchiveView):
 
 class DayView(DateArchiveView):
     title_format_string = '{d:%B} {d.day}, {d.year} Archives'
+
+class TagView(FeedWithTitleView):
+    def get(self, request, *args, **kwargs):
+        self.object = Tag.objects.get(pk=kwargs['pk'])
+
+        return super().get(self, request, *args, **kwargs)
+
+    def get_title(self):
+        return self.object.name
+
+    def get_queryset(self):
+        self.filters['tags__pk'] = self.object.pk
+
+        return super().get_queryset()

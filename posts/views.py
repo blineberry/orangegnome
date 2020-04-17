@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Category, Tag
+from .models import Post, Category
 from django.views import generic
 from datetime import date
 from django.http import Http404
@@ -60,23 +60,6 @@ class CategoryView(ForceSlugView, generic.detail.SingleObjectMixin, generic.List
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['permalink'] = self.request.build_absolute_uri(reverse('posts:category', args=[context['object'].id,context['object'].slug]))
-        context['page_title'] = context['object'].name
-        context['title'] = context['object'].name
-        return context
-
-class TagView(ForceSlugView, generic.detail.SingleObjectMixin, generic.ListView):
-    paginate_by = 5
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Tag.objects.all())
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        return self.object.posts.filter(is_published=True).order_by('published')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['permalink'] = self.request.build_absolute_uri(reverse('posts:tag', args=[context['object'].id,context['object'].slug]))
         context['page_title'] = context['object'].name
         context['title'] = context['object'].name
         return context

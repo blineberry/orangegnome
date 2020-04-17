@@ -19,16 +19,6 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse('posts:category', args=[self.id, self.slug])
 
-class Tag(models.Model):
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50, db_index=True, unique=True)
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse('posts:tag', args=[self.id, self.slug])
-
 class Post(FeedItem, TwitterSyndicatable, NoteBase):
     # h-entry properties
     title = models.CharField(max_length=100, unique=True)
@@ -37,7 +27,6 @@ class Post(FeedItem, TwitterSyndicatable, NoteBase):
     
     # extra properties
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
-    old_tags = models.ManyToManyField(Tag, related_name='posts')
     
     def __str__(self):
         return self.title

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Category, Tag
+from .models import Post, Category
 from syndications.admin import SyndicatableAdmin
 from notes.admin import PublishableAdmin
 
@@ -12,7 +12,7 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin):
             'fields': ('title','slug','short_content','long_content','author')
         }),
         ('Metadata', {
-            'fields': ('category','old_tags','tags')
+            'fields': ('category','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
@@ -25,4 +25,3 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin):
 # Register your models here.
 admin.site.register(Post, PostAdmin)
 admin.site.register(Category)
-admin.site.register(Tag)

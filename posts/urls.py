@@ -8,7 +8,7 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('<int:pk>/<slug:slug>', views.DetailView.as_view(), name='detail'),
     path('category/<int:id>/<slug:slug>', views.CategoryView.as_view(), name='category'),
-    path('tag/<int:id>/<slug:slug>', views.TagView.as_view(), name='tag'),    
+    path('tag/<int:pk>/<slug:slug>', RedirectView.as_view(pattern_name='feed:tag'), name='tag'),    
     path('date/<int:year>/', include([
         path('', RedirectView.as_view(pattern_name='feed:year')),
         path('<int:month>/', include([
