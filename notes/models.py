@@ -1,6 +1,6 @@
 from django.db import models
 from profiles.models import Profile
-from feed.models import FeedItem
+from feed.models import FeedItem, Tag
 from syndications.models import TwitterSyndicatable
 from django.urls import reverse
 
@@ -16,6 +16,7 @@ class NoteBase(Publishable):
     author = models.ForeignKey(Profile, on_delete=models.PROTECT)
     published = models.DateTimeField(null=True)
     short_content = models.CharField(max_length=280)
+    tags = models.ManyToManyField(Tag, related_name='notes')
 
     class Meta:
         abstract = True

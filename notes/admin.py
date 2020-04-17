@@ -28,7 +28,7 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
     readonly_fields = PublishableAdmin.readonly_fields + SyndicatableAdmin.readonly_fields
     fieldsets = (
         (None, {
-            'fields': ('short_content','author')
+            'fields': ('short_content','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')

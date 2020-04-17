@@ -3,6 +3,7 @@ from django.urls import reverse
 from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable
 from notes.models import NoteBase
+from feed.models import Tag as FeedTag
 
 # Create your models here.
 class Category(models.Model):
@@ -37,6 +38,7 @@ class Post(FeedItem, TwitterSyndicatable, NoteBase):
     # extra properties
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
     tags = models.ManyToManyField(Tag, related_name='posts')
+    new_tags = models.ManyToManyField(FeedTag, related_name='posts')
     
     def __str__(self):
         return self.title

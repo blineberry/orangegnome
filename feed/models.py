@@ -25,3 +25,16 @@ class FeedItem(models.Model):
 
     class Meta:
         abstract = True
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50, db_index=True, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('feed:tag', args=[self.id, self.slug])
+
+    def test(self):
+        return self.name
