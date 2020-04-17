@@ -12,7 +12,7 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin):
             'fields': ('title','slug','short_content','long_content','author')
         }),
         ('Metadata', {
-            'fields': ('category','tags','new_tags')
+            'fields': ('category','old_tags','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')

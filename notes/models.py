@@ -16,12 +16,15 @@ class NoteBase(Publishable):
     author = models.ForeignKey(Profile, on_delete=models.PROTECT)
     published = models.DateTimeField(null=True)
     short_content = models.CharField(max_length=280)
-    tags = models.ManyToManyField(Tag, related_name='notes')
+    tags = models.ManyToManyField(Tag, 
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss",)
 
     class Meta:
         abstract = True
 
 class Note(NoteBase, FeedItem, TwitterSyndicatable):
+    
     def __str__(self):
         return self.short_content
 

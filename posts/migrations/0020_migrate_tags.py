@@ -16,7 +16,7 @@ def migrate_data(apps, schema_editor):
         else:
             new_tag.save()
 
-        new_tag.posts.add(*tag.posts.all())
+        new_tag.posts_post_related.add(*tag.posts.all())
         new_tag.save()
 
 def unmigrate_data(apps, schema_editor):
@@ -33,14 +33,14 @@ def unmigrate_data(apps, schema_editor):
         else:
             old_tag.save()
 
-        old_tag.posts.add(*tag.posts.all())
+        old_tag.posts.add(*tag.posts_post_related.all())
         old_tag.save()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('posts', '0018_post_new_tags'),
+        ('posts', '0019_post_tags'),
     ]
 
     operations = [
