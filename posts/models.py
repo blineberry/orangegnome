@@ -1,9 +1,9 @@
 from django.db import models
 from django.urls import reverse
-from feed.models import FeedItem
+from feed.models import FeedItemBase, FeedItem
 from syndications.models import TwitterSyndicatable
-from notes.models import NoteBase
-from feed.models import Tag as FeedTag
+from feed.models import Tag
+from profiles.models import Profile
 
 # Create your models here.
 class Category(models.Model):
@@ -19,12 +19,13 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse('posts:category', args=[self.id, self.slug])
 
-class Post(FeedItem, TwitterSyndicatable, NoteBase):
+class Post(FeedItemBase, TwitterSyndicatable, FeedItem):
     # h-entry properties
+    short_content = models.CharField(max_length=280)
     title = models.CharField(max_length=100, unique=True)
     long_content = models.TextField()    
     category = models.ForeignKey(Category, on_delete=models.PROTECT,related_name='posts', null=True)
-    
+
     # extra properties
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
     
@@ -42,4 +43,4 @@ class Post(FeedItem, TwitterSyndicatable, NoteBase):
         return self.title
 
     def to_twitter_status(self):
-        return f'{obj.short_content} {request.build_absolute_uri(obj.get_absolute_url())}'
+        return f'{self.short_content} {self.get_absolute_url()}'

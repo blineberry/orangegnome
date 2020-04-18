@@ -1,9 +1,9 @@
 from django.db import models
 from django.urls import reverse
-
+from profiles.models import Profile
 
 # Create your models here.
-class FeedItem(models.Model):
+class FeedItemBase(models.Model):
     def get_type_name(self):
         return self._meta.verbose_name
         
@@ -40,3 +40,13 @@ class Tag(models.Model):
 
     def test(self):
         return self.name
+
+class FeedItem(models.Model):
+    is_published = models.BooleanField(default=False)
+    updated = models.DateTimeField(null=True)
+    author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
+    published = models.DateTimeField(null=True)
+    tags = models.ManyToManyField(Tag, related_name='feed_items',)
+
+    def __str__(self):
+        return 'FeedItem'

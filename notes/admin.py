@@ -5,8 +5,6 @@ from syndications.admin import SyndicatableAdmin
 
 # Register your models here.
 class PublishableAdmin(admin.ModelAdmin):
-    readonly_fields = ('published',)
-
     def _handle_publish(self, obj, form):
         if not obj.is_published:
             obj.published = None
@@ -25,17 +23,17 @@ class PublishableAdmin(admin.ModelAdmin):
         return super().save_model(request, obj, form, change)
 
 class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
-    readonly_fields = PublishableAdmin.readonly_fields + SyndicatableAdmin.readonly_fields
-    fieldsets = (
-        (None, {
-            'fields': ('short_content','author','tags')
-        }),
-        ('Syndication', {
-            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
-        }),
-        ('Publishing', {
-            'fields': ('is_published','published')
-        })
-    )
+    pass
+    #fieldsets = (
+    #    (None, {
+    #        'fields': ('short_content','author','tags')
+    #    }),
+    #    ('Syndication', {
+    #        'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
+    #    }),
+    #    ('Publishing', {
+    #        'fields': ('is_published','published')
+    #    })
+    #)
 
 admin.site.register(Note, NoteAdmin)
