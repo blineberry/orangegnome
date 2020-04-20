@@ -15,6 +15,7 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
         'page_title': 'Notes',
         'feed_title': 'Notes',
     }
+    paginate_by = 5
 
 class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
     queryset = Note.objects.filter(is_published=True)
@@ -22,4 +23,3 @@ class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
 
     def get_canonical_view_args(self, context):
         return [self.kwargs['pk']]
-        

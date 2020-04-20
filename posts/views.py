@@ -5,6 +5,8 @@ from datetime import date
 from django.http import Http404
 from django.core.paginator import Paginator
 from django.urls import reverse
+from base.views import ForceSlugMixin
+from feed.views import PermalinkResponseMixin, PageTitleResponseMixin
 
 def render_index(request, posts, title, permalink):
     paginator = Paginator(posts, 5)
@@ -21,45 +23,44 @@ def render_index(request, posts, title, permalink):
 
     return render(request, 'posts/index.html', context)
 
-class IndexView(generic.ListView):
-    queryset = Post.objects.filter(is_published=True).order_by('-published')
+class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
+    queryset = Post.objects.filter(is_published=True)
     extra_context = {
-        'title': 'Posts',
+        'feed_title': 'Posts',
         'page_title': 'Posts'
     }
     paginate_by = 5
+    date_field = 'published'
+    canonical_viewname = 'posts:index'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['permalink'] = self.request.build_absolute_uri(reverse('posts:index'))
-        return context
+class DetailView(PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):
+    queryset = Post.objects.filter(is_published=True)
+    canonical_viewname = 'posts:detail'
 
-class ForceSlugView(generic.View):
-    def render_to_response(self, context, **response_kwargs):
-        if context['object'].slug == self.kwargs['slug']:
-            return super().render_to_response(context, **response_kwargs)
-    
-        return redirect(context['object'], permanent=True)
+    def get_canonical_view_args(self, context):
+        return [self.kwargs['pk'], self.kwargs['slug']]
 
-class DetailView(ForceSlugView, generic.DetailView):
-    model = Post
-
-    def get_object(self, queryset=None):
-        return super().get_object(Post.objects.filter(is_published=True))
-
-class CategoryView(ForceSlugView, generic.detail.SingleObjectMixin, generic.ListView):
+class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.SingleObjectMixin, generic.ListView, PageTitleResponseMixin):
     paginate_by = 5
+    template_name = 'posts/post_archive.html'
+    canonical_viewname = 'posts:category'
+
+    def get_canonical_view_args(self, context):
+        return [self.kwargs['pk'], self.kwargs['slug']]
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(queryset=Category.objects.all())
+        
         return super().get(request, *args, **kwargs)
 
+    def get_page_title(self, context):
+        return self.object.name
+
     def get_queryset(self):
-        return self.object.posts.filter(is_published=True).order_by('published')
+        return self.object.posts.filter(is_published=True).order_by('-published')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['permalink'] = self.request.build_absolute_uri(reverse('posts:category', args=[context['object'].id,context['object'].slug]))
-        context['page_title'] = context['object'].name
-        context['title'] = context['object'].name
+        context['feed_title'] = context['page_title']
+
         return context
