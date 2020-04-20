@@ -5,6 +5,5 @@ from django.urls import path, include
 app_name = 'notes'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
-    path('<int:id>', views.detail, name='detail'),
-    path('date/', include(date_pattern(views))),
+    path('<int:pk>', views.DetailView.as_view(), name='detail'),
 ]

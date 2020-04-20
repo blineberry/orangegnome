@@ -7,47 +7,17 @@ from itertools import chain
 from django.core.paginator import Paginator
 from datetime import date
 from .models import Tag, FeedItem
-from base.views import PermalinkResponseMixin, PageTitleResponseMixin
+from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 
-def get_combined_recent(paginate_by, **kwargs):
-    recent = Post.objects.filter(is_published=True,**kwargs).annotate(
-        type=Value('post',output_field=CharField())
-    ).values(
-        'pk','published','type', 'is_published'
-    ).union(
-        Note.objects.filter(is_published=True,**kwargs).annotate(
-            type=Value('note', output_field=CharField())
-        ).values(
-            'pk','published','type', 'is_published'
-        )
-    ).order_by('-published')[:(paginate_by*2)]
-
-    records = list(recent)
-
-    type_to_queryset = {
-        'post': Post.objects.all(),
-        'note': Note.objects.all(),
-    }
-
-    # Collect the pks we need to load for each type:
-    to_load = {}
-    for record in records:
-        to_load.setdefault(record['type'], []).append(record['pk'])
-
-    # Fetch them 
-    feed_items = list()
-    for type, pks in to_load.items():
-        feed_items = chain(feed_items,type_to_queryset[type].filter(pk__in=pks))
-
-    feed_items = list(feed_items)
-    feed_items.sort(key=lambda e: e.published, reverse=True)
-    return feed_items
-
-class PublishedMixin(list.MultipleObjectMixin):
+class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
         return super().get_queryset().filter(is_published=True)
 
-class FeedItemArchiveView(PublishedMixin, dates.ArchiveIndexView):
+class PublishedSingleObjectMixin(detail.SingleObjectMixin):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=True)
+
+class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
     model = FeedItem
     date_field = 'published'
     paginate_by = 5
@@ -104,7 +74,7 @@ class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveV
     def get_page_title(self, context):
         return '{d:%B} {d.day}, {d.year} Archives'.format(d = context['day'])
 
-class TagView(PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):#FeedWithTitleView):
+class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):#FeedWithTitleView):
     paginate_by = 5
     template_name = 'feed/feeditem_archive.html'
     canonical_viewname = 'feed:tag'
@@ -122,4 +92,3 @@ class TagView(PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveV
 
     def get_queryset(self):
         return self.object.feed_items.filter(is_published=True).order_by('-published')
-        
