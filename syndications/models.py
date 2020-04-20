@@ -27,7 +27,6 @@ class Syndication():
             access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
         
         response = api.DestroyStatus(id_str)
-        print(response)
         return response
 
     class Meta:

@@ -1,33 +1,9 @@
 from django.db import models
 from django.urls import reverse
 from profiles.models import Profile
+from django.conf import settings
 
 # Create your models here.
-class FeedItemBase(models.Model):
-    def get_type_name(self):
-        return self._meta.verbose_name
-        
-    def get_type_name_plural(self):
-        return self._meta.verbose_name_plural
-    
-    def get_type_verb(self):
-        return self._meta.object_verb
-
-    def meta_template(self):
-        return f'{ self._meta.app_label }/_meta.html'
-
-    def feed_item_template(self):
-        return None
-
-    def feed_item_header(self):
-        return None
-    
-    def feed_item_content(self):
-        return None
-
-    class Meta:
-        abstract = True
-
 class Tag(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, db_index=True, unique=True)
@@ -48,5 +24,48 @@ class FeedItem(models.Model):
     published = models.DateTimeField(null=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',)
 
+    @staticmethod
+    def get_site_url():
+        return settings.SITE_URL
+
+    def get_permalink(self):
+        return get_site_url + self.get_absolute_url
+
     def __str__(self):
         return 'FeedItem'
+
+    def is_post(self):
+        return hasattr(self, 'post')
+
+    def is_note(self):
+        return hasattr(self, 'note')
+
+    def get_child(self):
+        if self.is_post():
+            return self.post
+        
+        if self.is_note():
+            return self.note
+
+        return None
+    
+    def get_type_name(self):
+        return self._meta.verbose_name
+        
+    def get_type_name_plural(self):
+        return self._meta.verbose_name_plural
+    
+    def get_type_verb(self):
+        return self._meta.object_verb
+
+    def meta_template(self):
+        return f'{ self._meta.app_label }/_meta.html'
+
+    def feed_item_template(self):
+        return None
+
+    def feed_item_header(self):
+        return None
+    
+    def feed_item_content(self):
+        return None

@@ -27,8 +27,6 @@ def home(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    print(page_obj.object_list)
-
     for obj in page_obj:
         if obj['type'] == 'post':
             obj = Post.objects.get(pk=obj['pk'])

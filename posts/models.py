@@ -1,6 +1,6 @@
 from django.db import models
 from django.urls import reverse
-from feed.models import FeedItemBase, FeedItem
+from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable
 from feed.models import Tag
 from profiles.models import Profile
@@ -19,7 +19,7 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse('posts:category', args=[self.id, self.slug])
 
-class Post(FeedItemBase, TwitterSyndicatable, FeedItem):
+class Post(TwitterSyndicatable, FeedItem):
     # h-entry properties
     short_content = models.CharField(max_length=280)
     title = models.CharField(max_length=100, unique=True)
@@ -33,7 +33,6 @@ class Post(FeedItemBase, TwitterSyndicatable, FeedItem):
         return self.title
 
     def get_absolute_url(self):
-        print(reverse('posts:detail', args=[self.id, self.slug]))
         return reverse('posts:detail', args=[self.id, self.slug])
 
     def feed_item_content(self):

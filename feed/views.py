@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from posts.models import Post
 from notes.models import Note
-from django.views.generic import ListView, detail
+from django.views.generic import ListView, detail, list, dates, detail
 from django.db.models import Value, CharField
 from itertools import chain
 from django.core.paginator import Paginator
 from datetime import date
-from .models import Tag
+from .models import Tag, FeedItem
+from base.views import PermalinkResponseMixin, PageTitleResponseMixin
 
 def get_combined_recent(paginate_by, **kwargs):
     recent = Post.objects.filter(is_published=True,**kwargs).annotate(
@@ -42,121 +43,83 @@ def get_combined_recent(paginate_by, **kwargs):
     feed_items.sort(key=lambda e: e.published, reverse=True)
     return feed_items
 
-class FeedView(ListView):
-    template_name = 'feed/index.html'
-    paginate_by = 5
-    filters = {}
-
+class PublishedMixin(list.MultipleObjectMixin):
     def get_queryset(self):
-        return get_combined_recent(self.paginate_by, **self.filters)
+        return super().get_queryset().filter(is_published=True)
 
-    class Meta:
-        abstract = True
-
-# Create your views here.
-class FeedView(ListView):
-    template_name = 'feed/index.html'
+class FeedItemArchiveView(PublishedMixin, dates.ArchiveIndexView):
+    model = FeedItem
+    date_field = 'published'
     paginate_by = 5
-    filters = {}
-
-    def get_queryset(self):
-        return get_combined_recent(self.paginate_by, **self.filters)
-
-class FeedWithTitleView(FeedView):
-    title = ''
-
-    def get_title(self):
-        return title
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['feed_title'] = self.get_title()
+        context['feed_title'] = context['page_title']
+
         return context
 
-class DateArchiveView(FeedWithTitleView):
-    title_format_string = ''
+class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
+    canonical_viewname = 'feed:index'
+    extra_context = {
+        'page_title': 'Orange Gnome',
+    }
 
-    def set_date_from_kwargs(self):
-        has_year = 'year' in self.kwargs
-        has_month = 'month' in self.kwargs
-        has_day = 'day' in self.kwargs
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['feed_title'] = None
 
-        year = 1
-        month = 1
-        day = 1
+        return context
 
-        if has_year:
-            year = self.kwargs['year']
+class FeedItemDateArchiveView(FeedItemArchiveView):
+    make_object_list = True
+    template_name = 'feed/feeditem_archive.html'
 
-        if has_month:
-            month = self.kwargs['month']
+class YearView(PermalinkResponseMixin, dates.YearArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):    
+    canonical_viewname = 'feed:year'
+    
+    def get_canonical_view_args(self, context):
+        return [context['year'].strftime("%Y")]
 
-        if has_day:
-            day = self.kwargs['day']
+    def get_page_title(self, context):
+        return '{d.year} Archives'.format(d = context['year'])
 
-        try:
-            self.date = date(year, month, day)
-        except ValueError:
-            if not has_year:
-                raise Http404("Year does not exist")
 
-            if not has_month:
-                raise Http404("Month does not exist")
+class MonthView(PermalinkResponseMixin, dates.MonthArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
+    canonical_viewname = 'feed:month'
+    month_format = '%m'
+    
+    def get_canonical_view_args(self, context):
+        return [context['month'].strftime("%Y"), context['month'].strftime("%m")]
 
-            raise Http404("Date does not exist")
+    def get_page_title(self, context):
+        return '{d:%B} {d.year} Archives'.format(d = context['month'])
 
-        if has_year:
-            self.filters['published__year'] = year
+class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
+    canonical_viewname = 'feed:day'
+    month_format = '%m'
+    
+    def get_canonical_view_args(self, context):
+        return [context['day'].strftime("%Y"), context['day'].strftime("%m"), context['day'].strftime("%d")]
 
-        if has_month:
-            self.filters['published__month'] = month
+    def get_page_title(self, context):
+        return '{d:%B} {d.day}, {d.year} Archives'.format(d = context['day'])
 
-        if has_day:
-            self.filters['published__day'] = day
+class TagView(PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):#FeedWithTitleView):
+    paginate_by = 5
+    template_name = 'feed/feeditem_archive.html'
+    canonical_viewname = 'feed:tag'
 
-    # overriding `get` to insert methods into the lifecycle
+    def get_canonical_view_args(self, context):
+        return [self.kwargs['pk'], self.kwargs['slug']]
+
     def get(self, request, *args, **kwargs):
-        self.set_date_from_kwargs()
-        self.object_list = self.get_queryset()
-        allow_empty = self.get_allow_empty()
+        self.object = self.get_object(queryset=Tag.objects.all())
+        
+        return super().get(request, *args, **kwargs)
 
-        if not allow_empty:
-            # When pagination is enabled and object_list is a queryset,
-            # it's better to do a cheap query than to load the unpaginated
-            # queryset in memory.
-            if self.get_paginate_by(self.object_list) is not None and hasattr(self.object_list, 'exists'):
-                is_empty = not self.object_list.exists()
-            else:
-                is_empty = not self.object_list
-            if is_empty:
-                raise Http404(_('Empty list and “%(class_name)s.allow_empty” is False.') % {
-                    'class_name': self.__class__.__name__,
-                })
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-    def get_title(self):
-        return self.title_format_string.format(d = self.date)
-
-class YearView(DateArchiveView):
-    title_format_string = '{d.year} Archives'
-
-class MonthView(DateArchiveView):
-    title_format_string = '{d:%B} {d.year} Archives'
-
-class DayView(DateArchiveView):
-    title_format_string = '{d:%B} {d.day}, {d.year} Archives'
-
-class TagView(FeedWithTitleView):
-    def get(self, request, *args, **kwargs):
-        self.object = Tag.objects.get(pk=kwargs['pk'])
-
-        return super().get(self, request, *args, **kwargs)
-
-    def get_title(self):
+    def get_page_title(self, context):
         return self.object.name
 
     def get_queryset(self):
-        self.filters['tags__pk'] = self.object.pk
-
-        return super().get_queryset()
+        return self.object.feed_items.filter(is_published=True).order_by('-published')
+        

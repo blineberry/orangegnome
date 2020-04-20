@@ -1,9 +1,9 @@
 <div class="postmeta-published">Published by 
     <span class="p-author h-card">{{ item.author.name }}</span> on 
     <time class="dt-published" datetime="{{ item.published|date:'c' }}">
-        <a href="{% url 'notes:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a>
-        <a href="{% url 'notes:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, 
-        <a href="{% url 'notes:year' item.published|date:'Y' %}">{{ item.published|date:'Y' }}</a>
+        <a href="{% url 'feed:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a>
+        <a href="{% url 'feed:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, 
+        <a href="{% url 'feed:year' item.published|date:'Y' %}">{{ item.published|date:'Y' }}</a>
     </time>
 </div>
 <div class="postmeta-tags">Tags:

@@ -3,6 +3,7 @@ from .models import Note
 from django.urls import reverse
 from django.core.paginator import Paginator
 from datetime import date
+from django.views import generic
 
 def render_index(request, notes, title, permalink):
     paginator = Paginator(notes, 5)
@@ -20,6 +21,9 @@ def render_index(request, notes, title, permalink):
     return render(request, 'notes/index.html', context)
 
 # Create your views here.
+class IndexView(generic.ListView):
+    model = Note
+
 def index(request):
     notes = Note.objects.filter(is_published=True).order_by('-published')
 

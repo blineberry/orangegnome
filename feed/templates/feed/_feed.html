@@ -6,10 +6,10 @@
 <ul class="feed-list">
     {% for item in object_list %}
         <li class="feed-item">
-            {% if item.feed_item_template %}
-            {% include item.feed_item_template with linkTitle=True %}
+            {% if item.get_child.feed_item_template %}
+            {% include item.get_child.feed_item_template with linkTitle=True item=item.get_child %}
             {% else %}
-            {% include 'feed/_feed_item.html' with linkTitle=True %}
+            {% include 'feed/_feed_item.html' with linkTitle=True item=item.get_child %}
             {% endif %}
         </li>
     {% endfor %}

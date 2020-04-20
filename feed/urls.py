@@ -3,7 +3,7 @@ from . import views
 
 app_name = 'feed'
 urlpatterns = [
-    path('', views.FeedView.as_view(), name='index'),
+    path('', views.IndexView.as_view(), name='index'),
     path('date/<int:year>/', include([
         path('', views.YearView.as_view(), name='year'),
         path('<int:month>/', include([

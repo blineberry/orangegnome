@@ -1,11 +1,11 @@
 from django.db import models
 from profiles.models import Profile
-from feed.models import FeedItemBase, Tag, FeedItem
+from feed.models import Tag, FeedItem
 from syndications.models import TwitterSyndicatable
 from django.urls import reverse
 
 # Create your models here.
-class Note(FeedItemBase, TwitterSyndicatable, FeedItem):
+class Note(TwitterSyndicatable, FeedItem):
     short_content = models.CharField(max_length=280)
 
     def __str__(self):
