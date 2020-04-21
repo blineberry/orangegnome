@@ -15,8 +15,22 @@ class Syndication():
         api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
             consumer_secret=settings.TWITTER_CONSUMER_SECRET,
             access_token_key=settings.TWITTER_ACCESS_TOKEN_KEY,
-            access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
+            access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET,
+            tweet_mode='extended')
         response = api.PostUpdate(content)
+        print(response)
+        return response
+
+    @staticmethod
+    def get_tweet(id_str):
+        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+            access_token_key=settings.TWITTER_ACCESS_TOKEN_KEY,
+            access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET,
+            tweet_mode='extended')
+
+        response = api.GetStatus(id_str)
+
         print(response)
         return response
 
@@ -46,6 +60,7 @@ class Tweet(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+    full_text = models.TextField(max_length=560, null=True)
     user = models.ForeignKey(TwitterUser, on_delete=models.PROTECT, related_name='tweets', null=True)
 
     def get_url(self):

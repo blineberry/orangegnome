@@ -28,7 +28,13 @@ class SyndicatableAdmin(admin.ModelAdmin):
             user = TwitterUser(id_str=response.user.id_str, name=response.user.name, screen_name=response.user.screen_name)
             user.save()
 
-            obj.tweet.create(id_str=response.id_str, created_at=created_at, user=user)
+            full_text = response.text
+
+            if (response.truncated):
+                response = Syndication.get_tweet(response.id_str)
+                full_text = response.extended_tweet.full_text
+
+            obj.tweet.create(id_str=response.id_str, created_at=created_at, user=user, full_text=full_text)
             obj.syndicated_to_twitter = timezone.now()
         except Exception as e:
             self._desyndicate(response.id_str, obj)

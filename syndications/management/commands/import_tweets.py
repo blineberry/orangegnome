@@ -26,7 +26,7 @@ def is_reply(tweet):
     return 'in_reply_to_user_id' in tweet
 
 def import_tweet(tweet):
-    
+
 
 class Command(BaseCommand):
     help = 'Imports tweets from a Twitter archive'
@@ -50,14 +50,18 @@ class Command(BaseCommand):
         retweets = list()
         replies = list()
         imports = list()
-
-        
+        from_og = list()        
 
         for tweet in tweets:
             if 'tweet' not in tweet:
                 self.stdout.write('Tweet doesn\'t have "tweet"')
 
             t = tweet['tweet']
+
+            if t['source'] == "<a href=\"https://orangegnome.com\" rel=\"nofollow\">Orange Gnome</a>":
+                from_og.append(t)
+                self.stdout.write('Tweet was sent from Orange Gnome')
+                continue
 
             if not options['media'] and has_media(t):
                 media_tweets.append(t)
@@ -78,12 +82,13 @@ class Command(BaseCommand):
             import_tweet(t)
             self.stdout.write('Tweet imported')
 
+        self.stdout.write('%s tweets originated from Orange Gnome' % len(from_og))
         self.stdout.write('%s tweets with media skipped' % len(media_tweets))
         self.stdout.write('%s retweets skipped' % len(retweets))
         self.stdout.write('%s replies skipped' % len(replies))
         self.stdout.write('%s tweets imported out of %s' % (len(imports), str(len(tweets))))
 
-        if (len(media_tweets) + len(retweets) + len(replies) + len(imports)) == len(tweets):
+        if (len(from_og) + len(media_tweets) + len(retweets) + len(replies) + len(imports)) == len(tweets):
             self.stdout.write('The match checks!')
         else:
             self.stdout.write('Uh oh the math does not check out')
