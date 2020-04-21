@@ -1,6 +1,6 @@
 from django.contrib import admin
 from twitter import TwitterError
-from .models import Syndication
+from .models import Syndication, TwitterUser
 from django.utils import timezone
 import datetime
 
@@ -24,7 +24,11 @@ class SyndicatableAdmin(admin.ModelAdmin):
 
         try:
             created_at = datetime.datetime.strptime(response.created_at, "%a %b %d %H:%M:%S %z %Y")
-            obj.tweet.create(id_str=response.id_str, created_at=created_at, screen_name=response.user.screen_name)
+            
+            user = TwitterUser(id_str=response.user.id_str, name=response.user.name, screen_name=response.user.screen_name)
+            user.save()
+
+            obj.tweet.create(id_str=response.id_str, created_at=created_at, user=user)
             obj.syndicated_to_twitter = timezone.now()
         except Exception as e:
             self._desyndicate(response.id_str, obj)

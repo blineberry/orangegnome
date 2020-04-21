@@ -15,5 +15,5 @@
 </div>
 <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ item.get_absolute_url }}">{{ request.get_host }}{{ item.get_absolute_url }}</a></div>
 {% if item.is_syndicated_to_twitter %}
-<div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.twitter_syndication.get.get_url }}">Twitter</a> on {{ item.twitter_syndication.get.created_at|date }}</div>
+<div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.tweet.get.get_url }}">Twitter</a> on {{ item.tweet.get.created_at|date }}</div>
 {% endif %}

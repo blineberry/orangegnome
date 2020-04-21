@@ -17,6 +17,7 @@ class Syndication():
             access_token_key=settings.TWITTER_ACCESS_TOKEN_KEY,
             access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
         response = api.PostUpdate(content)
+        print(response)
         return response
 
     @staticmethod
@@ -32,6 +33,12 @@ class Syndication():
     class Meta:
         abstract = True
 
+
+class TwitterUser(models.Model):
+    id_str = models.TextField(max_length=40,primary_key=True)
+    name = models.TextField(max_length=100)
+    screen_name = models.TextField(max_length=30)
+
 class Tweet(models.Model):
     id_str = models.TextField(max_length=40)
     created_at = models.DateTimeField()
@@ -39,9 +46,16 @@ class Tweet(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+    user = models.ForeignKey(TwitterUser, on_delete=models.PROTECT, related_name='tweets', null=True)
 
     def get_url(self):
-        return f'https://twitter.com/{self.screen_name}/status/{self.id_str}'
+        screen_name = self.screen_name
+
+        if self.user is not None:
+            screen_name = self.user.screen_name
+
+        print(f'https://twitter.com/{screen_name}/status/{self.id_str}')
+        return f'https://twitter.com/{screen_name}/status/{self.id_str}'
 
     def to_syndication(self):
         return Syndication(name='Twitter',url=self.get_url())
@@ -59,3 +73,4 @@ class TwitterSyndicatable(models.Model):
 
     class Meta:
         abstract = True
+
