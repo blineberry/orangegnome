@@ -1,5 +1,5 @@
 from django.db import models
-import twitter
+import tweepy
 from django.conf import settings
 import json
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -11,37 +11,25 @@ class Syndication():
     url = models.TextField(max_length=2000)
 
     @staticmethod
-    def syndicate_to_twitter(content):
-        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
-            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
-            access_token_key=settings.TWITTER_ACCESS_TOKEN_KEY,
-            access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET,
-            tweet_mode='extended')
-        response = api.PostUpdate(content)
-        print(response)
-        return response
+    def get_twitter_client():
+        auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(settings.TWITTER_ACCESS_TOKEN_KEY, settings.TWITTER_ACCESS_TOKEN_SECRET)
+        
+        return tweepy.API(auth)
 
     @staticmethod
-    def get_tweet(id_str):
-        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
-            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
-            access_token_key=settings.TWITTER_ACCESS_TOKEN_KEY,
-            access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET,
-            tweet_mode='extended')
+    def syndicate_to_twitter(content):
+        api = Syndication.get_twitter_client()
 
-        response = api.GetStatus(id_str)
-
+        response = api.update_status(content, tweet_mode="extended")
         print(response)
         return response
 
     @staticmethod
     def delete_from_twitter(id_str):
-        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
-            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
-            access_token_key=settings.TWITTER_ACCESS_TOKEN_KEY,
-            access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
+        api = Syndication.get_twitter_client()
         
-        response = api.DestroyStatus(id_str)
+        response = api.destroy_status(id_str)
         return response
 
     class Meta:
@@ -69,7 +57,6 @@ class Tweet(models.Model):
         if self.user is not None:
             screen_name = self.user.screen_name
 
-        print(f'https://twitter.com/{screen_name}/status/{self.id_str}')
         return f'https://twitter.com/{screen_name}/status/{self.id_str}'
 
     def to_syndication(self):

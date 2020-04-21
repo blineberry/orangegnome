@@ -1,5 +1,5 @@
 from django.contrib import admin
-from twitter import TwitterError
+from tweepy import TweepError
 from .models import Syndication, TwitterUser
 from django.utils import timezone
 import datetime
@@ -18,23 +18,17 @@ class SyndicatableAdmin(admin.ModelAdmin):
    
         try:
             response = Syndication.syndicate_to_twitter(obj.to_twitter_status())
-        except TwitterError as e:
+        except TweepError as e:
             self.message_user(request, f"Error syndicating to Twitter: { str(e) }")
             return obj
 
-        try:
-            created_at = datetime.datetime.strptime(response.created_at, "%a %b %d %H:%M:%S %z %Y")
-            
+        try:            
             user = TwitterUser(id_str=response.user.id_str, name=response.user.name, screen_name=response.user.screen_name)
             user.save()
 
-            full_text = response.text
+            full_text = response.full_text
 
-            if (response.truncated):
-                response = Syndication.get_tweet(response.id_str)
-                full_text = response.extended_tweet.full_text
-
-            obj.tweet.create(id_str=response.id_str, created_at=created_at, user=user, full_text=full_text)
+            obj.tweet.create(id_str=response.id_str, created_at=response.created_at, user=user, full_text=full_text)
             obj.syndicated_to_twitter = timezone.now()
         except Exception as e:
             self._desyndicate(response.id_str, obj)
@@ -48,7 +42,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
 
         try:
             response = Syndication.delete_from_twitter(obj.tweet.get().id_str)
-        except TwitterError as e:
+        except TweepError as e:
             self.message_user(request, f"Error desyndicating to Twitter: { str(e) }")
             return obj
         except Exception as e:
