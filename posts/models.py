@@ -21,9 +21,9 @@ class Category(models.Model):
 
 class Post(TwitterSyndicatable, FeedItem):
     # h-entry properties
-    short_content = models.CharField(max_length=280)
+    summary = models.CharField(max_length=280)
     title = models.CharField(max_length=100, unique=True)
-    long_content = models.TextField()    
+    content = models.TextField()    
     category = models.ForeignKey(Category, on_delete=models.PROTECT,related_name='posts', null=True)
 
     # extra properties
@@ -36,10 +36,10 @@ class Post(TwitterSyndicatable, FeedItem):
         return reverse('posts:detail', args=[self.id, self.slug])
 
     def feed_item_content(self):
-        return self.long_content
+        return self.content
 
     def feed_item_header(self):
         return self.title
 
     def to_twitter_status(self):
-        return f'{self.short_content} {self.get_absolute_url()}'
+        return f'{self.summary} {self.get_absolute_url()}'

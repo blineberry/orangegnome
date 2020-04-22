@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'syndications.apps.SyndicationsConfig',
     'base.apps.BaseConfig',
     'feed.apps.FeedConfig',
-    'home.apps.HomeConfig',
     'pages.apps.PagesConfig',
     'profiles.apps.ProfilesConfig',
     'posts.apps.PostsConfig',

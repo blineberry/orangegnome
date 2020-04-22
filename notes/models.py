@@ -6,19 +6,19 @@ from django.urls import reverse
 
 # Create your models here.
 class Note(TwitterSyndicatable, FeedItem):
-    short_content = models.CharField(max_length=280)
+    content = models.CharField(max_length=560)
 
     def __str__(self):
-        return self.short_content
+        return self.content
 
     def get_absolute_url(self):
         return reverse('notes:detail', args=[self.id])
 
     def feed_item_content(self):
-        return self.short_content
+        return self.content
 
     def feed_item_header(self):
         return self.published
 
     def to_twitter_status(self):
-        return self.short_content
+        return self.content
