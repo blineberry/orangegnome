@@ -1,0 +1,13 @@
+{% extends 'base/extended_hcard.html' %}
+
+{% block meta %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:creator" content="@{{ note.author.twitter_screenname }}" />
+<meta property="og:url" content="{{ permalink }}" />
+<meta property="og:title" content="{{ note.published }}" />
+<meta property="og:description" content="{{ note.short_content }}" />
+{% endblock %}
+
+{% block body %}
+{% include 'feed/_feed_item.html' with item=note %}
+{% endblock %}

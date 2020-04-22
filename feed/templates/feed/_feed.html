@@ -4,18 +4,22 @@
 {% endif %}
 
 <ul class="feed-list">
-    {% for item in feed %}
+    {% for item in object_list %}
         <li class="feed-item">
-            {% include 'feed/_feed_item.html' with linkTitle=True %}
+            {% if item.get_child.feed_item_template %}
+            {% include item.get_child.feed_item_template with linkTitle=True item=item.get_child %}
+            {% else %}
+            {% include 'feed/_feed_item.html' with linkTitle=True item=item.get_child %}
+            {% endif %}
         </li>
     {% endfor %}
 </ul>
 <nav class="feed-nav">
-{% if feed.has_next %}
-    <a class="feed-nav-older" href="?page={{ feed.next_page_number }}">older</a>
+{% if page_obj.has_next %}
+    <a class="feed-nav-older" href="?page={{ page_obj.next_page_number }}">older</a>
 {% endif %}
-{% if feed.has_previous %}
-    <a class="feed-nav-newer" href="?page={{ feed.previous_page_number }}">newer</a>
+{% if page_obj.has_previous %}
+    <a class="feed-nav-newer" href="?page={{ page_obj.previous_page_number }}">newer</a>
 {% endif %}
 </div>
 </section>

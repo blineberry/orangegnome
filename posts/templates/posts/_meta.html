@@ -1,4 +1,4 @@
-<div class="postmeta-published">Published by <span class="p-author h-card">{{ site_owner.name }}</span> on <time class="dt-published" datetime="{{ item.published|date:'c' }}"><a class="p-category" href="{% url 'posts:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a> <a href="{% url 'posts:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, <a href="{% url 'posts:year' item.published|date:'Y' %}">{{ item.published|date:'Y' }}</a></time> in <a href="{{ item.category.get_absolute_url }}" rel="category tag">{{ item.category.name }}</a></div>
+<div class="postmeta-published">Published by <span class="p-author h-card">{{ item.author.name }}</span> on <time class="dt-published" datetime="{{ item.published|date:'c' }}"><a href="{% url 'feed:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a> <a href="{% url 'feed:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, <a href="{% url 'feed:year' item.published|date:'Y' %}">{{ item.published|date:'Y' }}</a></time> in <a href="{{ item.category.get_absolute_url }}" class="p-category" rel="category tag">{{ item.category.name }}</a></div>
 <div class="postmeta-tags">Tags:
     <ul>
     {% for tag in item.tags.all %}
@@ -8,5 +8,5 @@
 </div>
 <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ item.get_absolute_url }}">{{ request.get_host }}{{ item.get_absolute_url }}</a></div>
 {% if item.is_syndicated_to_twitter %}
-<div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.twitter_syndication.get.get_url }}">Twitter</a> on {{ item.twitter_syndication.get.created_at|date }}</div>
+<div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.tweet.get.get_url }}">Twitter</a> on {{ item.tweet.get.created_at|date }}</div>
 {% endif %}

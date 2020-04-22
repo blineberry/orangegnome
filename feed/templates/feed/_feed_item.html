@@ -1,20 +1,24 @@
 <article class="article h-entry">
+    {% if item.feed_item_header %}
     <header class="article-header">
         {% block feeditemheader %}
         <h1 class="p-name">
             {% if linkTitle %}
-                <a class="article-link alt" href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+                <a class="article-link alt" href="{{ item.get_absolute_url }}">{{ item.feed_item_header }}</a>
             {% else %}
-                {{ item.title }}
+                {{ item.feed_item_header }}
             {% endif %}
         </h1>
         {% endblock %}
     </header>
+    {% endif %}
+    {% if item.feed_item_content %}
     <div class="article-content e-content">
         {% block feeditemcontent %}
-        {{ item.content|safe }}
+        {{ item.feed_item_content|safe }}
         {% endblock %}
     </div>
+    {% endif %}
     <footer class="article-footer">
         {% block feeditemfooter %}
         <div class="meta">{% include item.meta_template %}</div>

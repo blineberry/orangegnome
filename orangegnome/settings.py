@@ -41,9 +41,10 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 # Application definition
 
 INSTALLED_APPS = [
+    'notes.apps.NotesConfig',
+    'syndications.apps.SyndicationsConfig',
     'base.apps.BaseConfig',
     'feed.apps.FeedConfig',
-    'home.apps.HomeConfig',
     'pages.apps.PagesConfig',
     'profiles.apps.ProfilesConfig',
     'posts.apps.PostsConfig',
