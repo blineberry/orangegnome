@@ -32,6 +32,17 @@ class Webmention():
         return None
 
     @staticmethod
+    def get_links_from(html):
+        soup = BeautifulSoup(html, features="html.parser")
+        href_els = soup.find_all(href=re.compile(".+"))
+        print(href_els)
+
+        if len(href_els) < 1:
+            return list()
+
+        return [e['href'] for e in href_els]
+
+    @staticmethod
     def get_webmention_endpoint(url):
         response = requests.get(url, headers={
             'user-agent': 'Webmention'
@@ -64,12 +75,18 @@ class Webmention():
 
     @staticmethod
     def send(sourceUrl, targetUrl):
+        print(f'Sending webmention notification to { targetUrl } for { sourceUrl }')
+
         webmention_endpoint = Webmention.get_webmention_endpoint(targetUrl)
 
         if webmention_endpoint is None:
             return False
 
-        return Webmention.notify_receiver(sourceUrl, targetUrl, webmention_endpoint)
+        if Webmention.notify_receiver(sourceUrl, targetUrl, webmention_endpoint):
+            print(f'webmention notification sent to { targetUrl } for { sourceUrl }')
+            return True
+
+        return False
         
 
                

@@ -4,8 +4,7 @@ from unittest import skip
 
 # Create your tests here.
 # commenting since this has an external dependency and was only used to implement webmention sending
-#class WebmentionTestCase(TestCase):
-class WebmentionTestCase():
+class WebmentionTestCase():#TestCase):
     def setUp(self):
         pass
 
