@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tweet',
             name='full_text',
-            field=models.TextField(max_length=560, null=True),
+            field=models.CharField(max_length=560, null=True),
         ),
     ]

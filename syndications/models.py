@@ -42,13 +42,13 @@ class TwitterUser(models.Model):
     screen_name = models.TextField(max_length=30)
 
 class Tweet(models.Model):
-    id_str = models.TextField(max_length=40)
+    id_str = models.CharField(max_length=40)
     created_at = models.DateTimeField()
     screen_name = models.CharField(max_length=30)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    full_text = models.TextField(max_length=560, null=True)
+    full_text = models.CharField(max_length=560, null=True)
     user = models.ForeignKey(TwitterUser, on_delete=models.PROTECT, related_name='tweets', null=True)
 
     def get_url(self):

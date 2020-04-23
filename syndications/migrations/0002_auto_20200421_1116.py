@@ -14,9 +14,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TwitterUser',
             fields=[
-                ('id_str', models.TextField(max_length=40, primary_key=True, serialize=False)),
-                ('name', models.TextField(max_length=100)),
-                ('screen_name', models.TextField(max_length=30)),
+                ('id_str', models.CharField(max_length=40, primary_key=True, serialize=False)),
+                ('name', models.CharField(max_length=100)),
+                ('screen_name', models.CharField(max_length=30)),
             ],
         ),
         migrations.AddField(
