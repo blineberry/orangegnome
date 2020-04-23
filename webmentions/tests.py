@@ -3,7 +3,9 @@ from .models import Webmention
 from unittest import skip
 
 # Create your tests here.
-class WebmentionTestCase(TestCase):
+# commenting since this has an external dependency and was only used to implement webmention sending
+#class WebmentionTestCase(TestCase):
+class WebmentionTestCase():
     def setUp(self):
         pass
 
