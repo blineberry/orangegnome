@@ -23,17 +23,18 @@ class PublishableAdmin(admin.ModelAdmin):
         return super().save_model(request, obj, form, change)
 
 class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
-    pass
-    #fieldsets = (
-    #    (None, {
-    #        'fields': ('short_content','author','tags')
-    #    }),
-    #    ('Syndication', {
-    #        'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
-    #    }),
-    #    ('Publishing', {
-    #        'fields': ('is_published','published')
-    #    })
-    #)
+    readonly_fields = ('published','syndicated_to_twitter')
+
+    fieldsets = (
+        (None, {
+            'fields': ('content','author','tags')
+        }),
+        ('Syndication', {
+            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
+        }),
+        ('Publishing', {
+            'fields': ('is_published','published')
+        })
+    )
 
 admin.site.register(Note, NoteAdmin)

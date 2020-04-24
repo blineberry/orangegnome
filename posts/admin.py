@@ -6,7 +6,23 @@ from webmentions.models import Webmention
 
 class PostAdmin(SyndicatableAdmin, PublishableAdmin):
     prepopulated_fields = { 'slug': ('title',)}
-
+    readonly_fields = ('published','syndicated_to_twitter')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('title','slug','summary','content','author')
+        }),
+        ('Metadata', {
+            'fields': ('category','tags')
+        }),
+        ('Syndication', {
+            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
+        }),
+        ('Publishing', {
+            'fields': ('is_published','published')
+        })
+    )
+    
     def save_model(self, request, obj, form, change):
         content_links = Webmention.get_links_from(obj.content)
 
@@ -15,26 +31,11 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin):
             old_links = Webmention.get_links_from(old_obj.content)
             content_links = set(content_links + old_links)
 
-        if (obj.is_published):
+        if obj.is_published:
             for link in content_links:
                 Webmention.send(obj.get_permalink(), link)
 
         return super().save_model(request, obj, form, change)
-    
-    #fieldsets = (
-    #    (None, {
-    #        'fields': ('title','slug','short_content','long_content','author')
-    #    }),
-    #    ('Metadata', {
-    #        'fields': ('category','tags')
-    #    }),
-    #    ('Syndication', {
-    #        'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
-    #    }),
-    #    ('Publishing', {
-    #        'fields': ('is_published','published')
-    #    })
-    #)
 
 # Register your models here.
 admin.site.register(Post, PostAdmin)
