@@ -42,4 +42,4 @@ class Post(TwitterSyndicatable, FeedItem):
         return self.title
 
     def to_twitter_status(self):
-        return f'{self.summary} {self.get_absolute_url()}'
+        return f'{self.summary} {self.get_permalink()}'

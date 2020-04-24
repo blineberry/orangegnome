@@ -29,7 +29,7 @@ class FeedItem(models.Model):
         return settings.SITE_URL
 
     def get_permalink(self):
-        return get_site_url + self.get_absolute_url
+        return self.get_site_url() + self.get_absolute_url()
 
     def __str__(self):
         return 'FeedItem'
