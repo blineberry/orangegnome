@@ -3,8 +3,9 @@ from .models import Post, Category
 from syndications.admin import SyndicatableAdmin
 from notes.admin import PublishableAdmin
 from webmentions.models import Webmention
+from webmentions.admin import WebmentionAdmin
 
-class PostAdmin(SyndicatableAdmin, PublishableAdmin):
+class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
     prepopulated_fields = { 'slug': ('title',)}
     readonly_fields = ('published','syndicated_to_twitter')
     
@@ -23,18 +24,22 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin):
         })
     )
     
-    def save_model(self, request, obj, form, change):
-        content_links = Webmention.get_links_from(obj.content)
+    def get_links_to_webmention(self, request, obj, form, change):
+        content_links = Webmention.get_links_from_html(obj.content)
 
         if change:
             old_obj = Post.objects.get(id=obj.id)
-            old_links = Webmention.get_links_from(old_obj.content)
+            old_links = Webmention.get_links_from_html(old_obj.content)
             content_links = set(content_links + old_links)
 
-        if obj.is_published:
-            for link in content_links:
-                Webmention.send(obj.get_permalink(), link)
+        return list(content_links)
 
+    def should_send_webmentions(self, request, obj, form, change):
+        return obj.is_published
+
+    def save_model(self, request, obj, form, change):
+        print("Post save")
+        
         return super().save_model(request, obj, form, change)
 
 # Register your models here.
