@@ -37,9 +37,9 @@ class Syndication():
 
 
 class TwitterUser(models.Model):
-    id_str = models.TextField(max_length=40,primary_key=True)
-    name = models.TextField(max_length=100)
-    screen_name = models.TextField(max_length=30)
+    id_str = models.CharField(max_length=40,primary_key=True)
+    name = models.CharField(max_length=100)
+    screen_name = models.CharField(max_length=30)
 
 class Tweet(models.Model):
     id_str = models.CharField(max_length=40)
