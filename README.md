@@ -27,7 +27,7 @@ Copy `example.env` and rename to `.env`. Supply values in accordance with [djang
 ## Dreamhost
 
 ### Initial deploy
-[Follow these instructions to create a Django 2 project](https://help.dreamhost.com/hc/en-us/articles/216385637-How-do-I-enable-Passenger-on-my-domain-), but instead of installing Django and creating a new project, `git clone` this repository and `pip3 install - r requirements.txt`.
+[Follow these instructions to create a Django 2 project](https://help.dreamhost.com/hc/en-us/articles/360002341572), but instead of installing Django and creating a new project, `git clone` this repository and `pip3 install - r requirements.txt`.
 
 A working `passenger_wsgi.py` file looks something like this
 ```
