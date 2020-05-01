@@ -18,16 +18,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='twitteruser',
             name='id_str',
-            field=models.TextField(max_length=40, primary_key=True, serialize=False),
+            field=models.CharField(max_length=40, primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='twitteruser',
             name='name',
-            field=models.TextField(max_length=100),
+            field=models.CharField(max_length=100),
         ),
         migrations.AlterField(
             model_name='twitteruser',
             name='screen_name',
-            field=models.TextField(max_length=30),
+            field=models.CharField(max_length=30),
         ),
     ]
