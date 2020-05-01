@@ -17,7 +17,8 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
    
         try:
-            response = Syndication.syndicate_to_twitter(obj.to_twitter_status())
+            update = obj.to_twitter_status_update()
+            response = Syndication.syndicate_to_twitter(update.status, in_reply_to_status_id=update.in_reply_to_status_id, attachment_url=update.attachment_url)
         except TweepError as e:
             self.message_user(request, f"Error syndicating to Twitter: { str(e) }")
             return obj
@@ -26,9 +27,16 @@ class SyndicatableAdmin(admin.ModelAdmin):
             user = TwitterUser(id_str=response.user.id_str, name=response.user.name, screen_name=response.user.screen_name)
             user.save()
 
-            full_text = response.full_text
+            in_reply_to_status_id_str = response.in_reply_to_status_id_str
+            in_reply_to_screen_name = response.in_reply_to_screen_name
 
-            obj.tweet.create(id_str=response.id_str, created_at=response.created_at, user=user, full_text=full_text)
+            obj.tweet.create(
+                id_str=response.id_str, 
+                created_at=response.created_at, 
+                user=user, 
+                full_text=response.full_text,
+                in_reply_to_status_id_str=in_reply_to_status_id_str,
+                in_reply_to_screen_name=in_reply_to_screen_name)
             obj.syndicated_to_twitter = timezone.now()
         except Exception as e:
             self._desyndicate(response.id_str, obj)
@@ -64,6 +72,9 @@ class SyndicatableAdmin(admin.ModelAdmin):
         return self._syndicate(request, obj)
 
     def save_model(self, request, obj, form, change):
-        obj = self._handle_syndication(request, obj)
+        save_response = super().save_model(request, obj, form, change)
 
-        return super().save_model(request, obj, form, change)
+        obj = self._handle_syndication(request, obj)
+        obj.save()
+
+        return save_response

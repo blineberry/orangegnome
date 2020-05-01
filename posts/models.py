@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from feed.models import FeedItem
-from syndications.models import TwitterSyndicatable
+from syndications.models import TwitterSyndicatable, TwitterStatusUpdate
 from feed.models import Tag
 from profiles.models import Profile
 
@@ -41,5 +41,20 @@ class Post(TwitterSyndicatable, FeedItem):
     def feed_item_header(self):
         return self.title
 
-    def to_twitter_status(self):
-        return f'{self.summary} {self.get_permalink()}'
+    def to_twitter_status_update(self):
+        update = TwitterStatusUpdate(status=f'{self.summary} {self.get_permalink()}')
+        
+        if self.in_reply_to is None:
+            return update
+
+        is_twitter_url, is_twitter_status, reply_to_screen_name, reply_to_status_id = TwitterSyndicatable.parse_twitter_url(self.in_reply_to)
+
+        if not is_twitter_url or not is_twitter_status:
+            return update
+
+        if self.summary.lower().startswith(f'@{reply_to_screen_name.lower()}'):
+            update.in_reply_to_status_id = reply_to_status_id
+            return update
+
+        update.attachment_url = self.in_reply_to
+        return update

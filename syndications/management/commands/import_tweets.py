@@ -63,9 +63,13 @@ def add_tags(note, tweet):
 def import_tweet(tweet, user, author):
     created_at = datetime.datetime.strptime(tweet['created_at'], "%a %b %d %H:%M:%S %z %Y")
     in_reply_to = None
+    in_reply_to_status_id_str = None
+    in_reply_to_screen_name = None
 
     if 'in_reply_to_status_id_str' in tweet and 'in_reply_to_screen_name' in tweet:
         in_reply_to = f"https://twitter.com/{tweet['in_reply_to_screen_name']}/status/{tweet['in_reply_to_status_id_str']}"
+        in_reply_to_status_id_str = tweet['in_reply_to_status_id_str']
+        in_reply_to_screen_name = tweet['in_reply_to_screen_name']
     elif has_links(tweet):
         in_reply_to = tweet['entities']['urls'][0]['expanded_url']
 
@@ -87,6 +91,8 @@ def import_tweet(tweet, user, author):
         created_at=created_at,
         user=user,
         full_text=tweet['full_text'],
+        in_reply_to_status_id_str=in_reply_to_status_id_str,
+        in_reply_to_screen_name=in_reply_to_screen_name,
     )
 
 class Command(BaseCommand):

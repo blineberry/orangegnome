@@ -4,6 +4,7 @@ from django.conf import settings
 import json
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from urllib.parse import urlparse
 
 # Create your models here.
 class Syndication():
@@ -18,10 +19,10 @@ class Syndication():
         return tweepy.API(auth)
 
     @staticmethod
-    def syndicate_to_twitter(content):
+    def syndicate_to_twitter(status, in_reply_to_status_id=None, attachment_url=None):
         api = Syndication.get_twitter_client()
 
-        response = api.update_status(content, tweet_mode="extended")
+        response = api.update_status(status, in_reply_to_status_id=in_reply_to_status_id, attachment_url=attachment_url, tweet_mode="extended")
         print(response)
         return response
 
@@ -50,6 +51,8 @@ class Tweet(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     full_text = models.CharField(max_length=560, null=True)
     user = models.ForeignKey(TwitterUser, on_delete=models.PROTECT, related_name='tweets', null=True)
+    in_reply_to_status_id_str=models.CharField(max_length=40, blank=True, null=True)
+    in_reply_to_screen_name=models.CharField(max_length=100, blank=True, null=True)
 
     def get_url(self):
         screen_name = self.screen_name
@@ -70,9 +73,31 @@ class TwitterSyndicatable(models.Model):
     def is_syndicated_to_twitter(self):
         return self.tweet.all().exists()
 
-    def to_twitter_status(self):
+    def to_twitter_status_update(self):
         pass
+
+    @staticmethod
+    def parse_twitter_url(url):
+        o = urlparse(url)
+
+        if o.netloc != 'twitter.com':
+            return False, False, None, None
+
+        pieces = o.path.split("/")
+
+        if len(pieces) < 4:
+            return True, False, None, None
+
+        if pieces[2].lower() != 'status':
+            return True, False, None, None
+        
+        return True, True, pieces[1], pieces[3]
 
     class Meta:
         abstract = True
 
+class TwitterStatusUpdate(object):
+    def __init__(self, status=None, in_reply_to_status_id=None, attachment_url=None):
+        self.status = status
+        self.in_reply_to_status_id = in_reply_to_status_id
+        self.attachment_url = attachment_url
