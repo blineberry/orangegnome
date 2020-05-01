@@ -1,28 +1,12 @@
 from django.contrib import admin
-from django.utils import timezone
 from .models import Note
 from syndications.admin import SyndicatableAdmin
+from feed.admin import PublishableAdmin
+from webmentions.admin import WebmentionAdmin
+from webmentions.models import Webmention
 
 # Register your models here.
-class PublishableAdmin(admin.ModelAdmin):
-    def _handle_publish(self, obj, form):
-        if not obj.is_published:
-            obj.published = None
-            return obj
-        
-        if 'is_published' not in form.changed_data:            
-            return obj
-        
-        obj.published = timezone.now()
-
-        return obj
-
-    def save_model(self, request, obj, form, change):
-        obj = self._handle_publish(obj, form)
-
-        return super().save_model(request, obj, form, change)
-
-class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
+class NoteAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
     readonly_fields = ('published','syndicated_to_twitter')
 
     fieldsets = (
@@ -36,5 +20,18 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
             'fields': ('is_published','published')
         })
     )
+
+    def get_links_to_webmention(self, request, obj, form, change):
+        content_links = Webmention.get_links_from_text(obj.content)
+
+        if change:
+            old_obj = Note.objects.get(id=obj.id)
+            old_links = Webmention.get_links_from_text(old_obj.content)
+            content_links = set(content_links + old_links)
+
+        return list(content_links)
+
+    def should_send_webmentions(self, request, obj, form, change):
+        return obj.is_published
 
 admin.site.register(Note, NoteAdmin)

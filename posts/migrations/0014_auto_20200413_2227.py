@@ -10,9 +10,9 @@ tweet_model = 'Tweet'
 def migrate_data(apps, schema_editor):
     TwitterSyndication = apps.get_model(post_app_label, post_model)
     Tweet = apps.get_model(tweet_app_label, tweet_model)
-    ContentType = apps.get_model('contenttypes','ContentType')
+    #ContentType = apps.get_model('contenttypes','ContentType')
 
-    twitterSyndicationContentType = ContentType.objects.get(app_label=post_app_label,model=post_model.lower())
+    #twitterSyndicationContentType = ContentType.objects.get(app_label=post_app_label,model=post_model.lower())
 
     for twitterSyndication in TwitterSyndication.objects.all():
         t = Tweet(
@@ -20,7 +20,7 @@ def migrate_data(apps, schema_editor):
             created_at=twitterSyndication.created_at,
             screen_name=twitterSyndication.screen_name,
             object_id=twitterSyndication.post_id,
-            content_type_id=twitterSyndicationContentType.id,
+            #content_type_id=twitterSyndicationContentType.id,
         )
         t.save()
 
@@ -44,8 +44,9 @@ def unmigrate_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('contenttypes','__first__'),
         ('posts', '0013_auto_20200401_1332'),
-        ('syndications', '0001_initial')
+        ('syndications', '0001_initial'),
     ]
 
     operations = [
