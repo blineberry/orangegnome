@@ -28,7 +28,6 @@ class PublishableMixin():
 
 class PublishableAdmin(PublishableMixin, admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
-        print('Publishable save')
         obj = self.publish(request, obj, form, change)
 
         return super().save_model(request, obj, form, change)

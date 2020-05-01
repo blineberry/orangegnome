@@ -34,9 +34,4 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
     def should_send_webmentions(self, request, obj, form, change):
         return obj.is_published
 
-    def save_model(self, request, obj, form, change):
-        print("Note save")
-        
-        return super().save_model(request, obj, form, change)
-
 admin.site.register(Note, NoteAdmin)

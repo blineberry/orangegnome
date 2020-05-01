@@ -37,11 +37,6 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
     def should_send_webmentions(self, request, obj, form, change):
         return obj.is_published
 
-    def save_model(self, request, obj, form, change):
-        print("Post save")
-        
-        return super().save_model(request, obj, form, change)
-
 # Register your models here.
 admin.site.register(Post, PostAdmin)
 admin.site.register(Category)

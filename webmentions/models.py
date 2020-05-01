@@ -187,6 +187,3 @@ class Webmention():
             return True
 
         return False
-        
-
-               

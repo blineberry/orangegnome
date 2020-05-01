@@ -64,7 +64,6 @@ class SyndicatableAdmin(admin.ModelAdmin):
         return self._syndicate(request, obj)
 
     def save_model(self, request, obj, form, change):
-        print('Syndication save')
         obj = self._handle_syndication(request, obj)
 
         return super().save_model(request, obj, form, change)
