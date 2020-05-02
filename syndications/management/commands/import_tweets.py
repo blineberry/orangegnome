@@ -62,6 +62,16 @@ def add_tags(note, tweet):
 
 def import_tweet(tweet, user, author):
     created_at = datetime.datetime.strptime(tweet['created_at'], "%a %b %d %H:%M:%S %z %Y")
+    in_reply_to = None
+    in_reply_to_status_id_str = None
+    in_reply_to_screen_name = None
+
+    if 'in_reply_to_status_id_str' in tweet and 'in_reply_to_screen_name' in tweet:
+        in_reply_to = f"https://twitter.com/{tweet['in_reply_to_screen_name']}/status/{tweet['in_reply_to_status_id_str']}"
+        in_reply_to_status_id_str = tweet['in_reply_to_status_id_str']
+        in_reply_to_screen_name = tweet['in_reply_to_screen_name']
+    elif has_links(tweet):
+        in_reply_to = tweet['entities']['urls'][0]['expanded_url']
 
     note = Note.objects.create(
         content=tweet['full_text'],
@@ -71,6 +81,7 @@ def import_tweet(tweet, user, author):
         published=created_at,
         syndicated_to_twitter=created_at,
         syndicate_to_twitter=True,
+        in_reply_to=in_reply_to,
     )
 
     note = add_tags(note, tweet)
@@ -80,6 +91,8 @@ def import_tweet(tweet, user, author):
         created_at=created_at,
         user=user,
         full_text=tweet['full_text'],
+        in_reply_to_status_id_str=in_reply_to_status_id_str,
+        in_reply_to_screen_name=in_reply_to_screen_name,
     )
 
 class Command(BaseCommand):
@@ -164,6 +177,6 @@ class Command(BaseCommand):
         self.stdout.write('%s tweets imported out of %s' % (len(imports), str(len(tweets))))
 
         if (len(already_imported) + len(from_og) + len(links) + len(media_tweets) + len(retweets) + len(replies) + len(imports)) == len(tweets):
-            self.stdout.write('The match checks!')
+            self.stdout.write('The math checks!')
         else:
             self.stdout.write('Uh oh the math does not check out')

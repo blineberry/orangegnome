@@ -23,6 +23,7 @@ class FeedItem(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
     published = models.DateTimeField(null=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
+    in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
 
     @staticmethod
     def get_site_url():
