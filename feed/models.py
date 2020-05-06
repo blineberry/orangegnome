@@ -41,6 +41,9 @@ class FeedItem(models.Model):
     def is_note(self):
         return hasattr(self, 'note')
 
+    def is_exercise(self):
+        return hasattr(self, 'exercise')
+
     def get_child(self):
         if self.is_post():
             return self.post
@@ -48,7 +51,10 @@ class FeedItem(models.Model):
         if self.is_note():
             return self.note
 
-        return None
+        if self.is_exercise():
+            return self.exercise
+
+        raise NotImplementedError
     
     def get_type_name(self):
         return self._meta.verbose_name
