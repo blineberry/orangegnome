@@ -32,7 +32,22 @@ class Command(BaseCommand):
         activities = client.get_activities(per_page=100)
 
         for activity in activities:
-            strava_activity = StravaActivity.objects.create(
+            exercise = Exercise.objects.create(
+                athlete=athlete,
+                type=activity['type'],
+                distance=activity['distance'],
+                moving_time=activity['moving_time'],
+                total_elevation_gain=activity['total_elevation_gain'],
+                start_date=activity['start_date'],
+                start_date_local=activity['start_date_local'],
+                timezone=activity['timezone'],
+                is_published=not activity['private'],
+                published=activity['start_date'],
+                author=athlete,
+                updated=activity['start_date'],
+            )
+            
+            exercise.strava_activity.create(
                 strava_id=activity['id'],
                 athlete=activity['athlete']['id'],
                 distance=activity['distance'],
@@ -46,21 +61,7 @@ class Command(BaseCommand):
                 private=activity['private'],
             )
 
-            Exercise.objects.create(
-                athlete=athlete,
-                type=strava_activity.type,
-                distance=strava_activity.distance,
-                moving_time=strava_activity.moving_time,
-                total_elevation_gain=strava_activity.total_elevation_gain,
-                start_date=strava_activity.start_date,
-                start_date_local=strava_activity.start_date_local,
-                timezone=strava_activity.timezone,
-                strava_activity=strava_activity,
-                is_published=not strava_activity.private,
-                published=strava_activity.start_date,
-                author=athlete,
-                updated=strava_activity.start_date,
-            )
+            
 
         print(len(activities))
         

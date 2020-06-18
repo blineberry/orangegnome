@@ -142,6 +142,10 @@ class TwitterStatusUpdate(object):
 #        abstract = True
 #
 class StravaActivity(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
     strava_id = models.BigIntegerField()
     #external_id = models.CharField(max_length=255)
     #upload_id = models.BigIntegerField()
@@ -187,6 +191,9 @@ class StravaActivity(models.Model):
     #gear = models.ForeignKey(SummaryGear)
     #calories = models.FloatField()
 
+    def get_url(self):
+        return f'https://www.strava.com/activities/{self.strava_id}'
+
     class Mega:
         abstract = True
 
@@ -211,3 +218,12 @@ class StravaActivity(models.Model):
 #
 #    class Mega:
 #        abstract = True
+
+class StravaSyndicatable(models.Model):
+    strava_activity = GenericRelation(StravaActivity)
+    
+    def is_syndicated_to_strava(self):
+        return self.strava_activity.all().exists()
+
+    class Meta:
+        abstract = True
