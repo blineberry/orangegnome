@@ -3,6 +3,7 @@ from feed.models import FeedItem
 from syndications.models import StravaSyndicatable
 from profiles.models import Profile
 from django.utils.timezone import localdate
+from django.urls import reverse
 
 # Create your models here.
 class Exercise(StravaSyndicatable, FeedItem):
@@ -23,4 +24,4 @@ class Exercise(StravaSyndicatable, FeedItem):
         return f'{localdate(self.start_date).strftime("%b %-d")} {self.type}'
 
     def get_absolute_url(self):
-        return 'absolute url'
+        return reverse('exercises:detail', args=[self.id])

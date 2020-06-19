@@ -113,7 +113,7 @@ class TwitterStatusUpdate(object):
 #    polyline = models.Text()
 #    summary_polyline = models.Text()
 #
-#    class Mega:
+#    class Meta:
 #        abstract = True
 #
 #class PhotosSummaryPrimary(models.Model):
@@ -121,14 +121,14 @@ class TwitterStatusUpdate(object):
 #    unique_id = models.CharField(max_length=255)
 #    urls = models.TextField()
 #
-#    class Mega:
+#    class Meta:
 #        abstract = True
 #
 #class PhotosSummary(models.Model):
 #    count = models.IntegerField()
 #    primary = models.OneToOneField(PhotosSummaryPrimary, on_delete=models.CASCADE)
 #
-#    class Mega:
+#    class Meta:
 #        abstract = True
 #
 #class SummaryGear(models.Model):
@@ -138,7 +138,7 @@ class TwitterStatusUpdate(object):
 #    name = models.Text()
 #    distance = models.FloatField()
 #
-#    class Mega:
+#    class Meta:
 #        abstract = True
 #
 class StravaActivity(models.Model):
@@ -194,9 +194,6 @@ class StravaActivity(models.Model):
     def get_url(self):
         return f'https://www.strava.com/activities/{self.strava_id}'
 
-    class Mega:
-        abstract = True
-
 #class DetailedSegmentEfford(models.Model):
 #    strava_id = models.BigIntegerField()
 #    elapsed_time = models.IntegerField()
@@ -216,7 +213,7 @@ class StravaActivity(models.Model):
 #    average_heartrate = models.FloatField()
 #    max_heartrate = models.FloatField()
 #
-#    class Mega:
+#    class Meta:
 #        abstract = True
 
 class StravaSyndicatable(models.Model):
@@ -227,3 +224,13 @@ class StravaSyndicatable(models.Model):
 
     class Meta:
         abstract = True
+
+class StravaWebhook(models.Model):
+    verify_token = models.CharField(max_length=32)
+    subscription_id = models.IntegerField(null=True)
+
+    class Meta: 
+        abstract = True
+
+    def __str__(self):
+        return 'Webhook: {}'.format(self.verify_token)

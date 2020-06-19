@@ -1,3 +1,8 @@
+from django import template
+import math
+
+register = template.Library()
+
 @register.filter(name='exercise_distance')
 def distance(value):
     # if less than a quarter mile, return meters
@@ -5,4 +10,4 @@ def distance(value):
         return f'{value}m'
 
     # otherwise return miles
-    return f'{value/1609}mi'
+    return f'{math.trunc(value/1609*100)/100}mi'

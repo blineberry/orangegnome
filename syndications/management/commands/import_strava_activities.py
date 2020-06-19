@@ -61,7 +61,5 @@ class Command(BaseCommand):
                 private=activity['private'],
             )
 
-            
-
         print(len(activities))
         
