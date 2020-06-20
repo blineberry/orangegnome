@@ -1,0 +1,24 @@
+{% load exercise_extras %}
+
+<dl class="exercisemeta">
+    <dt>Distance</dt>
+        <dd>{{ item.distance|exercise_distance }}</dd>
+    <dt>Time</dt>
+        <dd>{{ item.moving_time }}s</dd>
+</dl>
+
+<div class="postmeta-published">Published by <span class="p-author h-card">{{ item.author.name }}</span> on <time class="dt-published" datetime="{{ item.published|date:'c' }}"><a href="{% url 'feed:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a> <a href="{% url 'feed:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, <a href="{% url 'feed:year' item.published|date:'Y' %}">{{ item.published|date:'Y' }}</a></time></div>
+<div class="postmeta-tags">Tags:
+    <ul>
+    {% for tag in item.tags.all %}
+        <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+<div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ item.get_absolute_url }}">{{ request.get_host }}{{ item.get_absolute_url }}</a></div>
+{% if item.is_syndicated_to_strava %}
+<div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.strava_activity.get.get_url }}">Strava</a> on {{ item.strava_activity.get.start_date|date }}</div>
+{% endif %}
+{% if item.is_syndicated_to_twitter %}
+<div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.tweet.get.get_url }}">Twitter</a> on {{ item.tweet.get.created_at|date }}</div>
+{% endif %}

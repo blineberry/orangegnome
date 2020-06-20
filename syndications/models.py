@@ -101,3 +101,133 @@ class TwitterStatusUpdate(object):
         self.status = status
         self.in_reply_to_status_id = in_reply_to_status_id
         self.attachment_url = attachment_url
+
+#class StravaLatLng(models.Model):
+#    lat = models.FloatField()
+#    lng = models.FloatField()
+#
+#    class Meta:
+#        abstract = True
+#
+#class StravaPolylineMap(models.Model):
+#    polyline = models.Text()
+#    summary_polyline = models.Text()
+#
+#    class Meta:
+#        abstract = True
+#
+#class PhotosSummaryPrimary(models.Model):
+#    source = models.IntegerField()
+#    unique_id = models.CharField(max_length=255)
+#    urls = models.TextField()
+#
+#    class Meta:
+#        abstract = True
+#
+#class PhotosSummary(models.Model):
+#    count = models.IntegerField()
+#    primary = models.OneToOneField(PhotosSummaryPrimary, on_delete=models.CASCADE)
+#
+#    class Meta:
+#        abstract = True
+#
+#class SummaryGear(models.Model):
+#    strava_id = models.CharField(max_length=255)
+#    resource_state = models.IntegerField()
+#    primary = models.BooleanField()
+#    name = models.Text()
+#    distance = models.FloatField()
+#
+#    class Meta:
+#        abstract = True
+#
+class StravaActivity(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    strava_id = models.BigIntegerField()
+    #external_id = models.CharField(max_length=255)
+    #upload_id = models.BigIntegerField()
+    athlete = models.IntegerField()
+    #name = models.Text()
+    distance = models.FloatField()
+    moving_time = models.IntegerField()
+    elapsed_time = models.IntegerField()
+    total_elevation_gain = models.FloatField()
+    #elev_high = models.FloatField()
+    #elev_high = models.FloatField()
+    type = models.CharField(max_length=30)
+    start_date = models.DateTimeField()
+    start_date_local = models.DateTimeField()
+    timezone = models.CharField(max_length=50)
+    #start_latlng = models.OneToOneField(StravaLatLng, on_delete=models.CASCADE)
+    #end_latlng = models.OneToOneField(StravaLatLng, on_delete=models.CASCADE)
+    #achievement_count = models.IntegerField()
+    #kudos_count = models.IntegerField()
+    #comment_count = models.IntegerField()
+    #athlete_count = models.IntegerField()
+    #photo_count = models.IntegerField()
+    #total_photo_count = models.IntegerField()
+    #map = models.OneToOneField(StravaPolylineMap, on_delete=models.CASCADE)
+    #trainer = models.BooleanField()
+    #commute = models.BooleanField()
+    #manual = models.BooleanField()
+    private = models.BooleanField()
+    #flagged = models.BooleanField()
+    #workout_type = models.IntegerField()
+    #upload_id_str = models.CharField(max_length=128)
+    #average_speed = models.FloatField()
+    #max_speed = models.FloatField()
+    #has_kudoed = models.BooleanField()
+    #gear_id = models.CharField(255)
+    #kilojoules = models.FloatField()
+    #average_watts = models.FloatField()
+    #device_watts = models.BooleanField()
+    #max_watts = models.IntegerField()
+    #weighted_average_watts = models.IntegerField()
+    #description = models.TextField(null=True)
+    #photos = models.OneToOneField(StravaPhotosSummary, on_delete=models.CASCADE)
+    #gear = models.ForeignKey(SummaryGear)
+    #calories = models.FloatField()
+
+    def get_url(self):
+        return f'https://www.strava.com/activities/{self.strava_id}'
+
+#class DetailedSegmentEfford(models.Model):
+#    strava_id = models.BigIntegerField()
+#    elapsed_time = models.IntegerField()
+#    start_date = models.DateTimeField()
+#    start_date_local = models.DateTimeField()
+#    distance = models.FloatField()
+#    is_kom = models.BooleanField()
+#    name = models.TextField()
+#    activity = models.ForeignKey(StravaActivity, on_delete=models.CASCADE)
+#    athlete = models.IntegerField()
+#    moving_time = models.IntegerField()
+#    start_index = models.IntegerField()
+#    end_index = models.IntegerField()
+#    average_cadence = models.FloatField()
+#    average_watts = models.FloatField()
+#    device_watts = models.BooleanField()
+#    average_heartrate = models.FloatField()
+#    max_heartrate = models.FloatField()
+#
+#    class Meta:
+#        abstract = True
+
+class StravaSyndicatable(models.Model):
+    strava_activity = GenericRelation(StravaActivity)
+    
+    def is_syndicated_to_strava(self):
+        return self.strava_activity.all().exists()
+
+    class Meta:
+        abstract = True
+
+class StravaWebhook(models.Model):
+    verify_token = models.CharField(max_length=32)
+    subscription_id = models.IntegerField(null=True)
+
+    def __str__(self):
+        return 'Webhook: {}'.format(self.verify_token)
