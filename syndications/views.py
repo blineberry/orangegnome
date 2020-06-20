@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from .models import StravaWebhook
 
 # Create your views here.
 class StravaWebhookView(View):
@@ -17,6 +18,11 @@ class StravaWebhookView(View):
             return HttpResponseBadRequest()
         
         if request.GET['hub.mode'] != "subscribe":
+            return HttpResponseBadRequest()
+
+        webhook = StravaWebhook.objects.all()[0]
+
+        if request.GET['hub.verify_token'] != webhook.verify_token:
             return HttpResponseBadRequest()
 
         return JsonResponse({'hub.challenge':request.GET['hub.challenge']})

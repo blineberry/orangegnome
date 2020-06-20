@@ -229,8 +229,5 @@ class StravaWebhook(models.Model):
     verify_token = models.CharField(max_length=32)
     subscription_id = models.IntegerField(null=True)
 
-    class Meta: 
-        abstract = True
-
     def __str__(self):
         return 'Webhook: {}'.format(self.verify_token)
