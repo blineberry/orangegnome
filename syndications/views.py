@@ -4,7 +4,7 @@ from django.views import View
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .models import StravaWebhook, StravaActivity
+from .models import StravaWebhook, StravaActivity, StravaWebhookEvent
 from exercises.models import Exercise
 from profiles.models import Profile
 
@@ -32,7 +32,20 @@ class StravaWebhookView(View):
         return JsonResponse({'hub.challenge':request.GET['hub.challenge']})
 
     def post(self, request, *args, **kwargs):
-        activity = json.loads(request.body.decode("utf-8"))
+        event_json = json.loads(request.body.decode("utf-8"))
+
+        event = StravaWebhookEvent(
+            object_type = event_json['object_type'],
+            object_id = event_json['object_id'],
+            aspect_type = event_json['aspect_type'],
+            updates = json.dumps(event_json['updates']),
+            owner_id = event_json['owner_id'],
+            subscription_id = event_json['subscription_id'],
+            event_time = event_json['event_time'],
+        )
+        event.save()
+        return HttpResponse(status=200)
+
 
         webhook = StravaWebhook.objects.all()[0]
 
