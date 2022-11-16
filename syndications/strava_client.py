@@ -37,7 +37,7 @@ class Client(object):
             "redirect_uri": self.redirect_uri,
             "response_type": "code",
             "approval_prompt": "auto",
-            "scope": "activity:read",
+            "scope": "activity:read,activity:read_all",
             "state": state,
         }), url_parts[4]))
 
