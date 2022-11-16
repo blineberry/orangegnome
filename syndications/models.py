@@ -231,3 +231,12 @@ class StravaWebhook(models.Model):
 
     def __str__(self):
         return 'Webhook: {}'.format(self.verify_token)
+
+class StravaWebhookEvent(models.Model):
+    object_type = models.CharField(max_length=16)
+    object_id = models.BigIntegerField()
+    aspect_type = models.CharField(max_length=12)
+    updates = models.TextField()
+    owner_id = models.BigIntegerField()
+    subscription_id = models.IntegerField()
+    event_time = models.BigIntegerField()
