@@ -162,3 +162,5 @@ TWITTER_ACCESS_TOKEN_SECRET = env('TWITTER_ACCESS_TOKEN_SECRET')
 # Site Settings
 SITE_NAME = "Orange Gnome"
 SITE_URL = env('SITE_URL')
+
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
