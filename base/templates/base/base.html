@@ -16,6 +16,10 @@
     <meta property="og:site_name" content="{{ base.site_name }}">
     <meta name="twitter:site" content="@{{ profiles.site_owner.twitter_screenname }}" />
 
+    {% if permalink %}
+    <link rel="canonical" href="{{ permalink }}" />
+    {% endif %}
+
     {% block meta %}
     {% endblock %}
 </head>
