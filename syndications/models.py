@@ -1,10 +1,13 @@
-from django.db import models
+import json
+from urllib.parse import urlparse
+
 import tweepy
 from django.conf import settings
-import json
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import (GenericForeignKey,
+                                                GenericRelation)
 from django.contrib.contenttypes.models import ContentType
-from urllib.parse import urlparse
+from django.db import models
+
 
 # Create your models here.
 class Syndication():
@@ -240,3 +243,17 @@ class StravaWebhookEvent(models.Model):
     owner_id = models.BigIntegerField()
     subscription_id = models.IntegerField()
     event_time = models.BigIntegerField()
+
+class MastadonStatus(models.Model):
+    id_str = models.CharField(max_length=40)
+
+class MastodonSyndicatable(models.Model):
+    syndicated_to_mastodon = models.DateTimeField(null=True)
+    syndicate_to_mastodon = models.BooleanField(default=False)
+    status = GenericRelation(MastadonStatus)
+    
+    def is_syndicated_to_mastadon(self):
+        return self.status.all().exists()
+
+    class Meta:
+        abstract = True
