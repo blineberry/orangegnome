@@ -1,5 +1,6 @@
 import json
 from urllib.parse import urlparse
+import re
 
 import tweepy
 from django.conf import settings
@@ -244,16 +245,32 @@ class StravaWebhookEvent(models.Model):
     subscription_id = models.IntegerField()
     event_time = models.BigIntegerField()
 
-class MastadonStatus(models.Model):
+class MastodonStatus(models.Model):
     id_str = models.CharField(max_length=40)
+    url = models.CharField(max_length=2048)
 
 class MastodonSyndicatable(models.Model):
     syndicated_to_mastodon = models.DateTimeField(null=True)
     syndicate_to_mastodon = models.BooleanField(default=False)
-    status = GenericRelation(MastadonStatus)
+    status = GenericRelation(MastodonStatus)
     
     def is_syndicated_to_mastadon(self):
         return self.status.all().exists()
+
+    @staticmethod
+    def parse_mastodon_url(url):
+        o = urlparse(url)
+
+        pieces = o.path.split("/")
+
+        if len(pieces) < 3:
+            return None
+        
+        mastodonUserPattern = re.compile("^@(.+)@(.+)\.(.+)$")
+        mastodonStatusIdPattern = re.compile("^(.+)$")
+
+        if bool(mastodonUserPattern.match(pieces[1])) and bool(mastodonStatusIdPattern.match(pieces[2])):
+            return pieces[2]
 
     class Meta:
         abstract = True

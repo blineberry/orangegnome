@@ -1,14 +1,14 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from tweepy import TweepError
-from .models import Syndication, TwitterUser
+from .models import Syndication, TwitterUser, MastodonStatus
 from django.utils import timezone
 import datetime
 
 # Register your models here.
 class SyndicatableAdmin(admin.ModelAdmin):
-    readonly_fields = ('syndicated_to_twitter',)
+    readonly_fields = ('syndicated_to_twitter', 'syndicated_to_mastodon')
 
-    def _syndicate(self, request, obj):
+    def _syndicate_to_twitter(self, request, obj):
         if obj.is_syndicated_to_twitter():
             return obj
 
@@ -44,7 +44,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         return obj
 
-    def _desyndicate(self, request, obj):
+    def _desyndicate_from_twitter(self, request, obj):
         if not obj.is_syndicated_to_twitter():
             return obj
 
@@ -65,11 +65,50 @@ class SyndicatableAdmin(admin.ModelAdmin):
         obj.syndicated_to_twitter = None
         return obj
 
-    def _handle_syndication(self, request, obj):
-        if not obj.syndicate_to_twitter:
-            return self._desyndicate(request, obj)            
+    def _syndicate_to_mastodon(self, request, obj):
+        if obj.is_syndicated_to_mastodon():
+            return obj
 
-        return self._syndicate(request, obj)
+        if not obj.is_published:
+            self.message_user(request, "Cannot syndicate an unpublished post.", messages.WARNING)
+            return obj
+
+        try:
+            status = obj.to_mastodon_status()
+            response = Syndication.syndicate_to_mastodon(status.status, in_reply_to_status_id=status.in_reply_to_id)
+        except TweepError as e:
+            self.message_user(request, f"Error syndicating to Mastodon: { str(e) }")
+            return obj
+
+        try:
+            obj.mastodon_status.create(
+                id_str=response.id, 
+                url=response.url
+            )
+            obj.syndicated_to_mastodon = timezone.now()
+        except Exception as e:
+            self._desyndicate_from_mastodon(response.id_str, obj)
+            self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }")
+        
+        return obj
+
+    def _handle_twitter_syndication(self, request, obj):
+        if not obj.syndicate_to_twitter:
+            return self._desyndicate_from_twitter(request, obj)            
+
+        return self._syndicate_to_twitter(request, obj)
+
+    def _handle_mastodon_syndication(self, request, obj):
+        if not obj.syndicate_to_mastodon:
+            return self._desyndicate_from_mastodon(request, obj)            
+
+        return self._syndicate_to_twitter(request, obj)
+
+    def _handle_syndication(self, request, obj):
+        obj = self._handle_twitter_syndication(request, obj)
+        obj = self._handle_mastodon_syndication(request, obj)
+
+        return obj
 
     def save_model(self, request, obj, form, change):
         save_response = super().save_model(request, obj, form, change)
