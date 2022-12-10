@@ -74,22 +74,44 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
 
         try:
-            status = obj.to_mastodon_status()
-            response = Syndication.syndicate_to_mastodon(status.status, in_reply_to_status_id=status.in_reply_to_id)
-        except TweepError as e:
+            status = obj.to_mastodon_status_update()
+            response = Syndication.syndicate_to_mastodon(status.status, in_reply_to_id=status.in_reply_to_id)
+        except Exception as e:
             self.message_user(request, f"Error syndicating to Mastodon: { str(e) }")
             return obj
 
         try:
             obj.mastodon_status.create(
-                id_str=response.id, 
-                url=response.url
+                id_str=response['id'], 
+                url=response['url'],
+                created_at=response['created_at']
             )
             obj.syndicated_to_mastodon = timezone.now()
         except Exception as e:
-            self._desyndicate_from_mastodon(response.id_str, obj)
+            self._desyndicate_from_mastodon(response.id, obj)
             self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }")
         
+        return obj
+
+    def _desyndicate_from_mastodon(self, request, obj):
+        if not obj.is_syndicated_to_mastodon():
+            return obj
+
+        try:
+            response = Syndication.delete_from_mastodon(obj.mastodon_status.get().id_str)
+        except TweepError as e:
+            self.message_user(request, f"Error desyndicating to Mastodon: { str(e) }")
+            return obj
+        except Exception as e:
+            self.message_user(request, f"Error desyndicating to Mastodon: { str(e) }")
+
+        try:
+            ms = obj.mastodon_status.get()
+            ms.delete()
+        except Exception as e:
+            self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }")
+        
+        obj.syndicated_to_mastodon = None
         return obj
 
     def _handle_twitter_syndication(self, request, obj):
@@ -102,7 +124,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
         if not obj.syndicate_to_mastodon:
             return self._desyndicate_from_mastodon(request, obj)            
 
-        return self._syndicate_to_twitter(request, obj)
+        return self._syndicate_to_mastodon(request, obj)
 
     def _handle_syndication(self, request, obj):
         obj = self._handle_twitter_syndication(request, obj)

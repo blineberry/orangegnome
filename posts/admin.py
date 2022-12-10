@@ -7,7 +7,7 @@ from webmentions.admin import WebmentionAdmin
 
 class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
     prepopulated_fields = { 'slug': ('title',)}
-    readonly_fields = ('published','syndicated_to_twitter')
+    readonly_fields = ('published','syndicated_to_twitter', 'syndicated_to_mastodon')
     
     fieldsets = (
         (None, {
@@ -17,7 +17,7 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
             'fields': ('category','tags')
         }),
         ('Syndication', {
-            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
+            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
         }),
         ('Publishing', {
             'fields': ('is_published','published')

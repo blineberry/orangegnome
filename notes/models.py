@@ -5,7 +5,7 @@
 from django.db import models
 from profiles.models import Profile
 from feed.models import Tag, FeedItem
-from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatus
+from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
 from django.urls import reverse
 from urllib.parse import urlparse
 
@@ -64,21 +64,20 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         update.attachment_url = self.in_reply_to
         return update
 
-    def to_mastodon_status(self):
+    def to_mastodon_status_update(self):
         """Converts the Note model to an object able to post to Mastodon."""
 
         # Get the basic Mastodon Status object from the content.
-        status = MastodonStatus(status=self.content)
+        status = MastodonStatusUpdate(self.content)
 
         # If Note is not replying to anything, return the status as it is.
         if self.in_reply_to is None:
             return status
 
-        # Check the reply to url for a mastodon-looking id.
+        # Check the reply for a Mastodon Id.
         reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.in_reply_to)
 
-        # If the reply to url is not a twitter url or is not a twitter status,
-        # or does not have an id, append the reply to url to the end of the 
+        # If no Mastodon Id, append the reply to url to the end of the 
         # Note content.
         if reply_to_id is None:
             status.status = f'{self.content} {self.in_reply_to}'
