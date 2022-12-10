@@ -14,8 +14,7 @@ class Client(object):
     @staticmethod
     def post_status(status,in_reply_to_id=None):
         data = {
-            'status': status,
-            'visibility': 'private'
+            'status': status
         }
 
         if in_reply_to_id is not None:
