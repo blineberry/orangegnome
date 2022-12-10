@@ -10,3 +10,6 @@
 {% if item.is_syndicated_to_twitter %}
 <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.tweet.get.get_url }}">Twitter</a> on {{ item.tweet.get.created_at|date }}</div>
 {% endif %}
+{% if item.is_syndicated_to_mastodon %}
+<div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.mastodon_status.get.url }}">Mastodon</a> on {{ item.mastodon_status.get.created_at|date }}</div>
+{% endif %}

@@ -1,10 +1,16 @@
-from django.db import models
+import json
+from urllib.parse import urlparse
+import re
+
 import tweepy
 from django.conf import settings
-import json
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import (GenericForeignKey,
+                                                GenericRelation)
 from django.contrib.contenttypes.models import ContentType
-from urllib.parse import urlparse
+from django.db import models
+
+from syndications.mastodon_client import Client as MastodonClient
+
 
 # Create your models here.
 class Syndication():
@@ -32,6 +38,14 @@ class Syndication():
         
         response = api.destroy_status(id_str)
         return response
+
+    @staticmethod
+    def syndicate_to_mastodon(status, in_reply_to_id=None):
+        return MastodonClient.post_status(status, in_reply_to_id)
+
+    @staticmethod
+    def delete_from_mastodon(id):
+        return MastodonClient.delete_status(id)
 
     class Meta:
         abstract = True
@@ -240,3 +254,61 @@ class StravaWebhookEvent(models.Model):
     owner_id = models.BigIntegerField()
     subscription_id = models.IntegerField()
     event_time = models.BigIntegerField()
+
+# 
+# MASTODON SYNDICATION FEATURE
+# 
+class MastodonStatus(models.Model):
+    """
+    The Mastodon Status from Mastodon.
+    """
+    id_str = models.CharField(max_length=40)
+    url = models.CharField(max_length=2048)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    created_at = models.DateTimeField()
+
+class MastodonStatusUpdate(object):
+    """
+    An object to contain the necessary data to publish a Mastodon Status.
+    """
+    def __init__(self, status=None, in_reply_to_id=None):
+        self.status = status
+        self.in_reply_to_id = in_reply_to_id
+
+class MastodonSyndicatable(models.Model):
+    """
+    An abstract class to be inherited by Models that want to syndicate
+    to Mastodon.
+    """
+
+    syndicated_to_mastodon = models.DateTimeField(null=True)
+    syndicate_to_mastodon = models.BooleanField(default=False)
+    mastodon_status = GenericRelation(MastodonStatus)
+    
+    def is_syndicated_to_mastodon(self):
+        return self.mastodon_status.all().exists()
+
+    @staticmethod
+    def parse_mastodon_url(url):
+        o = urlparse(url)
+
+        if o.netloc.lower() != settings.MASTODON_DOMAIN.lower():
+            return None
+
+        pieces = o.path.split("/")
+
+        if len(pieces) < 3:
+            return None        
+        
+        mastodonUserPattern = re.compile("^@(.+)@(.+)\.(.+)$")
+        mastodonStatusIdPattern = re.compile("^(.+)$")
+
+        if bool(mastodonUserPattern.match(pieces[1])) and bool(mastodonStatusIdPattern.match(pieces[2])):
+            return pieces[2]
+
+        return None
+
+    class Meta:
+        abstract = True

@@ -41,7 +41,7 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
     form = NoteModelForm
     """Override the dynamically created form with customizations."""
 
-    readonly_fields = ('published','syndicated_to_twitter')
+    readonly_fields = ('published','syndicated_to_twitter', 'syndicated_to_mastodon')
     """
     These fields will be shown but uneditable. 
     
@@ -53,7 +53,7 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
             'fields': ('content','in_reply_to','author','tags')
         }),
         ('Syndication', {
-            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter')
+            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
         }),
         ('Publishing', {
             'fields': ('is_published','published')
