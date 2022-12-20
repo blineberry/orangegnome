@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from .feed import LatestEntriesFeed
 
 app_name = 'feed'
 urlpatterns = [
@@ -12,4 +13,5 @@ urlpatterns = [
         ])),
     ])),
     path('tag/<int:pk>/<slug:slug>', views.TagView.as_view(), name='tag'),
+    path('feed', LatestEntriesFeed())
 ]
