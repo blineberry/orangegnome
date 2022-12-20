@@ -8,6 +8,7 @@ from feed.models import Tag, FeedItem
 from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
 from django.urls import reverse
 from urllib.parse import urlparse
+import re
 
 # An indieweb "Note" contenttype https://indieweb.org/note
 class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
@@ -28,7 +29,32 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_content(self):
         """Returns the content for aggregated feed item indexes."""
-        return self.content
+        return self.content_html()
+
+    @staticmethod
+    def doublespaces_to_paragraphs(content):
+        """
+        Returns the passed in content with doublespaces converted to html `p` 
+        elements.
+        """
+        return re.sub(r"([\n\r]{2})","<p>",content)
+
+    @staticmethod
+    def urls_to_links(content, target="_blank"):
+        """
+        Returns the passed in content with links converted to html `a` 
+        elements.
+        """
+        # Taken from https://gist.github.com/guillaumepiot/4539986
+        # Replace url to link
+        anchorRepl = r'<a href="\1" target="' + target + r'">\1</a>'
+        urls = re.compile(r"((https?):((//)|(\\\\))+[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.MULTILINE|re.UNICODE)
+        content = urls.sub(anchorRepl, content)
+        return content
+
+    def content_html(self):
+        """Returns the content with specific html conversions."""
+        return '<p>' + Note.urls_to_links(Note.doublespaces_to_paragraphs(self.content), "_self")
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
