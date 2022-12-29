@@ -9,13 +9,13 @@ class LatestEntriesFeed(Feed):
     description = "Latest entries from Brent Lineberry."
 
     def items(self):
-        return FeedItem.objects.order_by('-published')[:5]
+        return FeedItem.objects.order_by('-published')[:10]
     
     def item_title(self, item):
-        return item.feed_item_header()
+        return item.get_child().feed_item_header()
     
     def item_description(self, item):
-        return item.feed_item_content()
+        return item.get_child().feed_item_content()
 
     def item_link(self, item):
-        return item.get_permalink()
+        return item.get_child().get_permalink()

@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from datetime import date
 from .models import Tag, FeedItem
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
+from .feed import LatestEntriesFeed
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
@@ -37,6 +38,8 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['feed_title'] = None
+        context['rss_title'] = LatestEntriesFeed.description
+        context['rss_url'] = "%s/feed" % LatestEntriesFeed.link
 
         return context
 
