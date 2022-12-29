@@ -12,16 +12,18 @@ class Client(object):
         return 'https://' + settings.MASTODON_INSTANCE + '/api/v1'
 
     @staticmethod
-    def post_status(status,in_reply_to_id=None):
+    def post_status(status, idempotency_key, in_reply_to_id=None, visibility='private'):
         data = {
-            'status': status
+            'status': status,
+            'visibility': visibility
         }
 
         if in_reply_to_id is not None:
             data['in_reply_to_id'] = in_reply_to_id
 
         headers = {
-            'Authorization': Client.get_auth_header()
+            'Authorization': Client.get_auth_header(),
+            #'Idempotency-Key': idempotency_key
         }
 
         response = requests.post(Client.get_base_url() + '/statuses', data=data, headers=headers)

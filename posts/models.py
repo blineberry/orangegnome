@@ -70,13 +70,13 @@ class Post(TwitterSyndicatable, MastodonSyndicatable, FeedItem):
             return status
 
         # Check the reply to url for a mastodon-looking id.
-        reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.in_reply_to)
+        in_reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.in_reply_to)
 
         # If no Mastodon Id in the reply to url, return the status.
-        if reply_to_id is None:
+        if in_reply_to_id is None:
             status.status = f'{self.content} {self.in_reply_to}'
             return status
 
         # Add the reply_to_id and return
-        status.reply_to_id = reply_to_id
+        status.in_reply_to_id = in_reply_to_id
         return status
