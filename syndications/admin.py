@@ -75,9 +75,11 @@ class SyndicatableAdmin(admin.ModelAdmin):
 
         try:
             status = obj.to_mastodon_status_update()
-            response = Syndication.syndicate_to_mastodon(status.status, in_reply_to_id=status.in_reply_to_id)
+            print("status.in_reply_to_id: %s" % status.in_reply_to_id)
+            response = Syndication.syndicate_to_mastodon(status.status, str(obj.id), in_reply_to_id=status.in_reply_to_id)
         except Exception as e:
-            self.message_user(request, f"Error syndicating to Mastodon: { str(e) }")
+            self._desyndicate_from_mastodon(None, obj)
+            self.message_user(request, f"Error syndicating to Mastodon: { str(e) }", messages.ERROR)
             return obj
 
         try:
@@ -89,7 +91,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             obj.syndicated_to_mastodon = timezone.now()
         except Exception as e:
             self._desyndicate_from_mastodon(response.id, obj)
-            self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }")
+            self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }", messages.ERROR)
         
         return obj
 
@@ -99,17 +101,14 @@ class SyndicatableAdmin(admin.ModelAdmin):
 
         try:
             response = Syndication.delete_from_mastodon(obj.mastodon_status.get().id_str)
-        except TweepError as e:
-            self.message_user(request, f"Error desyndicating to Mastodon: { str(e) }")
-            return obj
         except Exception as e:
-            self.message_user(request, f"Error desyndicating to Mastodon: { str(e) }")
+            self.message_user(request, f"Error desyndicating to Mastodon: { str(e) }", messages.ERROR)
 
         try:
             ms = obj.mastodon_status.get()
             ms.delete()
         except Exception as e:
-            self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }")
+            self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }", messages.ERROR)
         
         obj.syndicated_to_mastodon = None
         return obj

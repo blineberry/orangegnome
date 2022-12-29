@@ -40,8 +40,8 @@ class Syndication():
         return response
 
     @staticmethod
-    def syndicate_to_mastodon(status, in_reply_to_id=None):
-        return MastodonClient.post_status(status, in_reply_to_id)
+    def syndicate_to_mastodon(status, idempotency_key, in_reply_to_id=None):
+        return MastodonClient.post_status(status, idempotency_key, in_reply_to_id)
 
     @staticmethod
     def delete_from_mastodon(id):
@@ -294,18 +294,24 @@ class MastodonSyndicatable(models.Model):
     def parse_mastodon_url(url):
         o = urlparse(url)
 
-        if o.netloc.lower() != settings.MASTODON_DOMAIN.lower():
+        print("o.netloc.lower: %s" % o.netloc.lower())
+        print("settings.MASTODON_INSTANCE.lower: %s" % settings.MASTODON_INSTANCE.lower())
+
+        if o.netloc.lower() != settings.MASTODON_INSTANCE.lower():
             return None
 
         pieces = o.path.split("/")
 
+        print("len(pieces): %s" % len(pieces))
         if len(pieces) < 3:
             return None        
         
-        mastodonUserPattern = re.compile("^@(.+)@(.+)\.(.+)$")
+        mastodonUserPattern = re.compile("^@(.+)$")
         mastodonStatusIdPattern = re.compile("^(.+)$")
 
-        if bool(mastodonUserPattern.match(pieces[1])) and bool(mastodonStatusIdPattern.match(pieces[2])):
+        print("bool(mastodonUserPattern.match(pieces[1])): %s" % bool(mastodonUserPattern.match(pieces[1])))
+        print("bool(mastodonStatusIdPattern.match(pieces[2]): %s" % bool(mastodonStatusIdPattern.match(pieces[2])))
+        if bool(mastodonUserPattern.match(pieces[1])) and bool(mastodonStatusIdPattern.match(pieces[2])):            
             return pieces[2]
 
         return None
