@@ -20,6 +20,10 @@
     <link rel="canonical" href="{{ permalink }}" />
     {% endif %}
 
+    {% if rss_url %}
+    <link rel="alternate" type="application/rss+xml" title="{{ rss_title }}" href="{{ rss_url }}">
+    {% endif %}
+
     {% block meta %}
     {% endblock %}
 </head>
