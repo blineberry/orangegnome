@@ -315,6 +315,26 @@ class MastodonSyndicatable(models.Model):
             return pieces[2]
 
         return None
+    
+    @staticmethod
+    def add_hashtags(status, tags):
+        tagsToAppend = list()
+
+        for tag in tags:
+            tagPattern = re.compile(r"\b(%s)\b" % tag.name, re.IGNORECASE)
+            
+            if bool(tagPattern.search(status)):
+                status = tagPattern.sub(tag.to_hashtag(), status, 1)
+                continue
+
+            tagsToAppend.append(tag.to_hashtag())
+
+        if len(tagsToAppend) > 0:
+            status += "\n\n"
+            status += " ".join(tagsToAppend)
+
+        return status
+
 
     class Meta:
         abstract = True

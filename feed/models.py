@@ -17,6 +17,12 @@ class Tag(models.Model):
     def test(self):
         return self.name
 
+    def to_pascale_case(self):
+        return "".join(self.name.title().split())    
+
+    def to_hashtag(self):
+        return "#" + self.to_pascale_case()
+
 class FeedItem(models.Model):
     is_published = models.BooleanField(default=False)
     updated = models.DateTimeField(null=True)

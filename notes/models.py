@@ -96,21 +96,17 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         # Get the basic Mastodon Status object from the content.
         status = MastodonStatusUpdate(self.content)
 
-        # If Note is not replying to anything, return the status as it is.
-        if self.in_reply_to is None:
-            return status
-
         # Check the reply for a Mastodon Id.
         in_reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.in_reply_to)
-        print("reply_to_id: %s" % in_reply_to_id)
 
         # If no Mastodon Id, append the reply to url to the end of the 
         # Note content.
-        if in_reply_to_id is None:
-            status.status = f'{self.content} {self.in_reply_to}'
-            return status
-
+        if self.in_reply_to is not None and in_reply_to_id is None:
+            status.status = f'{self.content}\n\n{self.in_reply_to}'
+        # Otherwise add the reply_to_id
+        elif self.in_reply_to is not None and in_reply_to_id is not None:
+            status.in_reply_to_id = in_reply_to_id
+            
+        status.status = MastodonSyndicatable.add_hashtags(status.status, self.tags.all())
         
-        # Add the reply_to_id and return
-        status.in_reply_to_id = in_reply_to_id
         return status
