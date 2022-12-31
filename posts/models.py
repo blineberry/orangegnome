@@ -63,20 +63,21 @@ class Post(TwitterSyndicatable, MastodonSyndicatable, FeedItem):
         """Converts the Post model to an object able to post to Mastodon."""
 
         # Get the basic Mastodon Status object from the content.
-        status = MastodonStatusUpdate(status=f'{self.summary} {self.get_permalink()}')
-
-        # If Note is not replying to anything, return the status as it is.
-        if self.in_reply_to is None:
-            return status
+        status = MastodonStatusUpdate(status=f'{self.summary}\n\n{self.get_permalink()}')
 
         # Check the reply to url for a mastodon-looking id.
         in_reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.in_reply_to)
 
-        # If no Mastodon Id in the reply to url, return the status.
-        if in_reply_to_id is None:
-            status.status = f'{self.content} {self.in_reply_to}'
-            return status
+        # If no Mastodon Id, append the reply to url to the end of the 
+        # Post content.
+        if self.in_reply_to is not None and in_reply_to_id is None:
+            status.status = f'{self.content}\n\n{self.in_reply_to}'
+        # Otherwise add the reply_to_id
+        elif self.in_reply_to is not None and in_reply_to_id is not None:
+            status.in_reply_to_id = in_reply_to_id
 
-        # Add the reply_to_id and return
-        status.in_reply_to_id = in_reply_to_id
-        return status
+        print("Tags: %s" % self.tags.all())
+            
+        status.status = MastodonSyndicatable.add_hashtags(status.status, self.tags.all())
+        
+        return status        

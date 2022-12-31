@@ -106,9 +106,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         # Otherwise add the reply_to_id
         elif self.in_reply_to is not None and in_reply_to_id is not None:
             status.in_reply_to_id = in_reply_to_id
-        
-        print("Status: %s" % status.status)
-        print("Tags: %s" % self.tags.all())
+            
         status.status = MastodonSyndicatable.add_hashtags(status.status, self.tags.all())
         
         return status

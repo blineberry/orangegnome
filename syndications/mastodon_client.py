@@ -23,7 +23,7 @@ class Client(object):
 
         headers = {
             'Authorization': Client.get_auth_header(),
-            #'Idempotency-Key': idempotency_key
+            'Idempotency-Key': idempotency_key
         }
 
         response = requests.post(Client.get_base_url() + '/statuses', data=data, headers=headers)
