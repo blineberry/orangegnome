@@ -15,7 +15,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     """
     A Note model.
 
-    Implements TwitterSyndicatable and FeedItem.
+    Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
     """
     content = models.CharField(max_length=560)
     """The Note content. Max length is 560 characters."""
