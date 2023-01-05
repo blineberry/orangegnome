@@ -8,6 +8,20 @@ from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
 from django.urls import reverse
 from .storage import PublicAzureStorage
+from uuid import uuid4
+from datetime import date
+from django_resized import ResizedImageField
+
+# Custom upload_to callable
+# Heavily influenced from https://stackoverflow.com/a/15141228/814492
+def upload_to_callable(instance, filename):
+    ext = filename.split('.')[-1]
+
+    filename = '{}.{}'.format(uuid4().hex, ext)
+
+    d = date.today()
+
+    return '{0}/{1}'.format(d.strftime('%Y/%m/%d'),filename)
 
 # Create your models here.
 class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
@@ -16,7 +30,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
     """
-    content = models.ImageField(storage=PublicAzureStorage)
+    content = ResizedImageField(size=[1188,1188], quality=70, upload_to=upload_to_callable,storage=PublicAzureStorage)
     """The Photo."""
 
     caption = models.TextField()
