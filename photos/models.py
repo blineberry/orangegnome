@@ -39,8 +39,14 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     alternative_text = models.CharField(max_length=255)
     """The alternative text description of the photo."""
 
+    html_class = 'photo'
+
     def __str__(self):
-        return self.alternative_text
+        return self.caption
+
+    def content_html(self):
+        """Returns an html representation of the content."""
+        return '<div class="photo"><img class="u-photo" src="' + self.content.url + '" alt="' + self.alternative_text + '"><p class="p-content">' + self.caption + '</p></div>'
 
     def get_absolute_url(self):
         """Returns the url for the photo relative to the root."""
@@ -48,12 +54,10 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_content(self):
         """Returns the content for aggregated feed item indexes."""
-        # TODO
-        pass
+        return self.content_html()
 
     def feed_item_header(self):
-        # TODO
-        pass
+        return self.published
 
     def to_twitter_status_update(self):
         # TODO 

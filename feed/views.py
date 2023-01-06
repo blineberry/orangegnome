@@ -34,6 +34,7 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
     extra_context = {
         'page_title': 'Orange Gnome',
     }
+    template_name = 'feed/feed.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -45,7 +46,7 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
 
 class FeedItemDateArchiveView(FeedItemArchiveView):
     make_object_list = True
-    template_name = 'feed/feeditem_archive.html'
+    template_name = 'feed/feed.html'
 
 class YearView(PermalinkResponseMixin, dates.YearArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):    
     canonical_viewname = 'feed:year'
@@ -79,7 +80,7 @@ class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveV
 
 class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):#FeedWithTitleView):
     paginate_by = 5
-    template_name = 'feed/feeditem_archive.html'
+    template_name = 'feed/feed.html'
     canonical_viewname = 'feed:tag'
 
     def get_canonical_view_args(self, context):

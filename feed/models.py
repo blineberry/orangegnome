@@ -47,6 +47,9 @@ class FeedItem(models.Model):
     def is_note(self):
         return hasattr(self, 'note')
 
+    def is_photo(self):
+        return hasattr(self, 'photo')
+
     def is_exercise(self):
         return hasattr(self, 'exercise')
 
@@ -56,6 +59,9 @@ class FeedItem(models.Model):
         
         if self.is_note():
             return self.note
+
+        if self.is_photo():
+            return self.photo
 
         if self.is_exercise():
             return self.exercise
