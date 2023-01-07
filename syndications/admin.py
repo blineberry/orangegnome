@@ -1,5 +1,5 @@
 from django.contrib import admin, messages
-from tweepy import TweepError
+from tweepy.errors import TweepyException
 from .models import Syndication, TwitterUser, MastodonStatus, MastodonSyndicatable
 from django.utils import timezone
 import datetime
@@ -17,10 +17,12 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
    
         try:
+            media = obj.get_twitter_media()
             update = obj.to_twitter_status_update()
-            response = Syndication.syndicate_to_twitter(update.status, in_reply_to_status_id=update.in_reply_to_status_id, attachment_url=update.attachment_url)
-        except TweepError as e:
-            self.message_user(request, f"Error syndicating to Twitter: { str(e) }")
+            response = Syndication.syndicate_to_twitter(update, media)
+        except TweepyException as e:
+            obj.syndicate_to_twitter = False
+            self.message_user(request, f"Error syndicating to Twitter: { str(e) }", messages.WARNING)
             return obj
 
         try:            
@@ -34,13 +36,13 @@ class SyndicatableAdmin(admin.ModelAdmin):
                 id_str=response.id_str, 
                 created_at=response.created_at, 
                 user=user, 
-                full_text=response.full_text,
+                full_text=response.text,
                 in_reply_to_status_id_str=in_reply_to_status_id_str,
                 in_reply_to_screen_name=in_reply_to_screen_name)
             obj.syndicated_to_twitter = timezone.now()
         except Exception as e:
-            self._desyndicate(response.id_str, obj)
-            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }")
+            self._desyndicate_from_twitter(response.id_str, obj)
+            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }", messages.WARNING)
         
         return obj
 
@@ -50,17 +52,17 @@ class SyndicatableAdmin(admin.ModelAdmin):
 
         try:
             response = Syndication.delete_from_twitter(obj.tweet.get().id_str)
-        except TweepError as e:
-            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }")
+        except TweepyException as e:
+            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }", messages.WARNING)
             return obj
         except Exception as e:
-            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }")
+            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }", messages.WARNING)
 
         try:
             ts = obj.tweet.get()
             ts.delete()
         except Exception as e:
-            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }")
+            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }", messages.WARNING)
         
         obj.syndicated_to_twitter = None
         return obj
@@ -78,6 +80,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             status = obj.get_mastodon_status_update()
             response = Syndication.syndicate_to_mastodon(status, media)
         except Exception as e:
+            obj.syndicate_to_mastodon = False
             self._desyndicate_from_mastodon(None, obj)
             self.message_user(request, f"Error syndicating to Mastodon: { str(e) }", messages.ERROR)
             return obj

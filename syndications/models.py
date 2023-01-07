@@ -25,10 +25,20 @@ class Syndication():
         return tweepy.API(auth)
 
     @staticmethod
-    def syndicate_to_twitter(status, in_reply_to_status_id=None, attachment_url=None):
+    def syndicate_to_twitter(update=None, media=None):
         api = Syndication.get_twitter_client()
+        media_id = None
 
-        response = api.update_status(status, in_reply_to_status_id=in_reply_to_status_id, attachment_url=attachment_url, tweet_mode="extended")
+        if media is not None:
+            media_response = api.media_upload(media.filename, file=media.file)
+            print(media_response)
+            media_id = media_response.media_id_string
+            api.create_media_metadata(media_id, media.alt_text)
+
+        print(media_id)
+        print(update)
+
+        response = api.update_status(update.status, in_reply_to_status_id=update.in_reply_to_status_id, attachment_url=update.attachment_url, media_ids=[media_id])
         return response
 
     @staticmethod
@@ -92,8 +102,64 @@ class TwitterSyndicatable(models.Model):
     def is_syndicated_to_twitter(self):
         return self.tweet.all().exists()
 
+    def to_twitter_status(self):        
+        """Return the content that should be the tweet status."""
+        raise NotImplementedError("to_twitter_status not implemented.")
+    
+    def get_twitter_reply_to_url(self):
+        """Return the url that should be checked for the in_reply_to_id."""
+        raise NotImplementedError("get_twitter_reply_to_url not implemented.")
+
     def to_twitter_status_update(self):
-        pass
+        """Converts the Note model to an object able to post to Twitter."""
+
+        # Get the basic Twitter Status object from the content.
+        update = TwitterStatusUpdate(self.to_twitter_status())
+
+        # If Note is not replying to anything, return the update as it is.
+        if self.get_twitter_reply_to_url() is None:
+            return update
+
+        # Check if the reply to url is a twitter url, if it's a twitter status,
+        # parse the screen name and status id from it.
+        is_twitter_url, is_twitter_status, reply_to_screen_name, reply_to_status_id = TwitterSyndicatable.parse_twitter_url(self.get_twitter_reply_to_url())
+
+        # If the reply to url is not a twitter url and is not a twitter status,
+        # append the reply to url to the end of the Note content.
+        if not is_twitter_url or not is_twitter_status:
+            update.status = f'{update.status} {self.in_reply_to}'
+            return update
+
+        # If the Note content starts with the reply to screen name, then it's 
+        # a reply.  Add that data to the update object.
+        if update.status.lower().startswith(f'@{reply_to_screen_name.lower()}'):
+            update.in_reply_to_status_id = reply_to_status_id
+            return update
+
+        # Otherwise, it's a quote tweet. Add that to the update object.
+        update.attachment_url = self.get_twitter_reply_to_url()
+        return update
+    
+    def has_twitter_media(self):
+        """Returns True if the Model has media to upload."""
+        return False
+    
+    def get_twitter_media_image_field(self):
+        """Returns the ImageField for the media."""
+        raise NotImplementedError("get_twitter_media_image_field not implemented.")
+
+    def get_twitter__media_alttext(self):
+        """Returns the description for the media."""
+        raise NotImplementedError("get_twitter__media_alttext not implemented.")
+
+    def get_twitter_media(self):
+        if not self.has_twitter_media():
+            return None
+
+        media = self.get_twitter_media_image_field()
+
+        media_upload = TwitterMedia(media.name.split('/')[-1], file=media, alt_text=self.get_twitter__media_alttext())
+        return media_upload  
 
     @staticmethod
     def parse_twitter_url(url):
@@ -120,6 +186,12 @@ class TwitterStatusUpdate(object):
         self.status = status
         self.in_reply_to_status_id = in_reply_to_status_id
         self.attachment_url = attachment_url
+
+class TwitterMedia(object):
+    def __init__(self, filename, file=None, alt_text=None):
+        self.filename = filename
+        self.file = file
+        self.alt_text = alt_text
 
 #class StravaLatLng(models.Model):
 #    lat = models.FloatField()

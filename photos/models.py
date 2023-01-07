@@ -59,9 +59,25 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def feed_item_header(self):
         return self.published
 
-    def to_twitter_status_update(self):
-        # TODO 
-        pass
+    def to_twitter_status(self):        
+        """Return the content that should be the tweet status."""
+        return self.caption
+    
+    def get_twitter_reply_to_url(self):
+        """Return the url that should be checked for the in_reply_to_id."""
+        return self.in_reply_to
+    
+    def has_twitter_media(self):
+        """Returns True if the Model has media to upload."""
+        return self.content is not None
+    
+    def get_twitter_media_image_field(self):
+        """Returns the ImageField for the media."""
+        return self.content
+
+    def get_twitter__media_alttext(self):
+        """Returns the description for the media."""
+        return self.alternative_text
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""

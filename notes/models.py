@@ -60,35 +60,13 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         """Returns the title for aggregated feed item indexes."""
         return self.published
 
-    def to_twitter_status_update(self):
-        """Converts the Note model to an object able to post to Twitter."""
-
-        # Get the basic Twitter Status object from the content.
-        update = TwitterStatusUpdate(status=self.content)
-
-        # If Note is not replying to anything, return the update as it is.
-        if self.in_reply_to is None:
-            return update
-
-        # Check if the reply to url is a twitter url, if it's a twitter status,
-        # parse the screen name and status id from it.
-        is_twitter_url, is_twitter_status, reply_to_screen_name, reply_to_status_id = TwitterSyndicatable.parse_twitter_url(self.in_reply_to)
-
-        # If the reply to url is not a twitter url and is not a twitter status,
-        # append the reply to url to the end of the Note content.
-        if not is_twitter_url or not is_twitter_status:
-            update.status = f'{self.content} {self.in_reply_to}'
-            return update
-
-        # If the Note content starts with the reply to screen name, then it's 
-        # a reply.  Add that data to the update object.
-        if self.content.lower().startswith(f'@{reply_to_screen_name.lower()}'):
-            update.in_reply_to_status_id = reply_to_status_id
-            return update
-
-        # Otherwise, it's a quote tweet. Add that to the update object.
-        update.attachment_url = self.in_reply_to
-        return update    
+    def to_twitter_status(self):        
+        """Return the content that should be the tweet status."""
+        return self.content
+    
+    def get_twitter_reply_to_url(self):
+        """Return the url that should be checked for the in_reply_to_id."""
+        return self.in_reply_to
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
