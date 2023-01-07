@@ -48,7 +48,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     image_width = models.PositiveIntegerField()
     """The width of the image."""
 
-    caption = models.CharField(max_length=560)
+    caption = models.CharField(max_length=560, blank=True)
     """The caption for the photo."""
 
     alternative_text = models.CharField(max_length=255)
