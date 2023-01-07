@@ -1,0 +1,10 @@
+{% extends 'feed/feed.html' %}
+
+{% block postcontent %}
+
+<div class="article-content">
+    <a href="{{ item.get_absolute_url }}"><img class="u-photo" src="{{ item.image.url }}" alt="{{ item.alternative_text }}"></a>
+    <p class="p-content">{{ item.caption }}</p>
+</div>
+
+{% endblock %}

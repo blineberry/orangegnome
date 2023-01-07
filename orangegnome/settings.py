@@ -41,6 +41,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 # Application definition
 
 INSTALLED_APPS = [
+    'photos.apps.PhotosConfig',
     'exercises.apps.ExercisesConfig',
     'notes.apps.NotesConfig',
     'syndications.apps.SyndicationsConfig',
@@ -160,6 +161,11 @@ TWITTER_ACCESS_TOKEN_SECRET = env('TWITTER_ACCESS_TOKEN_SECRET')
 # Mastodon Settings
 MASTODON_INSTANCE = env('MASTODON_INSTANCE')
 MASTODON_ACCESS_TOKEN = env('MASTODON_ACCESS_TOKEN')
+
+# Azure Blob Storage Settings
+AZURE_PUBLIC_ACCOUNT_NAME = env("AZURE_PUBLIC_ACCOUNT_NAME")
+AZURE_PUBLIC_ACCOUNT_KEY = env("AZURE_PUBLIC_ACCOUNT_KEY")
+AZURE_PUBLIC_CONTAINER = env("AZURE_PUBLIC_CONTAINER")
 
 # Site Settings
 SITE_NAME = "Orange Gnome"

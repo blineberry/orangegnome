@@ -1,0 +1,52 @@
+{% extends 'base/extended_hcard.html' %}
+
+{% block body %}
+<article class="article h-entry {{ object.html_class }}">
+{% block postheader %}
+    <header class="article-header">
+        <h1 class="p-name"><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.feed_item_header }}</a></h1>
+        {% if object.in_reply_to %}
+        <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% endif %}
+    </header>
+{% endblock %}
+{% block postcontent %}
+    <div class="article-content e-content">
+        {{ object.feed_item_content|safe }}
+    </div>
+{% endblock %}
+{% block postfooter %}
+    <footer class="article-footer">
+        <div class="meta">
+            <div class="postmeta-published">Published by 
+                <span class="p-author h-card">{{ object.author.name }}</span> on 
+                <time class="dt-published" datetime="{{ object.published|date:'c' }}">
+                    <a href="{% url 'feed:month' object.published|date:'Y' object.published|date:'m' %}">{{ object.published|date:'F' }}</a>
+                    <a href="{% url 'feed:day' object.published|date:'Y' object.published|date:'m' object.published|date:'d' %}">{{ object.published|date:'j' }}</a>, 
+                    <a href="{% url 'feed:year' object.published|date:'Y' %}">{{ object.published|date:'Y' }}</a>
+                </time>
+            {% if object.category %}
+                in <a href="{{ object.category.get_absolute_url }}" class="p-category" rel="category tag">{{ object.category.name }}</a>
+            {% endif %}
+            </div>
+            {% if object.tags.all %}
+            <div class="postmeta-tags">Tags:
+                <ul>
+                {% for tag in object.tags.all %}
+                    <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ object.get_absolute_url }}">{{ request.get_host }}{{ object.get_absolute_url }}</a></div>
+            {% if object.is_syndicated_to_twitter %}
+            <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ object.tweet.get.get_url }}">Twitter</a> on {{ object.tweet.get.created_at|date }}</div>
+            {% endif %}
+            {% if object.is_syndicated_to_mastodon %}
+            <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ object.mastodon_status.get.url }}">Mastodon</a> on {{ object.mastodon_status.get.created_at|date }}</div>
+            {% endif %}
+        </div>
+    </footer>
+{% endblock %}
+</article>
+{% endblock %}

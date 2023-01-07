@@ -424,3 +424,11 @@ hr {
   margin-right: 1em;
 }
 
+.photo img {
+  max-width: 594px;
+  height: auto;
+  max-height: 594px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+}

@@ -1,4 +1,4 @@
-{% extends 'base/extended_hcard.html' %}
+{% extends 'feed/detail.html' %}
 
 {% block meta %}
 <meta name="twitter:card" content="summary" />
@@ -6,8 +6,4 @@
 <meta property="og:url" content="{{ permalink }}" />
 <meta property="og:title" content="{{ post.title }}" />
 <meta property="og:description" content="{{ post.short_content }}" />
-{% endblock %}
-
-{% block body %}
-{% include 'feed/_feed_item.html' with item=post %}
 {% endblock %}

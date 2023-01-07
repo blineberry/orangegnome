@@ -1,0 +1,78 @@
+{% extends 'base/extended_hcard.html' %}
+
+{% block body %}
+
+<section class="feed {{feedclass}} h-feed">
+    {% if feed_title %}
+    <h1 class="feed-title p-name">{{ feed_title }}</h1>
+    {% endif %}
+    
+    <ul class="feed-list">
+        {% for item in object_list %}
+        {% with item=item.get_child  %}
+            <li class="feed-item">
+            {% block post %}
+                <article class="article h-entry {{ item.html_class }}">
+                {% block postheader %}
+                    <header class="article-header">
+                        <h1 class="p-name"><a class="article-link alt" href="{{ item.get_absolute_url }}">{{ item.feed_item_header }}</a></h1>
+                        {% if item.in_reply_to %}
+                        <div>In reply to <a class="u-in-reply-to" href="{{item.in_reply_to}}">{{item.in_reply_to}}</a></div>
+                        {% endif %}
+                    </header>
+                {% endblock %}
+                {% block postcontent %}
+                    <div class="article-content e-content">
+                        {{ item.feed_item_content|safe }}
+                    </div>
+                {% endblock %}
+                {% block postfooter %}
+                    <footer class="article-footer">
+                        <div class="meta">
+                            <div class="postmeta-published">Published by 
+                                <span class="p-author h-card">{{ item.author.name }}</span> on 
+                                <time class="dt-published" datetime="{{ item.published|date:'c' }}">
+                                    <a href="{% url 'feed:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a>
+                                    <a href="{% url 'feed:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, 
+                                    <a href="{% url 'feed:year' item.published|date:'Y' %}">{{ item.published|date:'Y' }}</a>
+                                </time>
+                            {% if item.category %}
+                                in <a href="{{ item.category.get_absolute_url }}" class="p-category" rel="category tag">{{ item.category.name }}</a>
+                            {% endif %}
+                            </div>
+                            {% if item.tags.all %}
+                            <div class="postmeta-tags">Tags:
+                                <ul>
+                                {% for tag in item.tags.all %}
+                                    <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ item.get_absolute_url }}">{{ request.get_host }}{{ item.get_absolute_url }}</a></div>
+                            {% if item.is_syndicated_to_twitter %}
+                            <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.tweet.get.get_url }}">Twitter</a> on {{ item.tweet.get.created_at|date }}</div>
+                            {% endif %}
+                            {% if item.is_syndicated_to_mastodon %}
+                            <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ item.mastodon_status.get.url }}">Mastodon</a> on {{ item.mastodon_status.get.created_at|date }}</div>
+                            {% endif %}
+                        </div>
+                    </footer>
+                {% endblock %}
+                </article>
+            {% endblock %}
+            </li>
+        {% endwith %}
+        {% endfor %}
+    </ul>
+    <nav class="feed-nav">
+    {% if page_obj.has_next %}
+        <a class="feed-nav-older" href="?page={{ page_obj.next_page_number }}">older</a>
+    {% endif %}
+    {% if page_obj.has_previous %}
+        <a class="feed-nav-newer" href="?page={{ page_obj.previous_page_number }}">newer</a>
+    {% endif %}
+    </div>
+    </section>
+
+{% endblock %}

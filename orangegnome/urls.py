@@ -24,6 +24,7 @@ urlpatterns = [
     path('posts/', include('posts.urls', namespace='posts')),
     path('notes/', include('notes.urls', namespace='notes')),
     path('exercises/', include('exercises.urls', namespace='exercises')),
+    path('photos/', include('photos.urls', namespace='photos')),
     path('syndications/', include('syndications.urls', namespace='syndications')),
     path('', include('feed.urls', namespace='feed')),
     path('robots.txt', TemplateView.as_view(template_name="base/robots.txt", content_type="text/plain")),

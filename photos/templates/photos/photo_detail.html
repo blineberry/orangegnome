@@ -1,0 +1,17 @@
+{% extends 'feed/detail.html' %}
+
+{% block meta %}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:creator" content="@{{ photo.author.twitter_screenname }}" />
+<meta property="og:url" content="{{ permalink }}" />
+<meta property="og:title" content="{{ photo.published }}" />
+<meta property="og:description" content="{{ photo.caption }}" />
+<meta name="og:image" content="{{ photo.image.url }}" />
+{% endblock %}
+
+{% block postcontent %}
+<div class="article-content">
+    <img class="u-photo" src="{{ object.image.url }}" alt="{{ object.alternative_text }}">
+    <p class="p-content">{{ object.caption }}</p>
+</div>
+{% endblock %}
