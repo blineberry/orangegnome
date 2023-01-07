@@ -32,7 +32,14 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
     """
 
-    image = ResizedImageField(size=[1188,1188], quality=70, upload_to=upload_to_callable,storage=PublicAzureStorage, height_field="image_height", width_field="image_width")
+    image = ResizedImageField(
+        size=[1188,1188], 
+        quality=70, 
+        upload_to=upload_to_callable,
+        storage=PublicAzureStorage, 
+        height_field="image_height", 
+        width_field="image_width",
+        keep_meta=False)
     """The Photo."""
 
     image_height = models.PositiveIntegerField()
