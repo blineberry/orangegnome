@@ -11,6 +11,7 @@ from .storage import PublicAzureStorage
 from uuid import uuid4
 from datetime import date
 from django_resized import ResizedImageField
+from django.utils.html import mark_safe
 
 # Custom upload_to callable
 # Heavily influenced from https://stackoverflow.com/a/15141228/814492
@@ -30,8 +31,15 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
     """
-    content = ResizedImageField(size=[1188,1188], quality=70, upload_to=upload_to_callable,storage=PublicAzureStorage)
+
+    image = ResizedImageField(size=[1188,1188], quality=70, upload_to=upload_to_callable,storage=PublicAzureStorage, height_field="image_height", width_field="image_width")
     """The Photo."""
+
+    image_height = models.PositiveIntegerField()
+    """The height of the image."""
+
+    image_width = models.PositiveIntegerField()
+    """The width of the image."""
 
     caption = models.CharField(max_length=560)
     """The caption for the photo."""
@@ -44,9 +52,20 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def __str__(self):
         return self.caption
 
+    # From https://stackoverflow.com/a/37965068/814492
+    def image_tag(self):
+        """Returns html for the Admin change view to display the uploaded image."""
+        if self.image is None:
+            return ""
+
+        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image.url))
+
+    image_tag.short_description = 'Preview'
+
+
     def content_html(self):
         """Returns an html representation of the content."""
-        return '<div class="photo"><img class="u-photo" src="' + self.content.url + '" alt="' + self.alternative_text + '"><p class="p-content">' + self.caption + '</p></div>'
+        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><p class="p-content">' + self.caption + '</p></div>'
 
     def get_absolute_url(self):
         """Returns the url for the photo relative to the root."""
@@ -69,11 +88,11 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     
     def has_twitter_media(self):
         """Returns True if the Model has media to upload."""
-        return self.content is not None
+        return self.image is not None
     
     def get_twitter_media_image_field(self):
         """Returns the ImageField for the media."""
-        return self.content
+        return self.image
 
     def get_twitter__media_alttext(self):
         """Returns the description for the media."""
@@ -97,11 +116,11 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     
     def has_mastodon_media(self):
         """Returns True if the Model has media to upload."""
-        return self.content is not None
+        return self.image is not None
     
     def get_mastodon_media_image_field(self):
         """Returns the ImageField for the media."""
-        return self.content
+        return self.image
 
     def get_mastodon_media_description(self):
         """Returns the description for the media."""

@@ -4,7 +4,7 @@ from syndications.admin import SyndicatableAdmin
 from feed.admin import PublishableAdmin
 from webmentions.admin import WebmentionAdmin
 from webmentions.models import Webmention
-from django.forms import ModelForm
+from django.forms import ModelForm, CharField, Textarea
 
 # Customize the Admin form
 class PhotoModelForm(ModelForm):
@@ -14,10 +14,16 @@ class PhotoModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
+    caption = CharField(widget=Textarea)
+    """Display the caption input as a Textarea"""
+
+    alternative_text = CharField(widget=Textarea)
+    """Display the caption input as a Textarea"""
+
     class Meta:
         model = Photo
         fields = [
-            'content',
+            'image',
             'caption',
             'alternative_text',
             'in_reply_to',
@@ -40,7 +46,7 @@ class PhotoAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
     form = PhotoModelForm
     """Override the dynamically created form with customizations."""
 
-    readonly_fields = ('published','syndicated_to_twitter', 'syndicated_to_mastodon')
+    readonly_fields = ('image_tag','published','syndicated_to_twitter', 'syndicated_to_mastodon')
     """
     These fields will be shown but uneditable. 
     
@@ -49,7 +55,7 @@ class PhotoAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('content', 'caption', 'alternative_text','in_reply_to','author','tags')
+            'fields': ('image_tag', 'image', 'caption', 'alternative_text','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
@@ -71,9 +77,11 @@ class PhotoAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """
 
+    list_display = ['image_tag', 'caption']
+
     def get_links_to_webmention(self, request, obj, form, change):
         """
-        Called from save_model, returns a list of urls from the Note content.
+        Called from save_model, returns a list of urls from the Photo caption.
 
         Has all the information available in save_model:
         request     =   the HttpRequest
