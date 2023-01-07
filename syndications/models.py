@@ -27,7 +27,7 @@ class Syndication():
     @staticmethod
     def syndicate_to_twitter(update=None, media=None):
         api = Syndication.get_twitter_client()
-        media_id = None
+        media_ids = None
 
         if media is not None:
             media_response = api.media_upload(media.filename, file=media.file)
@@ -35,10 +35,9 @@ class Syndication():
             media_id = media_response.media_id_string
             api.create_media_metadata(media_id, media.alt_text)
 
-        print(media_id)
-        print(update)
+            media_ids = [media_id]
 
-        response = api.update_status(update.status, in_reply_to_status_id=update.in_reply_to_status_id, attachment_url=update.attachment_url, media_ids=[media_id])
+        response = api.update_status(update.status, in_reply_to_status_id=update.in_reply_to_status_id, attachment_url=update.attachment_url, media_ids=media_ids)
         return response
 
     @staticmethod
