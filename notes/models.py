@@ -88,25 +88,20 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
         # Otherwise, it's a quote tweet. Add that to the update object.
         update.attachment_url = self.in_reply_to
-        return update
+        return update    
+    
+    def to_mastodon_status(self):
+        """Return the content that should be the Status of a mastodon post."""
+        return self.content
+    
+    def get_mastodon_reply_to_url(self):
+        """Return the url that should be checked for the in_reply_to_id."""
+        return self.in_reply_to
 
-    def to_mastodon_status_update(self):
-        """Converts the Note model to an object able to post to Mastodon."""
-
-        # Get the basic Mastodon Status object from the content.
-        status = MastodonStatusUpdate(self.content)
-
-        # Check the reply for a Mastodon Id.
-        in_reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.in_reply_to)
-
-        # If no Mastodon Id, append the reply to url to the end of the 
-        # Note content.
-        if self.in_reply_to is not None and in_reply_to_id is None:
-            status.status = f'{self.content}\n\n{self.in_reply_to}'
-        # Otherwise add the reply_to_id
-        elif self.in_reply_to is not None and in_reply_to_id is not None:
-            status.in_reply_to_id = in_reply_to_id
-            
-        status.status = MastodonSyndicatable.add_hashtags(status.status, self.tags.all())
-        
-        return status
+    def get_mastodon_tags(self):
+        """Return the tags that should be parsed and added to the status."""
+        return self.tags.all()
+    
+    def get_mastodon_idempotency_key(self):
+        """Return a string to use as the Idempotency key for Status posts."""
+        return str(self.id) + str(self.updated)

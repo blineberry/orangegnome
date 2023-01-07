@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from tweepy import TweepError
-from .models import Syndication, TwitterUser, MastodonStatus
+from .models import Syndication, TwitterUser, MastodonStatus, MastodonSyndicatable
 from django.utils import timezone
 import datetime
 
@@ -74,9 +74,9 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
 
         try:
-            status = obj.to_mastodon_status_update()
-            print("status.in_reply_to_id: %s" % status.in_reply_to_id)
-            response = Syndication.syndicate_to_mastodon(status.status, str(obj.id), in_reply_to_id=status.in_reply_to_id)
+            media = obj.get_mastodon_media_upload()
+            status = obj.get_mastodon_status_update()
+            response = Syndication.syndicate_to_mastodon(status, media)
         except Exception as e:
             self._desyndicate_from_mastodon(None, obj)
             self.message_user(request, f"Error syndicating to Mastodon: { str(e) }", messages.ERROR)

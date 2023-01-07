@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from syndications.mastodon_client import Client as MastodonClient
-
+import io
 
 # Create your models here.
 class Syndication():
@@ -29,7 +29,6 @@ class Syndication():
         api = Syndication.get_twitter_client()
 
         response = api.update_status(status, in_reply_to_status_id=in_reply_to_status_id, attachment_url=attachment_url, tweet_mode="extended")
-        print(response)
         return response
 
     @staticmethod
@@ -40,8 +39,14 @@ class Syndication():
         return response
 
     @staticmethod
-    def syndicate_to_mastodon(status, idempotency_key, in_reply_to_id=None):
-        return MastodonClient.post_status(status, idempotency_key, in_reply_to_id)
+    def syndicate_to_mastodon(status=None, media=None):
+        if media is not None:
+            response = MastodonClient.post_media(media.file, media.thumbnail, media.description, media.focus)
+
+            if status is not None:
+                status.media_ids = [response['id']]
+
+        return MastodonClient.post_status(status.status, status.idempotency_key, status.in_reply_to_id, status.media_ids)
 
     @staticmethod
     def delete_from_mastodon(id):
@@ -273,9 +278,24 @@ class MastodonStatusUpdate(object):
     """
     An object to contain the necessary data to publish a Mastodon Status.
     """
-    def __init__(self, status=None, in_reply_to_id=None):
+    def __init__(self, status=None, idempotency_key=None, in_reply_to_id=None, tags=None, media_ids=None):
         self.status = status
+        self.idempotency_key = idempotency_key
         self.in_reply_to_id = in_reply_to_id
+        self.tags = tags
+        self.media_ids = media_ids
+
+class MastodonMediaUpload(object):
+    """
+    An object to contain the necessary data to publish a Mastodon 
+    Media attachment.
+    """
+    def __init__(self, file, thumbnail=None, description=None, focus=None):
+        self.file = file
+        self.thumbnail = thumbnail
+        self.description = description
+        self.focus = focus
+
 
 class MastodonSyndicatable(models.Model):
     """
@@ -290,27 +310,80 @@ class MastodonSyndicatable(models.Model):
     def is_syndicated_to_mastodon(self):
         return self.mastodon_status.all().exists()
 
+    def to_mastodon_status(self):
+        """Return the content that should be the Status of a mastodon post."""
+        raise NotImplementedError("to_mastodon_status not implemented.")
+    
+    def get_mastodon_idempotency_key(self):
+        """Return a string to use as the Idempotency key for Status posts."""
+        raise NotImplementedError("get_mastodon_idempotency_key not implemented.")
+    
+    def get_mastodon_reply_to_url(self):
+        """Return the url that should be checked for the in_reply_to_id."""
+        raise NotImplementedError("get_mastodon_reply_to_url not implemented.")
+
+    def get_mastodon_tags(self):
+        """Return the tags that should be parsed and added to the status."""
+        raise NotImplementedError("get_mastodon_tags not implemented.")
+    
+    def has_mastodon_media(self):
+        """Returns True if the Model has media to upload."""
+        return False
+    
+    def get_mastodon_media_image_field(self):
+        """Returns the ImageField for the media."""
+        raise NotImplementedError("get_mastodon_media_image_field not implemented.")
+
+    def get_mastodon_media_description(self):
+        """Returns the description for the media."""
+        raise NotImplementedError("get_mastodon_media_description not implemented.")
+
+    def get_mastodon_status_update(self):
+        # Get the basic Mastodon Status object from the content.
+        status = MastodonStatusUpdate(self.to_mastodon_status())
+
+        status.idempotency_key = self.get_mastodon_idempotency_key();
+
+        # Check the reply for a Mastodon Id.
+        in_reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.get_mastodon_reply_to_url())
+
+        # If no Mastodon Id, append the reply to url to the end of the 
+        # Note content.
+        if self.get_mastodon_reply_to_url() is not None and in_reply_to_id is None:
+            status.status = f'{self.content}\n\n{self.in_reply_to}'
+        # Otherwise add the reply_to_id
+        elif self.get_mastodon_reply_to_url() is not None and in_reply_to_id is not None:
+            status.in_reply_to_id = in_reply_to_id
+            
+        status.status = MastodonSyndicatable.add_hashtags(status.status, self.get_mastodon_tags())
+        
+        return status
+
+    def get_mastodon_media_upload(self):
+        if not self.has_mastodon_media():
+            return None
+
+        media = self.get_mastodon_media_image_field()
+        # https://stackoverflow.com/a/35974071/814492
+        file = (media.name.split('/')[-1], media)
+
+        media_upload = MastodonMediaUpload(file, description=self.get_mastodon_media_description())
+        return media_upload
+
     @staticmethod
     def parse_mastodon_url(url):
         o = urlparse(url)
-
-        print("o.netloc.lower: %s" % o.netloc.lower())
-        print("settings.MASTODON_INSTANCE.lower: %s" % settings.MASTODON_INSTANCE.lower())
 
         if o.netloc.lower() != settings.MASTODON_INSTANCE.lower():
             return None
 
         pieces = o.path.split("/")
-
-        print("len(pieces): %s" % len(pieces))
         if len(pieces) < 3:
             return None        
         
         mastodonUserPattern = re.compile("^@(.+)$")
         mastodonStatusIdPattern = re.compile("^(.+)$")
 
-        print("bool(mastodonUserPattern.match(pieces[1])): %s" % bool(mastodonUserPattern.match(pieces[1])))
-        print("bool(mastodonStatusIdPattern.match(pieces[2]): %s" % bool(mastodonStatusIdPattern.match(pieces[2])))
         if bool(mastodonUserPattern.match(pieces[1])) and bool(mastodonStatusIdPattern.match(pieces[2])):            
             return pieces[2]
 

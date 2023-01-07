@@ -33,7 +33,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     content = ResizedImageField(size=[1188,1188], quality=70, upload_to=upload_to_callable,storage=PublicAzureStorage)
     """The Photo."""
 
-    caption = models.TextField()
+    caption = models.CharField(max_length=560)
     """The caption for the photo."""
 
     alternative_text = models.CharField(max_length=255)
@@ -63,6 +63,30 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         # TODO 
         pass
     
-    def to_mastodon_status_update(self):
-        # TODO 
-        pass
+    def to_mastodon_status(self):
+        """Return the content that should be the Status of a mastodon post."""
+        return self.caption
+    
+    def get_mastodon_idempotency_key(self):
+        """Return a string to use as the Idempotency key for Status posts."""
+        return str(self.id) + str(self.updated)
+    
+    def get_mastodon_reply_to_url(self):
+        """Return the url that should be checked for the in_reply_to_id."""
+        return self.in_reply_to
+
+    def get_mastodon_tags(self):
+        """Return the tags that should be parsed and added to the status."""
+        return self.tags.all()
+    
+    def has_mastodon_media(self):
+        """Returns True if the Model has media to upload."""
+        return self.content is not None
+    
+    def get_mastodon_media_image_field(self):
+        """Returns the ImageField for the media."""
+        return self.content
+
+    def get_mastodon_media_description(self):
+        """Returns the description for the media."""
+        return self.alternative_text
