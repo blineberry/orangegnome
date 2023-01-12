@@ -425,10 +425,9 @@ hr {
 }
 
 .photo img {
+  width: 100%;
   max-width: 594px;
   height: auto;
-  max-height: 594px;
-  width: auto;
   display: block;
   margin: 0 auto;
 }
