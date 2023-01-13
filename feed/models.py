@@ -17,11 +17,16 @@ class Tag(models.Model):
     def test(self):
         return self.name
 
-    def to_pascale_case(self):
-        return "".join(self.name.title().split())    
+    def to_pascale_case(self, strip_special_characters = True):
+        name = self.name
 
-    def to_hashtag(self):
-        return "#" + self.to_pascale_case()
+        if strip_special_characters:
+            name = ''.join(filter(lambda character : character.isalnum() or character == ' ',self.name))
+
+        return "".join(name.title().split())
+
+    def to_hashtag(self, strip_special_characters = True):
+        return "#" + self.to_pascale_case(strip_special_characters)
 
 class FeedItem(models.Model):
     is_published = models.BooleanField(default=False)
