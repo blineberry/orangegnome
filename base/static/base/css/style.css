@@ -437,3 +437,13 @@ hr {
   display: block;
   margin: 0 auto;
 }
+
+/* code blocks */
+pre code {
+  border-radius: 0.5em;
+  background: #f3f3f3;
+  color: #444;
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
