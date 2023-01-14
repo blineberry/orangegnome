@@ -10,8 +10,7 @@
 {% endblock %}
 
 {% block postcontent %}
-<div class="article-content">
-    <img height="{{ object.image_height }}" width="{{ object.image_width}}" class="u-photo" src="{{ object.image.url }}" alt="{{ object.alternative_text }}">
-    <p class="p-content">{{ object.caption }}</p>
-</div>
+
+{% include "photos/_photo_content.html" with photo=item %}
+
 {% endblock %}
