@@ -12,6 +12,7 @@ from uuid import uuid4
 from datetime import date
 from django_resized import ResizedImageField
 from django.utils.html import mark_safe
+from django.template.loader import render_to_string
 
 # Custom upload_to callable
 # Heavily influenced from https://stackoverflow.com/a/15141228/814492
@@ -80,7 +81,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_content(self):
         """Returns the content for aggregated feed item indexes."""
-        return self.content_html()
+        return render_to_string('photos/_photo_content.html', { 'photo': self })
 
     def feed_item_header(self):
         return self.published
