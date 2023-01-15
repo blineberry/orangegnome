@@ -37,7 +37,16 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         Returns the passed in content with doublespaces converted to html `p` 
         elements.
         """
-        return re.sub(r"([\n\r]{2})","<p>",content)
+
+        # Standardize End Of Lines to Line Feeds
+        content = re.sub(r"(\r\n)", "\n", content)
+        # Standardize Carriage Returns to Line Feeds
+        content = re.sub(r"(\r)", "\n", content)
+        # Convert 2+ Line Feeds to paragraph elements
+        content = re.sub(r"\n{2,}", "<p>", content)
+        # Convert remaining Line Feeds to line break elements
+        content = re.sub(r"\n", "<br>", content)
+        return content
 
     @staticmethod
     def urls_to_links(content, target="_blank"):
