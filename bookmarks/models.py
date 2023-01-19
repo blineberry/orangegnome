@@ -107,7 +107,7 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         if self.has_quote() and (len(quote_content) + TwitterSyndicatable.tweet_link_length) < TwitterSyndicatable.tweet_length_limit:
             content = quote_content
 
-        if self.has_commentary and (len(content) + len(commentary_content) + TwitterSyndicatable.tweet_link_length) < TwitterSyndicatable.tweet_length_limit:
+        if self.has_commentary() and (len(content) + len(commentary_content) + TwitterSyndicatable.tweet_link_length) < TwitterSyndicatable.tweet_length_limit:
             content = content + commentary_content
 
         return content + self.url
@@ -123,10 +123,10 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
         content = ""
         
-        if self.has_quote:
+        if self.has_quote():
             content = "“" + self.quote + "”\n\n"
         
-        if self.has_commentary:
+        if self.has_commentary():
             content = content + self.commentary + "\n\n"
 
         return content + self.url
