@@ -1,0 +1,12 @@
+{% if item.has_content %}
+<div class="article-content">
+    {% if item.quote %}
+    <blockquote>
+        {{ item.quote }}
+    </blockquote>
+    {% endif %}
+    {% if item.commentary %}
+    <p>{{ item.commentary }}</p>
+    {% endif %}
+</div>
+{% endif %}

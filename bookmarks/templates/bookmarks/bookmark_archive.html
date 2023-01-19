@@ -1,0 +1,13 @@
+{% extends 'feed/feed.html' %}
+
+{% block postheader %}
+
+{% include "bookmarks/_bookmark_postheader.html" with item=item %}
+
+{% endblock %}
+
+{% block postcontent %}
+
+{% include "bookmarks/_bookmark_postcontent.html" with item=item %}
+
+{% endblock %}

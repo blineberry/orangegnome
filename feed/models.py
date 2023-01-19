@@ -36,6 +36,9 @@ class FeedItem(models.Model):
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
 
+    postheader_template = "feed/_postheader_template.html"
+    postcontent_template = "feed/_postbody_template.html"
+
     @staticmethod
     def get_site_url():
         return settings.SITE_URL
@@ -58,6 +61,9 @@ class FeedItem(models.Model):
     def is_exercise(self):
         return hasattr(self, 'exercise')
 
+    def is_bookmark(self):
+        return hasattr(self, 'bookmark')
+
     def get_child(self):
         if self.is_post():
             return self.post
@@ -70,6 +76,9 @@ class FeedItem(models.Model):
 
         if self.is_exercise():
             return self.exercise
+        
+        if self.is_bookmark():
+            return self.bookmark
 
         raise NotImplementedError
     

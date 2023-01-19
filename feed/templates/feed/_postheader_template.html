@@ -1,0 +1,6 @@
+<header class="article-header">
+    <h1 class="p-name"><a class="article-link alt" href="{{ item.get_absolute_url }}">{{ item.feed_item_header }}</a></h1>
+    {% if item.in_reply_to %}
+    <div>In reply to <a class="u-in-reply-to" href="{{item.in_reply_to}}">{{item.in_reply_to}}</a></div>
+    {% endif %}
+</header>

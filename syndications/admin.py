@@ -20,9 +20,9 @@ class SyndicatableAdmin(admin.ModelAdmin):
             media = obj.get_twitter_media()
             update = obj.to_twitter_status_update()
             response = Syndication.syndicate_to_twitter(update, media)
-        except TweepyException as e:
+        except Exception as e:
             obj.syndicate_to_twitter = False
-            self.message_user(request, f"Error syndicating to Twitter: { str(e) }", messages.WARNING)
+            self.message_user(request, f"Error syndicating to Twitter: { str(e) }", messages.ERROR)
             return obj
 
         try:            
@@ -42,7 +42,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             obj.syndicated_to_twitter = timezone.now()
         except Exception as e:
             self._desyndicate_from_twitter(response.id_str, obj)
-            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }", messages.WARNING)
+            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }", messages.ERROR)
         
         return obj
 
@@ -53,16 +53,16 @@ class SyndicatableAdmin(admin.ModelAdmin):
         try:
             response = Syndication.delete_from_twitter(obj.tweet.get().id_str)
         except TweepyException as e:
-            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }", messages.WARNING)
+            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }", messages.ERROR)
             return obj
         except Exception as e:
-            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }", messages.WARNING)
+            self.message_user(request, f"Error desyndicating to Twitter: { str(e) }", messages.ERROR)
 
         try:
             ts = obj.tweet.get()
             ts.delete()
         except Exception as e:
-            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }", messages.WARNING)
+            self.message_user(request, f"Error updating Twitter syndication info: { str(e) }", messages.ERROR)
         
         obj.syndicated_to_twitter = None
         return obj

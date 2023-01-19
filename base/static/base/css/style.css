@@ -186,6 +186,22 @@ hr {
   opacity: 0.5;
 }
 
+/* code blocks */
+pre code {
+  border-radius: 0.5em;
+  background: #f3f3f3;
+  color: #444;
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+blockquote {
+  margin-left: 2em;
+  border-left: 0.25em solid #CC8400;
+  padding-left: 1em;
+}
+
 @media screen and (min-width: 360px) {
   body {
     font-size: 16px;
@@ -438,12 +454,10 @@ hr {
   margin: 0 auto;
 }
 
-/* code blocks */
-pre code {
-  border-radius: 0.5em;
-  background: #f3f3f3;
-  color: #444;
-  display: block;
-  overflow-x: auto;
-  padding: 1em;
+a.u-bookmark-of {
+  position:relative;
+}
+
+a.u-bookmark-of::after {
+  content: ' \1F517';
 }

@@ -31,7 +31,6 @@ class Syndication():
 
         if media is not None:
             media_response = api.media_upload(media.filename, file=media.file)
-            print(media_response)
             media_id = media_response.media_id_string
             api.create_media_metadata(media_id, media.alt_text)
 
@@ -97,6 +96,8 @@ class TwitterSyndicatable(models.Model):
     syndicated_to_twitter = models.DateTimeField(null=True)
     syndicate_to_twitter = models.BooleanField(default=False)
     tweet = GenericRelation(Tweet)
+    tweet_length_limit = 280
+    tweet_link_length = 23
     
     def is_syndicated_to_twitter(self):
         return self.tweet.all().exists()
@@ -110,7 +111,7 @@ class TwitterSyndicatable(models.Model):
         raise NotImplementedError("get_twitter_reply_to_url not implemented.")
 
     def to_twitter_status_update(self):
-        """Converts the Note model to an object able to post to Twitter."""
+        """Converts the model to an object able to post to Twitter."""
 
         # Get the basic Twitter Status object from the content.
         update = TwitterStatusUpdate(self.to_twitter_status())

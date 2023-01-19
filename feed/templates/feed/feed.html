@@ -14,17 +14,10 @@
             {% block post %}
                 <article class="article h-entry {{ item.html_class }}">
                 {% block postheader %}
-                    <header class="article-header">
-                        <h1 class="p-name"><a class="article-link alt" href="{{ item.get_absolute_url }}">{{ item.feed_item_header }}</a></h1>
-                        {% if item.in_reply_to %}
-                        <div>In reply to <a class="u-in-reply-to" href="{{item.in_reply_to}}">{{item.in_reply_to}}</a></div>
-                        {% endif %}
-                    </header>
+                    {% include item.postheader_template with item=item %}
                 {% endblock %}
                 {% block postcontent %}
-                    <div class="article-content e-content">
-                        {{ item.feed_item_content|safe }}
-                    </div>
+                    {% include item.postcontent_template with item=item %}
                 {% endblock %}
                 {% block postfooter %}
                     <footer class="article-footer">
