@@ -5,7 +5,7 @@
 from django.db import models
 from profiles.models import Profile
 from feed.models import Tag, FeedItem
-from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
+from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 from django.urls import reverse
 from urllib.parse import urlparse
 import re

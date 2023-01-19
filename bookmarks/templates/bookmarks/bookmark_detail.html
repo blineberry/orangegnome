@@ -1,0 +1,22 @@
+{% extends 'feed/detail.html' %}
+
+{% block meta %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:creator" content="@{{ bookmark.author.twitter_screenname }}" />
+<meta property="og:url" content="{{ permalink }}" />
+<meta property="og:title" content="{{ bookmark.published }}" />
+<meta property="og:description" content="{{ bookmark.commentary }}" />
+{% endblock %}
+
+{% block postheader %}
+
+{% include "bookmarks/_bookmark_postheader.html" with bookmark=bookmark %}
+
+{% endblock %}
+
+
+{% block postcontent %}
+
+{% include "bookmarks/_bookmark_postcontent.html" with bookmark=bookmark %}
+
+{% endblock %}

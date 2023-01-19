@@ -20,7 +20,7 @@ class Client(object):
         return Client.get_base_url() + '/v2'
 
     @staticmethod
-    def post_status(status, idempotency_key, in_reply_to_id=None, media_ids=None, visibility='public'):
+    def post_status(status, idempotency_key, in_reply_to_id=None, media_ids=None, visibility='direct'):
         data = {
             'status': status,
             'visibility': visibility
