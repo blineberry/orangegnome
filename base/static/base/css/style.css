@@ -387,6 +387,13 @@ blockquote {
   font-weight: bold;
 }
 
+.article-readmore {
+  font-family: 'Open Sans', sans-serif;
+  display: block;
+  margin: 1em 0;
+  font-size: 0.85em;
+}
+
 .article .tags ul {
   list-style: none;
   margin: 0;

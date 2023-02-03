@@ -14,7 +14,7 @@ class PhotoModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    caption = CharField(widget=Textarea)
+    caption = CharField(widget=Textarea, help_text="Markdown supported.")
     """Display the caption input as a Textarea"""
 
     alternative_text = CharField(widget=Textarea)

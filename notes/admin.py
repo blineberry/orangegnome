@@ -14,7 +14,7 @@ class NoteModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    content = CharField(widget=Textarea)
+    content = CharField(widget=Textarea, help_text="Markdown supported.")
     """Display the content input as a Textarea"""
 
     class Meta:

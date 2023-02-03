@@ -3,12 +3,10 @@
 """
 
 from django.db import models
-from profiles.models import Profile
-from feed.models import Tag, FeedItem
+from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 from django.urls import reverse
-from urllib.parse import urlparse
-import re
+import mistune
 
 # An indieweb "Note" contenttype https://indieweb.org/note
 class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
@@ -17,7 +15,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
     """
-    content = models.CharField(max_length=560)
+    content = models.CharField(max_length=560, help_text="Markdown supported.")
     """The Note content. Max length is 560 characters."""
 
     def __str__(self):
@@ -31,39 +29,10 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         """Returns the content for aggregated feed item indexes."""
         return self.content_html()
 
-    @staticmethod
-    def doublespaces_to_paragraphs(content):
-        """
-        Returns the passed in content with doublespaces converted to html `p` 
-        elements.
-        """
-
-        # Standardize End Of Lines to Line Feeds
-        content = re.sub(r"(\r\n)", "\n", content)
-        # Standardize Carriage Returns to Line Feeds
-        content = re.sub(r"(\r)", "\n", content)
-        # Convert 2+ Line Feeds to paragraph elements
-        content = re.sub(r"\n{2,}", "<p>", content)
-        # Convert remaining Line Feeds to line break elements
-        content = re.sub(r"\n", "<br>", content)
-        return content
-
-    @staticmethod
-    def urls_to_links(content, target="_blank"):
-        """
-        Returns the passed in content with links converted to html `a` 
-        elements.
-        """
-        # Taken from https://gist.github.com/guillaumepiot/4539986
-        # Replace url to link
-        anchorRepl = r'<a href="\1" target="' + target + r'">\1</a>'
-        urls = re.compile(r"((https?):((//)|(\\\\))+[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.MULTILINE|re.UNICODE)
-        content = urls.sub(anchorRepl, content)
-        return content
-
     def content_html(self):
-        """Returns the content with specific html conversions."""
-        return '<p>' + Note.urls_to_links(Note.doublespaces_to_paragraphs(self.content), "_self")
+        """Returns the content converted from markdown to HTML."""
+        markdown = mistune.create_markdown(plugins=['url'])
+        return markdown(self.content)
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
