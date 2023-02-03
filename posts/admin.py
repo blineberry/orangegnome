@@ -4,8 +4,40 @@ from syndications.admin import SyndicatableAdmin
 from notes.admin import PublishableAdmin
 from webmentions.models import Webmention
 from webmentions.admin import WebmentionAdmin
+from django.forms import ModelForm, CharField, Textarea
+
+class PostModelForm(ModelForm):
+    """
+    Customizations for the Add and Change admin pages.
+
+    Inherits from forms.ModelForm.
+    """
+    
+    summary = CharField(widget=Textarea, help_text="Markdown supported.")
+    """Display the summary input as a Textarea."""
+
+    class Meta:
+        model = Post
+        fields = [
+            'published',
+            'syndicate_to_twitter',
+            'syndicated_to_twitter',
+            'syndicate_to_mastodon',
+            'syndicated_to_mastodon',
+            'title',
+            'slug',
+            'summary',
+            'in_reply_to', 
+            'content',
+            'author',
+            'category',
+            'tags',
+            'is_published'
+        ]
 
 class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
+    form = PostModelForm
+
     prepopulated_fields = { 'slug': ('title',)}
     readonly_fields = ('published','syndicated_to_twitter', 'syndicated_to_mastodon')
     

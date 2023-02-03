@@ -13,6 +13,7 @@ from datetime import date
 from django_resized import ResizedImageField
 from django.utils.html import mark_safe
 from django.template.loader import render_to_string
+import mistune
 
 # Custom upload_to callable
 # Heavily influenced from https://stackoverflow.com/a/15141228/814492
@@ -49,7 +50,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     image_width = models.PositiveIntegerField()
     """The width of the image."""
 
-    caption = models.CharField(max_length=560, blank=True)
+    caption = models.CharField(max_length=560, blank=True, help_text="Markdown supported.")
     """The caption for the photo."""
 
     alternative_text = models.CharField(max_length=255)
@@ -70,10 +71,13 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     image_tag.short_description = 'Preview'
 
+    def caption_html(self):
+        markdown = mistune.markdown(plugins=['url'])
+        return markdown(self.caption)
 
     def content_html(self):
         """Returns an html representation of the content."""
-        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><p class="p-content">' + self.caption + '</p></div>'
+        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><div class="p-content">' + self.caption_html() + '</div></div>'
 
     def get_absolute_url(self):
         """Returns the url for the photo relative to the root."""

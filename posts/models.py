@@ -4,6 +4,7 @@ from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
 from feed.models import Tag
 from profiles.models import Profile
+import mistune
 
 # Create your models here.
 class Category(models.Model):
@@ -21,19 +22,25 @@ class Category(models.Model):
 
 class Post(TwitterSyndicatable, MastodonSyndicatable, FeedItem):
     # h-entry properties
-    summary = models.CharField(max_length=280)
+    summary = models.CharField(max_length=280, help_text="Markdown supported.")
     title = models.CharField(max_length=100, unique=True)
-    content = models.TextField()    
+    content = models.TextField(help_text="HTML supported.")    
     category = models.ForeignKey(Category, on_delete=models.PROTECT,related_name='posts', null=True)
 
     # extra properties
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
     
+    postcontent_template = "posts/_post_summary.html"
+
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         return reverse('posts:detail', args=[self.id, self.slug])
+
+    def summary_html(self):
+        markdown = mistune.create_markdown(plugins=['url'])
+        return markdown(self.summary)
 
     def feed_item_content(self):
         return self.content
