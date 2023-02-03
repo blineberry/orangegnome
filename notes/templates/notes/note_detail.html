@@ -5,5 +5,6 @@
 <meta name="twitter:creator" content="@{{ note.author.twitter_screenname }}" />
 <meta property="og:url" content="{{ permalink }}" />
 <meta property="og:title" content="{{ note.published }}" />
-<meta property="og:description" content="{{ note.short_content }}" />
+<meta property="og:description" content="{{ note.content }}" />
+<meta property="og:type" content="article" />
 {% endblock %}
