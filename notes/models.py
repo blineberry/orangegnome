@@ -36,7 +36,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
-        return self.published
+        return self.published.strftime('%b. %d, %Y, %I:%M %p')
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""

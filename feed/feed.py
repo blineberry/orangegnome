@@ -18,4 +18,4 @@ class LatestEntriesFeed(Feed):
         return item.get_child().feed_item_content()
 
     def item_link(self, item):
-        return item.get_child().get_permalink()
+        return item.get_child().feed_item_link()

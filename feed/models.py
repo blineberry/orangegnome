@@ -102,3 +102,6 @@ class FeedItem(models.Model):
     
     def feed_item_content(self):
         return None
+    
+    def feed_item_link(self):
+        return self.get_child().get_permalink()
