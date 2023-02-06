@@ -7,6 +7,7 @@ from django.db import models
 from django.urls import reverse
 from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable, MastodonSyndicatable
+from django.template.loader import render_to_string
 
 # Create your models here.
 class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
@@ -89,6 +90,19 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         if self.title is not None and self.title.isspace() == False and self.title != "":
             return self.title
 
+        return self.url    
+    
+    def feed_item_header(self):
+        """
+        Returns the title for feed item indexes.
+        """
+        return self.get_title_or_url()
+
+    def feed_item_content(self):
+        """Returns the content for aggregated feed item indexes."""
+        return render_to_string('bookmarks/_bookmark_postcontent.html', { 'item': self })
+
+    def feed_item_link(self):
         return self.url
 
     def to_twitter_status(self):

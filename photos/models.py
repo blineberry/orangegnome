@@ -88,7 +88,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         return render_to_string('photos/_photo_content.html', { 'photo': self })
 
     def feed_item_header(self):
-        return self.published
+        return self.published.strftime('%b. %d, %Y, %I:%M %p')
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""
