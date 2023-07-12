@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from tweepy.errors import TweepyException
 from .models import Syndication, TwitterUser, MastodonStatus, MastodonSyndicatable
 from django.utils import timezone
-import datetime
+from django.conf import settings
 
 # Register your models here.
 class SyndicatableAdmin(admin.ModelAdmin):
@@ -26,22 +26,23 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
 
         try:            
-            user = TwitterUser(id_str=response.user.id_str, name=response.user.name, screen_name=response.user.screen_name)
+            user = TwitterUser(id_str=settings.TWITTER_ID_STR, name=settings.TWITTER_NAME, screen_name=settings.TWITTER_SCREEN_NAME)
             user.save()
 
-            in_reply_to_status_id_str = response.in_reply_to_status_id_str
-            in_reply_to_screen_name = response.in_reply_to_screen_name
+            in_reply_to_status_id_str = update.in_reply_to_status_id
+            #in_reply_to_screen_name = response.in_reply_to_screen_name
 
             obj.tweet.create(
-                id_str=response.id_str, 
-                created_at=response.created_at, 
+                id_str=response.data["id"], 
+                #created_at=response.created_at, 
                 user=user, 
-                full_text=response.text,
+                full_text=response.data["text"],
                 in_reply_to_status_id_str=in_reply_to_status_id_str,
-                in_reply_to_screen_name=in_reply_to_screen_name)
+                #in_reply_to_screen_name=in_reply_to_screen_name
+                )
             obj.syndicated_to_twitter = timezone.now()
         except Exception as e:
-            self._desyndicate_from_twitter(response.id_str, obj)
+            self._desyndicate_from_twitter(response.data["id"], obj)
             self.message_user(request, f"Error updating Twitter syndication info: { str(e) }", messages.ERROR)
         
         return obj
@@ -93,7 +94,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             )
             obj.syndicated_to_mastodon = timezone.now()
         except Exception as e:
-            self._desyndicate_from_mastodon(response.id, obj)
+            self._desyndicate_from_mastodon(response.data.id, obj)
             self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }", messages.ERROR)
         
         return obj
