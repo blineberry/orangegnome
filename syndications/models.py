@@ -108,6 +108,15 @@ class TwitterSyndicatable(models.Model):
     tweet = GenericRelation(Tweet)
     tweet_length_limit = 280
     tweet_link_length = 23
+
+    def get_tweet_datetime(self):
+        tweet_created_at = self.tweet.get().created_at
+        print(tweet_created_at)
+
+        if tweet_created_at is not None:
+            return tweet_created_at
+        
+        return self.syndicated_to_twitter
     
     def is_syndicated_to_twitter(self):
         return self.tweet.all().exists()

@@ -40,7 +40,7 @@
             {% endif %}
             <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ object.get_absolute_url }}">{{ request.get_host }}{{ object.get_absolute_url }}</a></div>
             {% if object.is_syndicated_to_twitter %}
-            <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ object.tweet.get.get_url }}">Twitter</a> on {{ object.tweet.get.created_at|date }}</div>
+            <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ object.tweet.get.get_url }}">Twitter</a> on {{ object.get_tweet_datetime|date }}</div>
             {% endif %}
             {% if object.is_syndicated_to_mastodon %}
             <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ object.mastodon_status.get.url }}">Mastodon</a> on {{ object.mastodon_status.get.created_at|date }}</div>
