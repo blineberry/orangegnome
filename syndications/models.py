@@ -18,7 +18,16 @@ class Syndication():
     url = models.TextField(max_length=2000)
 
     @staticmethod
-    def get_twitter_client():
+    def get_twitter_v2_client():
+        return tweepy.Client(
+            consumer_key=settings.TWITTER_CONSUMER_KEY, 
+            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+            access_token=settings.TWITTER_ACCESS_TOKEN_KEY,
+            access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET
+        )
+
+    @staticmethod
+    def get_twitter_v1_client():
         auth = tweepy.OAuthHandler(settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET)
         auth.set_access_token(settings.TWITTER_ACCESS_TOKEN_KEY, settings.TWITTER_ACCESS_TOKEN_SECRET)
         
@@ -26,24 +35,25 @@ class Syndication():
 
     @staticmethod
     def syndicate_to_twitter(update=None, media=None):
-        api = Syndication.get_twitter_client()
+        client = Syndication.get_twitter_v2_client()
         media_ids = None
 
         if media is not None:
+            api = Syndication.get_twitter_v1_client()
             media_response = api.media_upload(media.filename, file=media.file)
             media_id = media_response.media_id_string
             api.create_media_metadata(media_id, media.alt_text)
 
             media_ids = [media_id]
 
-        response = api.update_status(update.status, in_reply_to_status_id=update.in_reply_to_status_id, attachment_url=update.attachment_url, media_ids=media_ids)
+        response = client.create_tweet(text=update.status, in_reply_to_tweet_id=update.in_reply_to_status_id, media_ids=media_ids, user_auth=True)
         return response
 
     @staticmethod
     def delete_from_twitter(id_str):
-        api = Syndication.get_twitter_client()
+        client = Syndication.get_twitter_v2_client()
         
-        response = api.destroy_status(id_str)
+        response = client.delete_tweet(id_str, user_auth=True)
         return response
 
     @staticmethod
@@ -71,7 +81,7 @@ class TwitterUser(models.Model):
 
 class Tweet(models.Model):
     id_str = models.CharField(max_length=40)
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(null=True)
     screen_name = models.CharField(max_length=30)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
