@@ -6,6 +6,7 @@ from django.db import models
 from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 from django.urls import reverse
+from django.utils import timezone
 import mistune
 
 # An indieweb "Note" contenttype https://indieweb.org/note
@@ -36,7 +37,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
-        return self.published.strftime('%b. %d, %Y, %I:%M %p')
+        return timezone.localtime(self.published).strftime('%b. %d, %Y, %I:%M %p')
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""
