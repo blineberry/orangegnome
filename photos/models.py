@@ -14,6 +14,7 @@ from django_resized import ResizedImageField
 from django.utils.html import mark_safe
 from django.template.loader import render_to_string
 import mistune
+from django.utils import timezone
 
 # Custom upload_to callable
 # Heavily influenced from https://stackoverflow.com/a/15141228/814492
@@ -88,7 +89,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         return render_to_string('photos/_photo_content.html', { 'photo': self })
 
     def feed_item_header(self):
-        return self.published.strftime('%b. %d, %Y, %I:%M %p')
+        return timezone.localtime(self.published).strftime('%b. %d, %Y, %I:%M %p')
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""
