@@ -14,8 +14,14 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     paginate_by = 5
 
 class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
-    queryset = Bookmark.objects.filter(is_published=True)
     canonical_viewname = 'bookmarks:detail'
 
     def get_canonical_view_args(self, context):
         return [self.kwargs['pk']]
+    
+    def get_queryset(self):
+        # Allow a draft view if the user is_staff
+        if self.request.user.is_staff:
+            return Bookmark.objects
+        
+        return Bookmark.objects.filter(is_published=True)

@@ -33,12 +33,18 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     date_field = 'published'
     canonical_viewname = 'posts:index'
 
-class DetailView(PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):
-    queryset = Post.objects.filter(is_published=True)
+class DetailView(PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):    
     canonical_viewname = 'posts:detail'
 
     def get_canonical_view_args(self, context):
         return [self.kwargs['pk'], self.kwargs['slug']]
+    
+    def get_queryset(self):
+        # Allow a draft view if the user is_staff
+        if self.request.user.is_staff:
+            return Post.objects
+        
+        return Post.objects.filter(is_published=True)
 
 class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.SingleObjectMixin, generic.ListView, PageTitleResponseMixin):
     paginate_by = 5

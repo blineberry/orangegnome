@@ -18,6 +18,7 @@
 {% block postfooter %}
     <footer class="article-footer">
         <div class="meta">
+            {% if object.is_published %}
             <div class="postmeta-published">Published by 
                 <span class="p-author h-card">{{ object.author.name }}</span> on 
                 <time class="dt-published" datetime="{{ object.published|date:'c' }}">
@@ -29,6 +30,9 @@
                 in <a href="{{ object.category.get_absolute_url }}" class="p-category" rel="category tag">{{ object.category.name }}</a>
             {% endif %}
             </div>
+            {% else %}
+            <div class="postmeta-published">Not yet published.</div>
+            {% endif %}
             {% if object.tags.all %}
             <div class="postmeta-tags">Tags:
                 <ul>

@@ -14,8 +14,14 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     paginate_by = 5
 
 class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
-    queryset = Photo.objects.filter(is_published=True)
     canonical_viewname = 'photos:detail'
 
     def get_canonical_view_args(self, context):
         return [self.kwargs['pk']]
+    
+    def get_queryset(self):
+        # Allow a draft view if the user is_staff
+        if self.request.user.is_staff:
+            return Photo.objects
+        
+        return Photo.objects.filter(is_published=True)
