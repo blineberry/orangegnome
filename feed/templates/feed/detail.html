@@ -8,6 +8,9 @@
         {% if object.in_reply_to %}
         <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
         {% endif %}
+        {% if user.is_staff %}
+            <div><small><a href="{{ object.get_edit_link }}">Edit</a></small></div>
+        {% endif %}
     </header>
 {% endblock %}
 {% block postcontent %}
@@ -26,9 +29,9 @@
                     <a href="{% url 'feed:day' object.published|date:'Y' object.published|date:'m' object.published|date:'d' %}">{{ object.published|date:'j' }}</a>, 
                     <a href="{% url 'feed:year' object.published|date:'Y' %}">{{ object.published|date:'Y' }}</a>
                 </time>
-            {% if object.category %}
-                in <a href="{{ object.category.get_absolute_url }}" class="p-category" rel="category tag">{{ object.category.name }}</a>
-            {% endif %}
+                {% if object.category %}
+                    in <a href="{{ object.category.get_absolute_url }}" class="p-category" rel="category tag">{{ object.category.name }}</a>
+                {% endif %}
             </div>
             {% else %}
             <div class="postmeta-published">Not yet published.</div>

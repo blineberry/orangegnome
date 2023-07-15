@@ -29,6 +29,9 @@
     {% endblock %}
 </head>
 <body>
+    {% if user.is_staff %}
+        <div><small><a href="{% url 'admin:index' %}">Admin</a></small></div>
+    {% endif %}
     <header class="siteheader">
         <div class="h-card profile {% block hcard_class %}{% endblock %}">
             <a rel="me" href="{% url 'feed:index' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="{{ profiles.site_owner.name }}" /></a>
