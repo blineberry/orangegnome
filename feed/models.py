@@ -105,3 +105,7 @@ class FeedItem(models.Model):
     
     def feed_item_link(self):
         return self.get_child().get_permalink()
+    
+    def get_edit_link(self):
+        #print(self._meta.app_name)
+        return reverse(f"admin:{self._meta.app_label}_{self._meta.model_name}_change", args=(self.pk,))
