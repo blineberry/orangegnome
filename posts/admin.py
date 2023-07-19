@@ -32,14 +32,13 @@ class PostModelForm(ModelForm):
             'author',
             'category',
             'tags',
-            'is_published'
         ]
 
 class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
     form = PostModelForm
 
     prepopulated_fields = { 'slug': ('title',)}
-    readonly_fields = ('published','syndicated_to_twitter', 'syndicated_to_mastodon')
+    readonly_fields = ('syndicated_to_twitter', 'syndicated_to_mastodon')
     
     fieldsets = (
         (None, {
@@ -52,7 +51,7 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
         }),
         ('Publishing', {
-            'fields': ('is_published','published')
+            'fields': ('published',)
         })
     )
 
@@ -72,7 +71,7 @@ class PostAdmin(SyndicatableAdmin, PublishableAdmin, WebmentionAdmin):
         return content_links
 
     def should_send_webmentions(self, request, obj, form, change):
-        return obj.is_published
+        return obj.is_published()
 
 # Register your models here.
 admin.site.register(Post, PostAdmin)

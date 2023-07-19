@@ -24,9 +24,8 @@ class NoteModelForm(ModelForm):
             'in_reply_to',
             'author',
             'tags',
-            'syndicate_to_twitter', 
+            'syndicate_to_twitter',
             'syndicated_to_twitter',
-            'is_published',
             'published'
         ]
 
@@ -41,7 +40,7 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
     form = NoteModelForm
     """Override the dynamically created form with customizations."""
 
-    readonly_fields = ('published','syndicated_to_twitter', 'syndicated_to_mastodon')
+    readonly_fields = ('syndicated_to_twitter', 'syndicated_to_mastodon')
     """
     These fields will be shown but uneditable. 
     
@@ -56,7 +55,7 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
         }),
         ('Publishing', {
-            'fields': ('is_published','published')
+            'fields': ('published',)
         })
     )
     """
@@ -101,6 +100,6 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
         Given the save_model context, returns a boolean if webmentions should 
         be sent or not.
         """
-        return obj.is_published
+        return obj.is_published()
 
 admin.site.register(Note, NoteAdmin)

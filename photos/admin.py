@@ -31,7 +31,6 @@ class PhotoModelForm(ModelForm):
             'tags',
             'syndicate_to_twitter', 
             'syndicated_to_twitter',
-            'is_published',
             'published'
         ]
 
@@ -46,7 +45,7 @@ class PhotoAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
     form = PhotoModelForm
     """Override the dynamically created form with customizations."""
 
-    readonly_fields = ('image_tag','published','syndicated_to_twitter', 'syndicated_to_mastodon')
+    readonly_fields = ('image_tag','syndicated_to_twitter', 'syndicated_to_mastodon')
     """
     These fields will be shown but uneditable. 
     
@@ -61,7 +60,7 @@ class PhotoAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
         }),
         ('Publishing', {
-            'fields': ('is_published','published')
+            'fields': ('published',)
         })
     )
     """
@@ -108,7 +107,7 @@ class PhotoAdmin(PublishableAdmin, SyndicatableAdmin, WebmentionAdmin):
         Given the save_model context, returns a boolean if webmentions should 
         be sent or not.
         """
-        return obj.is_published
+        return obj.is_published()
 
 # Register your models here.
 admin.site.register(Photo, PhotoAdmin)

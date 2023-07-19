@@ -5,18 +5,18 @@ from django.views.generic import ListView, detail, list, dates, detail
 from django.db.models import Value, CharField
 from itertools import chain
 from django.core.paginator import Paginator
-from datetime import date
+from datetime import date, datetime
 from .models import Tag, FeedItem
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
-        return super().get_queryset().filter(is_published=True)
+        return super().get_queryset().filter(published__lte=datetime.now())
 
 class PublishedSingleObjectMixin(detail.SingleObjectMixin):
     def get_queryset(self):
-        return super().get_queryset().filter(is_published=True)
+        return super().get_queryset().filter(published__lte=datetime.now())
 
 class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
     model = FeedItem
@@ -95,4 +95,4 @@ class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, 
         return self.object.name
 
     def get_queryset(self):
-        return self.object.feed_items.filter(is_published=True).order_by('-published')
+        return self.object.feed_items.filter(published__lte=datetime.now()).order_by('-published')

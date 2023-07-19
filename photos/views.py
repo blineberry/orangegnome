@@ -1,11 +1,12 @@
 from .models import Photo
 from django.views import generic
 from base.views import PermalinkResponseMixin
+from datetime import datetime
 
 # Create your views here.
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     date_field = 'published'
-    queryset = Photo.objects.filter(is_published=True)
+    queryset = Photo.objects.filter(published__lte=datetime.now())
     canonical_viewname = 'photos:index'
     extra_context = {
         'page_title': 'Photos',
@@ -24,4 +25,4 @@ class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
         if self.request.user.is_staff:
             return Photo.objects
         
-        return Photo.objects.filter(is_published=True)
+        return Photo.objects.filter(published__lte=datetime.now())

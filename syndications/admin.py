@@ -12,7 +12,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
         if obj.is_syndicated_to_twitter():
             return obj
 
-        if not obj.is_published:
+        if not obj.is_published():
             self.message_user(request, "Cannot syndicate an unpublished post.", messages.WARNING)
             return obj
    
@@ -72,7 +72,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
         if obj.is_syndicated_to_mastodon():
             return obj
 
-        if not obj.is_published:
+        if not obj.is_published():
             self.message_user(request, "Cannot syndicate an unpublished post.", messages.WARNING)
             return obj
 

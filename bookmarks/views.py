@@ -1,11 +1,12 @@
 from .models import Bookmark
 from django.views import generic
 from base.views import PermalinkResponseMixin
+from datetime import datetime
 
 # Create your views here.
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     date_field = 'published'
-    queryset = Bookmark.objects.filter(is_published=True)
+    queryset = Bookmark.objects.filter(published__lte=datetime.now())
     canonical_viewname = 'bookmarks:index'
     extra_context = {
         'page_title': 'Links',
@@ -24,4 +25,4 @@ class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
         if self.request.user.is_staff:
             return Bookmark.objects
         
-        return Bookmark.objects.filter(is_published=True)
+        return Bookmark.objects.filter(published__lte=datetime.now())

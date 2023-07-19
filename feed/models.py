@@ -2,6 +2,8 @@ from django.db import models
 from django.urls import reverse
 from profiles.models import Profile
 from django.conf import settings
+from datetime import datetime
+from django.utils import timezone
 
 # Create your models here.
 class Tag(models.Model):
@@ -29,10 +31,9 @@ class Tag(models.Model):
         return "#" + self.to_pascale_case(strip_special_characters)
 
 class FeedItem(models.Model):
-    is_published = models.BooleanField(default=False)
     updated = models.DateTimeField(null=True)
     author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
-    published = models.DateTimeField(null=True)
+    published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
 
@@ -42,6 +43,15 @@ class FeedItem(models.Model):
     @staticmethod
     def get_site_url():
         return settings.SITE_URL
+    
+    def is_published(self):
+        if self.published is None:
+            return False
+        
+        if self.published > timezone.now():
+            return False
+        
+        return True
 
     def get_permalink(self):
         return self.get_site_url() + self.get_absolute_url()

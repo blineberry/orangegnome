@@ -2,14 +2,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Note
 from django.urls import reverse
 from django.core.paginator import Paginator
-from datetime import date
+from datetime import date, datetime
 from django.views import generic
 from base.views import PermalinkResponseMixin
 
 # Create your views here.
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     date_field = 'published'
-    queryset = Note.objects.filter(is_published=True)
+    queryset = Note.objects.filter(published__lte=datetime.now())
     canonical_viewname = 'notes:index'
     extra_context = {
         'page_title': 'Notes',
@@ -29,4 +29,4 @@ class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
         if self.request.user.is_staff:
             return Note.objects
         
-        return Note.objects.filter(is_published=True)
+        return Note.objects.filter(published__lte=datetime.now())

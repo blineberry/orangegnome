@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Category
 from django.views import generic
-from datetime import date
+from datetime import datetime
 from django.http import Http404
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -24,7 +24,7 @@ def render_index(request, posts, title, permalink):
     return render(request, 'posts/index.html', context)
 
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
-    queryset = Post.objects.filter(is_published=True)
+    queryset = Post.objects.filter(published__lte=datetime.now())
     extra_context = {
         'feed_title': 'Posts',
         'page_title': 'Posts'
@@ -44,7 +44,7 @@ class DetailView(PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):
         if self.request.user.is_staff:
             return Post.objects
         
-        return Post.objects.filter(is_published=True)
+        return Post.objects.filter(published__lte=datetime.now())
 
 class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.SingleObjectMixin, generic.ListView, PageTitleResponseMixin):
     paginate_by = 5
@@ -63,7 +63,7 @@ class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.Single
         return self.object.name
 
     def get_queryset(self):
-        return self.object.posts.filter(is_published=True).order_by('-published')
+        return self.object.posts.filter(published__lte=datetime.now()).order_by('-published')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
