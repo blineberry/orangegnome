@@ -149,16 +149,10 @@ class TwitterSyndicatable(models.Model):
             update.status = f'{update.status} {self.in_reply_to}'
             return update
 
-        # If the Note content starts with the reply to screen name, then it's 
-        # a reply.  Add that data to the update object.
-        if update.status.lower().startswith(f'@{reply_to_screen_name.lower()}'):
-            update.in_reply_to_status_id = reply_to_status_id
-            return update
-
-        # Otherwise, it's a quote tweet. Add that to the update object.
-        update.attachment_url = self.get_twitter_reply_to_url()
+        # Otherwise it's a reply. Add that data to the update object.
+        update.in_reply_to_status_id = reply_to_status_id
         return update
-    
+        
     def has_twitter_media(self):
         """Returns True if the Model has media to upload."""
         return False
