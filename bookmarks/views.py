@@ -1,18 +1,23 @@
+from typing import Any
+from django.db.models.query import QuerySet
 from .models import Bookmark
 from django.views import generic
 from base.views import PermalinkResponseMixin
 from datetime import datetime
+from django.utils import timezone
 
 # Create your views here.
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     date_field = 'published'
-    queryset = Bookmark.objects.filter(published__lte=datetime.now())
     canonical_viewname = 'bookmarks:index'
     extra_context = {
         'page_title': 'Links',
         'feed_title': 'Links',
     }
     paginate_by = 5
+
+    def get_queryset(self):
+        return Bookmark.objects.filter(published__lte=timezone.now()).order_by('-published')
 
 class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
     canonical_viewname = 'bookmarks:detail'
@@ -25,4 +30,4 @@ class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
         if self.request.user.is_staff:
             return Bookmark.objects
         
-        return Bookmark.objects.filter(published__lte=datetime.now())
+        return Bookmark.objects.filter(published__lte=timezone.now())

@@ -9,14 +9,15 @@ from datetime import date, datetime
 from .models import Tag, FeedItem
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
+from django.utils import timezone
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
-        return super().get_queryset().filter(published__lte=datetime.now())
+        return super().get_queryset().filter(published__lte=timezone.now())
 
 class PublishedSingleObjectMixin(detail.SingleObjectMixin):
     def get_queryset(self):
-        return super().get_queryset().filter(published__lte=datetime.now())
+        return super().get_queryset().filter(published__lte=timezone.now())
 
 class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
     model = FeedItem
@@ -95,4 +96,4 @@ class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, 
         return self.object.name
 
     def get_queryset(self):
-        return self.object.feed_items.filter(published__lte=datetime.now()).order_by('-published')
+        return self.object.feed_items.filter(published__lte=timezone.now()).order_by('-published')

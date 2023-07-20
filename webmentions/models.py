@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 import html
 from django.utils.encoding import punycode
 from urllib.parse import (
-    #parse_qsl, 
-    quote, unquote, #urlencode, urlsplit, urlunsplit,
+    parse_qsl, 
+    quote, unquote, urlencode, urlsplit, urlunsplit,
 )
 from django.utils.http import RFC3986_GENDELIMS, RFC3986_SUBDELIMS
 
