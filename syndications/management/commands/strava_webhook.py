@@ -14,7 +14,7 @@ class Command(BaseCommand):
         parser.add_argument('client_secret', type=str, help="The Strava Client Secret")
 
     def create(self, client_id, client_secret):
-        token = hashlib.md5(str(datetime.datetime.now().timestamp()).encode())
+        token = hashlib.md5(str(datetime.timezone.now().timestamp()).encode())
         webhook = StravaWebhook(verify_token=token.hexdigest())
         webhook.save()
 

@@ -1,3 +1,5 @@
+from typing import Any
+from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Category
 from django.views import generic
@@ -7,6 +9,7 @@ from django.core.paginator import Paginator
 from django.urls import reverse
 from base.views import ForceSlugMixin
 from feed.views import PermalinkResponseMixin, PageTitleResponseMixin
+from django.utils import timezone
 
 def render_index(request, posts, title, permalink):
     paginator = Paginator(posts, 5)
@@ -24,7 +27,6 @@ def render_index(request, posts, title, permalink):
     return render(request, 'posts/index.html', context)
 
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
-    queryset = Post.objects.filter(published__lte=datetime.now())
     extra_context = {
         'feed_title': 'Posts',
         'page_title': 'Posts'
@@ -32,6 +34,9 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     paginate_by = 5
     date_field = 'published'
     canonical_viewname = 'posts:index'
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return Post.objects.filter(published__lte=timezone.now()).order_by('-published')
 
 class DetailView(PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):    
     canonical_viewname = 'posts:detail'
@@ -44,7 +49,7 @@ class DetailView(PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):
         if self.request.user.is_staff:
             return Post.objects
         
-        return Post.objects.filter(published__lte=datetime.now())
+        return Post.objects.filter(published__lte=timezone.now())
 
 class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.SingleObjectMixin, generic.ListView, PageTitleResponseMixin):
     paginate_by = 5
@@ -63,7 +68,7 @@ class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.Single
         return self.object.name
 
     def get_queryset(self):
-        return self.object.posts.filter(published__lte=datetime.now()).order_by('-published')
+        return self.object.posts.filter(published__lte=timezone.now()).order_by('-published')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
