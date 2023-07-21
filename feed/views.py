@@ -1,15 +1,12 @@
-from django.shortcuts import render
-from posts.models import Post
-from notes.models import Note
-from django.views.generic import ListView, detail, list, dates, detail
-from django.db.models import Value, CharField
-from itertools import chain
-from django.core.paginator import Paginator
-from datetime import date, datetime
+from typing import Any, Dict
+from django.shortcuts import redirect
+from django.views.generic import detail, list, dates, ListView
+from django.views.generic.base import TemplateResponseMixin
 from .models import Tag, FeedItem
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
 from django.utils import timezone
+from django.http import HttpResponse
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
@@ -79,7 +76,13 @@ class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveV
     def get_page_title(self, context):
         return '{d:%B} {d.day}, {d.year} Archives'.format(d = context['day'])
 
-class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):#FeedWithTitleView):
+class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
+    canonical_viewname = 'feed:tag:obsolete'
+
+    def render_to_response(self, context, **response_kwargs):
+        return redirect(context['object'], permanent=True)
+    
+class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
     paginate_by = 5
     template_name = 'feed/feed.html'
     canonical_viewname = 'feed:tag'
@@ -97,3 +100,8 @@ class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, 
 
     def get_queryset(self):
         return self.object.feed_items.filter(published__lte=timezone.now()).order_by('-published')
+    
+class TagIndex(ListView, PageTitleResponseMixin):
+    model = Tag
+    template_name = 'feed/tags.html'
+    ordering = ['name']

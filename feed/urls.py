@@ -12,6 +12,8 @@ urlpatterns = [
             path('<int:day>', views.DayView.as_view(), name='day')
         ])),
     ])),
-    path('tag/<int:pk>/<slug:slug>', views.TagView.as_view(), name='tag'),
+    path('tags/', views.TagIndex.as_view(), name='tagindex'),
+    path('tag/<int:pk>/<slug:slug>', views.TagView.as_view(), name='tag_old'),
+    path('tags/<int:pk>/<slug:slug>', views.TagArchive.as_view(), name='tag'),
     path('feed', LatestEntriesFeed())
 ]
