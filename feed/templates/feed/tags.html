@@ -1,0 +1,14 @@
+{% extends 'base/extended_hcard.html' %}
+
+{% block body %}
+
+<h1>Tags</h1>
+
+<ul class="linklist">
+{% for tag in object_list %}
+<li class="linklist-item"><a href="{% url 'feed:tag' pk=tag.id slug=tag.slug %}">{{tag.name}}</a></li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}
