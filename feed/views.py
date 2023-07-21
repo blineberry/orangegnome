@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from django.shortcuts import redirect
 from django.views.generic import detail, list, dates, ListView
-from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.base import RedirectView
 from .models import Tag, FeedItem
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
@@ -75,12 +75,6 @@ class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveV
 
     def get_page_title(self, context):
         return '{d:%B} {d.day}, {d.year} Archives'.format(d = context['day'])
-
-class TagView(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
-    canonical_viewname = 'feed:tag:obsolete'
-
-    def render_to_response(self, context, **response_kwargs):
-        return redirect(context['object'], permanent=True)
     
 class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
     paginate_by = 5
