@@ -1,34 +1,54 @@
+from typing import Optional
 from django.contrib import admin
 from bs4 import BeautifulSoup
-from .models import Webmention
+from django.http.request import HttpRequest
+from .models import Webmention, PendingOutgoingWebmention, OutgoingWebmention,PendingIncomingWebmention,IncomingWebmention
+
+
 
 # Register your models here.
-class WebmentionMixin():
-    send_webmentions = True
-    links_to_webmention = []
+class ReadOnlyAdmin(admin.ModelAdmin):
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+    
+class PendingOutgoingWebmentionAdmin(ReadOnlyAdmin):
+    actions = ["process_pending_outgoing_webmentions"]
 
-    def get_links_to_webmention(self, request, obj, form, change):
-        return self.links_to_webmention
+    @admin.action(description="Process selected webmentions")
+    def process_pending_outgoing_webmentions(self, request, queryset):
+        for obj in queryset:
+            obj.process()
 
-    def send_webmentions(self, request, obj, form, change):
-        if not self.should_send_webmentions(request,obj,form,change):   
-            return
-        
-        links = self.links_to_webmention
+class OutgoingWebmentionAdmin(ReadOnlyAdmin):
+    actions = ["try_notify_receivers"]
 
-        for link in links:
-            Webmention.send(obj.get_permalink(), link)
-            print("send webmention for " + link)
+    @admin.action(description="Notify selected webmentions' receivers")
+    def try_notify_receivers(self, request, queryset):
+        for obj in queryset:
+            obj.try_notify_receiver()
 
-    def should_send_webmentions(self, request, obj, form, change):
-        return self.send_webmentions
+class PendingIncomingWebmentionAdmin(ReadOnlyAdmin):
+    actions = ["process_pending_incoming_webmentions"]
 
-class WebmentionAdmin(WebmentionMixin, admin.ModelAdmin):
-    def save_model(self, request, obj, form, change):    
-        self.links_to_webmention = self.get_links_to_webmention(request, obj, form, change)
+    @admin.action(description="Process selected webmentions")
+    def process_pending_incoming_webmentions(self, request, queryset):
+        for obj in queryset:
+            obj.process_and_save()
 
-        saveresponse = super().save_model(request, obj, form, change)
+class IncomingWebmentionAdmin(ReadOnlyAdmin):
+    actions = ["parse_content", "attach"]
 
-        self.send_webmentions(request, obj, form, change)
-        
-        return saveresponse
+    @admin.action(description="Parse selected webmentions' content")
+    def parse_content(self, request, queryset):
+        for obj in queryset:
+            obj.try_parse_source_content_and_save()
+    
+    @admin.action(description="Attach webmentions to webmentionables")
+    def attach(self, request, queryset):
+        for obj in queryset:
+            obj.try_attach_to_webmentionable()
+
+admin.site.register(PendingOutgoingWebmention,PendingOutgoingWebmentionAdmin)
+admin.site.register(OutgoingWebmention,OutgoingWebmentionAdmin)
+admin.site.register(IncomingWebmention,IncomingWebmentionAdmin)
+admin.site.register(PendingIncomingWebmention,PendingIncomingWebmentionAdmin)

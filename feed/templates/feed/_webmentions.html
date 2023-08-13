@@ -1,0 +1,22 @@
+<aside class="article-webmentions webmentions">
+    {% if webmentions.count > 0 %}
+        {% if webmentions.count == 1 %}
+        <h1 class="webmentions-title display3">1 Mention</h1>
+        {% else %}
+        <h1 class="webmentions-title display3">{{ webmentions.count }} Mentions</h1>
+        {% endif %}
+
+        {% if webmentions.replies.count > 0 %}
+            {% include 'feed/_replies_list.html' with replies=webmentions.replies %}
+        {% endif %}
+
+        {% if webmentions.mentions.count > 0 %}
+            {% include 'feed/_mentions_list.html' with mentions=webmentions.mentions %}
+        {% endif %}
+
+        {% if webmentions.bookmarks.count > 0 %}
+            {% include 'feed/_bookmarks_list.html' with bookmarks=webmentions.bookmarks %}            
+        {% endif %}
+
+    {% endif %}
+</aside>

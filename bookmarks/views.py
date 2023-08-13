@@ -5,6 +5,7 @@ from django.views import generic
 from base.views import PermalinkResponseMixin
 from datetime import datetime
 from django.utils import timezone
+from webmentions.models import WebmentionList
 
 # Create your views here.
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
@@ -31,3 +32,10 @@ class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
             return Bookmark.objects
         
         return Bookmark.objects.filter(published__lte=timezone.now())
+    
+    def get_context_data(self, *args, **kwargs):
+        context = super(DetailView, self).get_context_data(*args, **kwargs)
+
+        webmentions = context["object"].webmentions.all()
+        context['webmentions'] = WebmentionList(webmentions=webmentions)
+        return context

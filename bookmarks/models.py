@@ -3,6 +3,7 @@ Implementation of the IndieWeb Bookmark post type.
 https://indieweb.org/bookmark
 """
 
+from typing import Iterable, Optional
 from django.db import models
 from django.urls import reverse
 from feed.models import FeedItem
@@ -156,3 +157,4 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def get_mastodon_tags(self):
         """Return the tags that should be parsed and added to the status."""
         return self.tags.all()
+    

@@ -427,7 +427,7 @@ class MastodonSyndicatable(models.Model):
         # Get the basic Mastodon Status object from the content.
         status = MastodonStatusUpdate(self.to_mastodon_status())
 
-        status.idempotency_key = self.get_mastodon_idempotency_key();
+        status.idempotency_key = self.get_mastodon_idempotency_key()
 
         # Check the reply for a Mastodon Id.
         in_reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.get_mastodon_reply_to_url())

@@ -483,3 +483,19 @@ a.u-bookmark-of::after {
   padding: 0.25em 0;
   width: 10em;
 }
+
+.mentions-list {
+  list-style: none;
+}
+
+.mentions-list-item {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.85em;
+  line-height: 1.4583;
+}
+
+.mentions-content {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.16em;
+  line-height: 1.5;
+}

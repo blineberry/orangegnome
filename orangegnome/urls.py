@@ -27,6 +27,7 @@ urlpatterns = [
     path('photos/', include('photos.urls', namespace='photos')),
     path('bookmarks/', include('bookmarks.urls', namespace='bookmarks')),
     path('syndications/', include('syndications.urls', namespace='syndications')),
+    path('webmentions/', include('webmentions.urls', namespace='webmentions')),
     path('', include('feed.urls', namespace='feed')),
     path('robots.txt', TemplateView.as_view(template_name="base/robots.txt", content_type="text/plain")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
