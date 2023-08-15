@@ -71,7 +71,6 @@ class WebmentionList:
         self.mentions = WebmentionTypeList()
 
         for mention in webmentions:
-            print(mention)
             self.webmentions.append(mention)
 
             if mention.type == IncomingWebmention.BOOKMARK:
@@ -189,10 +188,8 @@ class IncomingWebmention(Webmention):
             result["success"] = True
             return result
         except Resolver404 as e:
-            print(e)
             return result
         except Exception as e:
-            print(e)
             return result
 
     
@@ -239,7 +236,6 @@ class IncomingWebmention(Webmention):
         if self.source_content_type.startswith("text/html"):
             soup = BeautifulSoup(self.source_content,features="html.parser")
             for link in soup.find_all('a'):
-                print(link)
                 if link.get('href') == self.target:
                     self.verified = True
                     return True
@@ -248,21 +244,17 @@ class IncomingWebmention(Webmention):
         return False
     
     def __try_get_author_from_h_entry(self):
-        print(self.h_entry)
-        print("properties" not in self.h_entry)
+
         if "properties" not in self.h_entry:
             return False
 
-        print("author" not in self.h_entry["properties"])
         if "author" not in self.h_entry["properties"]:
             return False
         
         for author in self.h_entry["properties"]["author"]:
-            print(author)
-            print("h-card" not in author.get("type"))
             if "h-card" not in author.get("type"):
                 continue
-
+            
             self.h_card = author
             return True                
 
@@ -326,8 +318,18 @@ class IncomingWebmention(Webmention):
                 return True
             
         return False
+
+    def __try_parse_as_mention(self):
+        if "properties" not in self.h_entry:
+            return False
+    
+        self.__try_get_author_from_h_entry()
+        return True
     
     def try_parse_source_content(self):
+        self.h_card = None
+        self.h_entry = None
+
         if not self.verified:
             return False
         
@@ -336,29 +338,27 @@ class IncomingWebmention(Webmention):
         
         o = mf2py.Parser(doc=self.source_content)
         h_entries = o.to_dict(filter_by_type="h-entry")
-        print(len(h_entries))
 
         if len(h_entries) > 0:
             self.h_entry = h_entries[0]
-
-        print(self.h_entry)
 
         h_cards = o.to_dict(filter_by_type="h-card")
         if len(h_cards) > 0:
             self.h_card = h_cards[0]
         
-        if self.__try_parse_as_bookmark():
-            return True
-        
         if self.__try_parse_as_reply():
             return True
         
-        if self.__try_parse_as_like():
+        if self.__try_parse_as_bookmark():
             return True
         
-        if self.__try_parse_as_repost():
-            return True
+        #if self.__try_parse_as_like():
+        #    return True
         
+        #if self.__try_parse_as_repost():
+        #    return True
+        
+        self.__try_parse_as_mention()
         return True
     
     def try_parse_source_content_and_save(self):
@@ -567,10 +567,8 @@ class PendingIncomingWebmention(PendingWebmention):
             result["success"] = True
             return result
         except Resolver404 as e:
-            print(e)
             return result
         except Exception as e:
-            print(e)
             return result
 
 
@@ -675,8 +673,6 @@ class PendingOutgoingWebmention(PendingWebmention):
         }
 
         try:
-            print(self.source)
-
             response = requests.get(self.source)
 
             if not response.ok:
@@ -687,8 +683,6 @@ class PendingOutgoingWebmention(PendingWebmention):
 
             o = mf2py.Parser(doc=response.text)
             h_entry = o.to_dict(filter_by_type="h-entry")[0]
-
-            print(h_entry)
 
             if 'properties' not in h_entry:
                 return result
@@ -779,8 +773,6 @@ class OutgoingWebmention(Webmention):
         self.tries += 1
         try:
             endpoint = Webmention.get_webmention_endpoint(self.target)
-            print(endpoint)
-
             
             if endpoint is None:
                 self.result = "No webmention endpoint discovered."

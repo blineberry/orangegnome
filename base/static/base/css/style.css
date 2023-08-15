@@ -489,6 +489,20 @@ a.u-bookmark-of::after {
 }
 
 .mentions-list-item {
+  font-size: 0.77em;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.replies-list-item {
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.webmentions section + section {
+  margin-top: 2em;
+}
+/*
+.mentions-list-item {
   font-family: 'Open Sans', sans-serif;
   font-size: 0.85em;
   line-height: 1.4583;
@@ -499,3 +513,4 @@ a.u-bookmark-of::after {
   font-size: 1.16em;
   line-height: 1.5;
 }
+*/

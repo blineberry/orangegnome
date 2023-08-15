@@ -1,9 +1,4 @@
 <section class="mentions">
-    {% if mentions.count == 1 %}
-        <h2 class="display6 mentions-title">{{ mentions.count }} Mention</h2>
-    {% else %}
-        <h2 class="display6 mentions-title">{{ mentions.count }} Mentions</h2>
-    {% endif %}
     <ul class="mentions-list">
     {% for mention in mentions.items %}
         <li class="h-cite mentions-list-item">Mentioned by 

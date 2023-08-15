@@ -1,9 +1,4 @@
 <section class="bookmarks">
-    {% if bookmarks.count == 1 %}
-        <h2 class="display6 mentions-title">{{ bookmarks.count }} Bookmark</h2>
-    {% else %}
-        <h2 class="display6 mentions-title">{{ bookmarks.count }} Bookmarks</h2>
-    {% endif %}
     <ul class="mentions-list">
     {% for bookmark in bookmarks.items %}
         <li class="h-cite mentions-list-item">Bookmarked by 

@@ -1,37 +1,36 @@
 <section class="replies">
-    {% if replies.count == 1 %}
-        <h2 class="display6 mentions-title">{{ replies.count }} Reply</h2>
-    {% else %}
-        <h2 class="display6 mentions-title">{{ replies.count }} Replies</h2>
-    {% endif %}
-    <ul class="mentions-list">
+    <ul class="mentions-list replies-list">
     {% for reply in replies.items %}
-        <li class="h-cite u-comment mentions-list-item">
-            {% if reply.author %}
-                {% if reply.author.url %}
-                    <a class="u-author h-card" href="reply.author.url">{{ reply.author.name }}</a>
-                {% else %}
-                    <span class="p-author h-card" >{{ reply.author.name }}</span>
-                {% endif %}
-            {% else %}
-               <span>Anonymous</span>
-            {% endif %} 
-
+        <li class="h-cite u-comment mentions-list-item replies-list-item">
             {% if reply.content_html %}
                 <div class="e-content mentions-content">{{ reply.content_html|safe }}</div>
             {% else %}
                 <p class="p-content mentions-content">{{ reply.content_plain }}</p>
             {% endif %}
 
-            {% if reply.published %}
-                {% if reply.permalink %}
-                    <a class="u-url" href="{{ reply.permalink }}"><time class="dt-published" datetime="{{ reply.published|date:'c' }}">{{ reply.published }}</time></a>
-                {% else %}
-                    <time class="dt-published" datetime="{{ reply.published|date:'c' }}">{{ reply.published }}</time>
-                {% endif %}
-            {% elif bookmark.permalink %}
-                <a class="u-url" href="{{ reply.permalink }}">{{ reply.permalink }}</a>.            
-            {% endif %}
+            <footer>
+                <div class="meta">
+                    {% if reply.author %} By
+                        {% if reply.author.url %}
+                            <a class="u-author h-card" href="reply.author.url">{{ reply.author.name }}</a>
+                        {% else %}
+                            <span class="p-author h-card" >{{ reply.author.name }}</span>
+                        {% endif %}
+                    {% else %}
+                    <span>Anonymous</span>
+                    {% endif %} 
+                    
+                    {% if reply.published %} on
+                        {% if reply.permalink %}
+                            <a class="u-url" href="{{ reply.permalink }}"><time class="dt-published" datetime="{{ reply.published|date:'c' }}">{{ reply.published }}</time></a>
+                        {% else %}
+                            <time class="dt-published" datetime="{{ reply.published|date:'c' }}">{{ reply.published }}</time>
+                        {% endif %}
+                    {% elif bookmark.permalink %}
+                        <a class="u-url" href="{{ reply.permalink }}">{{ reply.permalink }}</a>.            
+                    {% endif %}
+                </div>
+            </footer>
         </li>
     {% endfor %}
     </ul>
