@@ -29,24 +29,16 @@ class Author:
     name = None
     url = None
 
-class Bookmark:
-    author = None
-    permalink = None
-    published = None
-
-class Reply:
+class Mention:
     author = None
     permalink = None
     published = None
     content_html = None
     content_plain = None
+    excerpt_html = None
+    excerpt_plain = None
     title = None
-
-class Mention:
-    author = None
-    permalink = None
-    published = None
-    title = None
+    type = None
 
 class WebmentionTypeList:
     def count(self):
@@ -60,33 +52,41 @@ class WebmentionList:
     def count(self):
         return len(self.webmentions)
 
-    webmentions = []
-    bookmarks = None
+    all = None
     replies = None
-    mentions = None
+    nonreplies = None
+    first_party = None
 
     def __init__(self, webmentions=[]):
-        self.webmentions = []
-        self.bookmarks = WebmentionTypeList()
+        self.all = WebmentionTypeList()
         self.replies = WebmentionTypeList()
-        self.mentions = WebmentionTypeList()
+        self.nonreplies = WebmentionTypeList()
+        self.first_party = WebmentionTypeList()
 
-        for mention in webmentions:
-            self.webmentions.append(mention)
+        for webmention in webmentions:
+            mention = webmention.as_mention()
+
+            self.all.items.append(mention)
 
             if mention.type == IncomingWebmention.BOOKMARK:
-                self.bookmarks.items.append(mention.as_bookmark())
+                self.nonreplies.items.append(mention)
                 continue
 
             if mention.type == IncomingWebmention.REPLY:
-                self.replies.items.append(mention.as_reply())
+                self.replies.items.append(mention)
                 continue
 
-            self.mentions.items.append(mention.as_mention())
+            if webmention.is_first_party():
+                self.first_party.items.append(mention)
+                continue
 
-            
+            self.nonreplies.items.append(mention)
 
-            
+        
+        self.all.items.sort(key = lambda x: x.published)
+        self.replies.items.sort(key = lambda x: x.published)
+        self.nonreplies.items.sort(key = lambda x: x.published)
+        self.first_party.items.sort(key = lambda x: x.published)            
 
 # Create your models here.
 class Webmention(models.Model):
@@ -120,7 +120,6 @@ class IncomingWebmention(Webmention):
     verified = models.BooleanField(default=False)
     source_content = models.TextField(null=True)
     source_content_type = models.CharField(null=True,max_length=50)
-    type = models.CharField(max_length=8,choices=TYPES,default=MENTION)
     h_entry = models.JSONField(null=True)
     h_card = models.JSONField(null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
@@ -136,7 +135,6 @@ class IncomingWebmention(Webmention):
         self.verified = False
         self.source_content = None
         self.source_content_type = None
-        self.type = self.MENTION
         self.h_entry = None
         self.h_card = None
         self.content_type = None
@@ -155,6 +153,14 @@ class IncomingWebmention(Webmention):
     @admin.display(boolean=True, description="Parsed")
     def is_parsed(self):
         return self.h_entry is not None
+    
+    def is_first_party(self):
+        parse_result = urlparse(self.source)
+
+        if parse_result.hostname in settings.ALLOWED_HOSTS:
+            return True
+        
+        return False
     
     def _try_resolve_target(self):
         result = {
@@ -199,7 +205,6 @@ class IncomingWebmention(Webmention):
         return True
     
     def __try_get_author_from_h_entry(self):
-
         if "properties" not in self.h_entry:
             return False
 
@@ -213,7 +218,7 @@ class IncomingWebmention(Webmention):
             self.h_card = author
             return True                
 
-    def __try_parse_as_bookmark(self):
+    def is_bookmark(self):
         if "properties" not in self.h_entry:
             return False
         
@@ -230,7 +235,7 @@ class IncomingWebmention(Webmention):
         
         return False
 
-    def __try_parse_as_reply(self):
+    def is_reply(self):
         if "properties" not in self.h_entry:
             return False
         
@@ -238,13 +243,11 @@ class IncomingWebmention(Webmention):
             return False
         
         if self.target in self.h_entry["properties"]["in-reply-to"]:
-            self.type = self.REPLY
-            self.__try_get_author_from_h_entry()
             return True
     
         return False
 
-    def __try_parse_as_like(self):
+    def is_like(self):
         if "properties" not in self.h_entry:
             return False
         
@@ -253,13 +256,11 @@ class IncomingWebmention(Webmention):
         
         for like in self.h_entry["properties"]["like-of"]:
             if like == self.target or (like.get("value") == self.target):
-                self.type = self.LIKE
-                self.__try_get_author_from_h_entry()
                 return True
             
         return False
 
-    def __try_parse_as_repost(self):
+    def is_repost(self):
         if "properties" not in self.h_entry:
             return False
         
@@ -268,19 +269,25 @@ class IncomingWebmention(Webmention):
         
         for repost in self.h_entry["properties"]["repost-of"]:
             if repost == self.target or (repost.get("value") == self.target):
-                self.type = self.REPOST
-                self.__try_get_author_from_h_entry()
                 return True
             
         return False
-
-    def __try_parse_as_mention(self):
-        if "properties" not in self.h_entry:
-            return False
     
-        self.__try_get_author_from_h_entry()
-        return True
+    def get_type(self):
+        if self.is_reply():
+            return self.REPLY
         
+        if self.is_bookmark():
+            return self.BOOKMARK
+        
+        #if self.__try_parse_as_like():
+        #    return True
+        
+        #if self.__try_parse_as_repost():
+        #    return True
+        
+        return self.MENTION
+            
     def as_author(self):
         if not self.h_card:
             return None
@@ -305,120 +312,106 @@ class IncomingWebmention(Webmention):
         if author.url is not None:
             author.url = author.url[0]
 
-        return author
-        
-    def as_bookmark(self):
-        bookmark = Bookmark()
-        bookmark.author = self.as_author()
-        bookmark.permalink=self.source
-
-        if not self.h_entry:
-            return bookmark
-        
-        h_entry = self.h_entry
-        
-        if not h_entry.get("properties"):
-            return bookmark
-        
-        bookmark.published = h_entry["properties"].get("published")
-        urls = h_entry["properties"].get("url")
-
-        if bookmark.published is not None:
-            bookmark.published = parse_datetime(bookmark.published[0])
-
-        # if the h-entry has a url, use that instead of the webmention source
-        if urls is not None:
-            for url in urls:
-                if isinstance(url,str):
-                    bookmark.permalink = url
-                    break
-
-        return bookmark
+        return author 
     
-    def as_reply(self):
-        reply = Reply()
-        reply.author = self.as_author()
-        reply.permalink = self.source
+    def __get_hentry_property_value(self, property_name, expected_type = str):        
+        if self.h_entry.get("properties") is None:
+            return None
 
-        if not self.h_entry:
-            return reply
-        
-        h_entry = self.h_entry
-        
-        print(h_entry)
+        property_value = self.h_entry["properties"].get(property_name)
 
-        if not h_entry.get("properties"):
-            return reply
+        if property_value is None:
+            return None
         
-        reply.published = h_entry["properties"].get("published")
-        urls = h_entry["properties"].get("url")
-        names = h_entry["properties"].get("name")
-        html = None
-        plain = None
+        for value in property_value:
+            if isinstance(value, expected_type):
+                return value
+            
+            if expected_type is str and value.get("value"):
+                return value["value"]
         
-        if h_entry["properties"].get("content") is not None:
-            html = h_entry["properties"].get("content")[0].get("html")
-            plain = h_entry["properties"].get("content")[0].get("value")        
+        return None
 
-        if reply.published is not None:
-            reply.published = parse_datetime(reply.published[0])
+    def __get_published(self):
+        return parse_datetime(self.__get_hentry_property_value("published"))
+    
+    def __get_permalink(self):
+        permalink = self.__get_hentry_property_value("url")
+
+        if permalink is not None:
+            return permalink
+        
+        return self.source
+    
+    def __get_content_html(self):
+        content = self.__get_hentry_property_value("content", dict)
+
+        if content is None:
+            return None
+    
+        if self.h_entry.get("properties") is None:
+            return None
+        
+        html = content.get("html")
 
         if html is not None:
-            reply.content_html = bleach.clean(html, tags=bleach.sanitizer.ALLOWED_TAGS.union(('p', 'br')))
-            reply.content_html = bleach.linkify(reply.content_html)
-            t = Truncator(reply.content_html)
-            reply.content_html = t.chars(580, "…", True)
-        
-        if plain is not None:
-            reply.content_plain = bleach.clean(plain, tags={})
-            t = Truncator(reply.content_plain)
-            reply.content_plain = t.chars(580, "…", False)
+            html = bleach.clean(html, tags=bleach.sanitizer.ALLOWED_TAGS.union(('p', 'br')))
+            html = bleach.linkify(html)
+            t = Truncator(html)
+            html = t.chars(580, "…", True)
 
-        if names is not None:
-            for name in names:
-                if isinstance(name, str):
-                    reply.name = name
-
-        # if the h-entry has a url, use that instead of the webmention source
-        if urls is not None:
-            for url in urls:
-                if isinstance(url,str):
-                    reply.permalink = url
-                    break
-
-        return reply
+        return html    
     
+    def __get_content_plain(self):
+        content = self.__get_hentry_property_value("content", str)
+        
+        if content is None:
+            return None
+
+        content = bleach.clean(content, tags={})
+        t = Truncator(content)
+        content = t.chars(580, "…", True)            
+
+        return content
+    
+    def __get_excerpt_html(self):
+        summary = self.__get_hentry_property_value("summary", str)
+
+        if summary is None:
+            summary = self.__get_content_html()
+
+        if summary is None:
+            return None
+        
+        t = Truncator(summary)
+        return t.chars(240, "…", True)
+    
+    def __get_excerpt_plain(self):
+        summary = self.__get_hentry_property_value("summary", str)
+
+        if summary is None:
+            summary = self.__get_content_html()
+
+        if summary is None:
+            return None
+        
+        t = Truncator(summary)
+        return t.chars(240, "…", True)
+    
+    def __get_title(self):
+        return (self.__get_hentry_property_value("name"))    
+        
     def as_mention(self):
         mention = Mention()
         mention.author = self.as_author()
-        mention.permalink = self.source
-
-        if not self.h_entry:
-            return mention
-        
-        h_entry = self.h_entry
-        
-        if not h_entry.get("properties"):
-            return mention
-        
-        mention.published = h_entry["properties"].get("published")
-        urls = h_entry["properties"].get("url")
-        names = h_entry["properties"].get("name")
-
-        if mention.published is not None:
-            mention.published = parse_datetime(mention.published[0])
-
-        # if the h-entry has a url, use that instead of the webmention source
-        if urls is not None:
-            for url in urls:
-                if isinstance(url,str):
-                    mention.permalink = url
-                    break
-
-        if names is not None:
-            for name in names:
-                if isinstance(name, str):
-                    mention.name = name
+        mention.permalink = self.__get_permalink()
+        mention.published = self.__get_published()
+        mention.content_html = self.__get_content_html()
+        mention.content_plain = self.__get_content_plain()
+        mention.excerpt_html = self.__get_excerpt_html()
+        mention.excerpt_plain = self.__get_excerpt_plain()
+        mention.title = self.__get_title()
+        mention.type = self.get_type()
 
         return mention
     
@@ -551,23 +544,9 @@ class IncomingWebmention(Webmention):
         h_cards = o.to_dict(filter_by_type="h-card")
         if len(h_cards) > 0:
             self.h_card = h_cards[0]
+
+        self.__try_get_author_from_h_entry() 
         
-        if self.__try_parse_as_reply():
-            self.result = str(self.result) + "Parse Content: Parsed as reply.\n\n"
-            return True
-        
-        if self.__try_parse_as_bookmark():
-            self.result = str(self.result) + "Parse Content: Parsed as bookmark.\n\n"
-            return True
-        
-        #if self.__try_parse_as_like():
-        #    return True
-        
-        #if self.__try_parse_as_repost():
-        #    return True
-        
-        self.__try_parse_as_mention()
-        self.result = self.result + "Parse Content: Parsed as mention.\n\n"
         return True
     
     def try_parse_source_content_and_save(self, force=False):

@@ -1,7 +1,12 @@
 <section class="mentions">
     <ul class="mentions-list">
     {% for mention in mentions.items %}
-        <li class="h-cite mentions-list-item">Mentioned by 
+        <li class="h-cite mentions-list-item">
+            {% if mention.type == "BOOKMARK" %}
+            Bookmarked
+            {% else %}
+            Mentioned
+            {% endif %} by 
             {% if mention.author %}
                 {% if mention.author.url %}
                     <a class="u-author h-card" href="{{ mention.author.url }}">{{ mention.author.name }}</a>
@@ -11,8 +16,8 @@
             {% else %}
                 Anonymous
             {% endif %} 
-            {% if mention.name %}
-                in “{{ mention.name }}”
+            {% if mention.title %}
+                in “{{ mention.title }}”
             {% endif %}
             on 
             {% if mention.published %}

@@ -9,3 +9,16 @@
 <meta property="og:description" content="{{ post.summary }}" />
 <meta property="og:type" content="article" />
 {% endblock %}
+
+{% block postheader %}
+    <header class="article-header">
+        {% if object.feed_item_header %}
+            <h1 class="p-name"><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.feed_item_header }}</a></h1>
+        {% endif %}
+        {% if object.in_reply_to %}
+            <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% endif %}
+
+        <p class="article-summary p-summary">{{ object.summary }}</p>
+    </header>
+{% endblock %}

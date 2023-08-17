@@ -1,15 +1,15 @@
 <aside class="article-webmentions webmentions">
-    {% if webmentions.count > 0 %}
+    {% if webmentions.all.count > 0 %}
         {% if webmentions.replies.count > 0 %}
             {% include 'feed/_replies_list.html' with replies=webmentions.replies %}
         {% endif %}
 
-        {% if webmentions.mentions.count > 0 %}
-            {% include 'feed/_mentions_list.html' with mentions=webmentions.mentions %}
+        {% if webmentions.first_party.count > 0 %}
+            {% include 'feed/_first_party_mentions_list.html' with mentions=webmentions.first_party %}
         {% endif %}
 
-        {% if webmentions.bookmarks.count > 0 %}
-            {% include 'feed/_bookmarks_list.html' with bookmarks=webmentions.bookmarks %}            
+        {% if webmentions.nonreplies.count > 0 %}
+            {% include 'feed/_mentions_list.html' with mentions=webmentions.nonreplies %}
         {% endif %}
 
     {% endif %}
