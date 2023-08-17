@@ -413,6 +413,19 @@ blockquote {
   content: '';
 }
 
+.article.note .article-header,
+.article.photo .article-header {
+  margin-top: 2.11em;
+}
+
+.article.note .article-content {
+  font-size: 1.5em;
+}
+
+.postmeta-published-author img {
+  display: none;
+}
+
 .postmeta-tags ul {
   list-style: none;
   margin: 0;
@@ -453,7 +466,7 @@ blockquote {
   margin-right: 1em;
 }
 
-.photo img {
+.photo .article-content img {
   width: 100%;
   max-width: 594px;
   height: auto;

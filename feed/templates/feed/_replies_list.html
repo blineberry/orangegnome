@@ -17,7 +17,7 @@
                 <div class="meta">
                     {% if reply.author %} By
                         {% if reply.author.url %}
-                            <a class="u-author h-card" href="reply.author.url">{{ reply.author.name }}</a>
+                            <a class="u-author h-card" href="{{ reply.author.url }}">{{ reply.author.name }}</a>
                         {% else %}
                             <span class="p-author h-card" >{{ reply.author.name }}</span>
                         {% endif %}
