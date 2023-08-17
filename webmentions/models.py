@@ -228,9 +228,6 @@ class IncomingWebmention(Webmention):
         for bookmark in self.h_entry["properties"]["bookmark-of"]:
             if "value" not in bookmark:
                 continue
-
-            self.type = self.BOOKMARK
-            self.__try_get_author_from_h_entry()
             return True
         
         return False
