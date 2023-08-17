@@ -10,6 +10,7 @@ from django.urls import reverse
 from base.views import ForceSlugMixin
 from feed.views import PermalinkResponseMixin, PageTitleResponseMixin
 from django.utils import timezone
+from webmentions.views import WebmentionableMixin
 
 def render_index(request, posts, title, permalink):
     paginator = Paginator(posts, 5)
@@ -38,7 +39,7 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     def get_queryset(self) -> QuerySet[Any]:
         return Post.objects.filter(published__lte=timezone.now()).order_by('-published')
 
-class DetailView(PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):    
+class DetailView(WebmentionableMixin, PermalinkResponseMixin, ForceSlugMixin, generic.DetailView):    
     canonical_viewname = 'posts:detail'
 
     def get_canonical_view_args(self, context):
