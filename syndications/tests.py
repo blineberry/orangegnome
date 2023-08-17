@@ -13,5 +13,4 @@ class MastodonSyndicatableTest(TestCase):
         tags.append(Tag(name="jumps", slug="jumps"))
 
         status = MastodonSyndicatable.add_hashtags(status, tags)
-        print(status)
         self.assertEqual(status, "#TheQuick brown fox #Jumps over the #LazyDog.\n\n#RedFox")

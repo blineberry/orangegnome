@@ -1,0 +1,42 @@
+<section class="replies">
+    <ul class="mentions-list replies-list">
+    {% for reply in replies.items %}
+        <li class="h-cite u-comment mentions-list-item replies-list-item">
+            {% if reply.name %}
+                <header>
+                    <p class="p-name display6">{{ reply.name }}</p>
+                </header>
+            {% endif %}
+            {% if reply.content_html %}
+                <div class="e-content mentions-content">{{ reply.content_html|safe }}</div>
+            {% else %}
+                <p class="p-content mentions-content">{{ reply.content_plain }}</p>
+            {% endif %}
+
+            <footer>
+                <div class="meta">
+                    {% if reply.author %} By
+                        {% if reply.author.url %}
+                            <a class="u-author h-card" href="reply.author.url">{{ reply.author.name }}</a>
+                        {% else %}
+                            <span class="p-author h-card" >{{ reply.author.name }}</span>
+                        {% endif %}
+                    {% else %}
+                    <span>Anonymous</span>
+                    {% endif %} 
+                    
+                    {% if reply.published %} on
+                        {% if reply.permalink %}
+                            <a class="u-url" href="{{ reply.permalink }}"><time class="dt-published" datetime="{{ reply.published|date:'c' }}">{{ reply.published }}</time></a>
+                        {% else %}
+                            <time class="dt-published" datetime="{{ reply.published|date:'c' }}">{{ reply.published }}</time>
+                        {% endif %}
+                    {% elif bookmark.permalink %}
+                        <a class="u-url" href="{{ reply.permalink }}">{{ reply.permalink }}</a>.            
+                    {% endif %}
+                </div>
+            </footer>
+        </li>
+    {% endfor %}
+    </ul>
+</section>

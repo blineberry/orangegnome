@@ -4,6 +4,7 @@ from profiles.models import Profile
 from django.conf import settings
 from datetime import datetime
 from django.utils import timezone
+from webmentions.models import Webmentionable
 
 # Create your models here.
 class Tag(models.Model):
@@ -30,7 +31,7 @@ class Tag(models.Model):
     def to_hashtag(self, strip_special_characters = True):
         return "#" + self.to_pascale_case(strip_special_characters)
 
-class FeedItem(models.Model):
+class FeedItem(Webmentionable, models.Model):
     updated = models.DateTimeField(null=True)
     author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
     published = models.DateTimeField(null=True,blank=True)
@@ -117,5 +118,8 @@ class FeedItem(models.Model):
         return self.get_child().get_permalink()
     
     def get_edit_link(self):
-        #print(self._meta.app_name)
         return reverse(f"admin:{self._meta.app_label}_{self._meta.model_name}_change", args=(self.pk,))
+
+    def should_send_webmentions(self):
+        if self.published:
+            return True

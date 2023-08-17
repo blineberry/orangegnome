@@ -6,7 +6,7 @@ from django.views.generic import RedirectView
 app_name = 'posts'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
-    path('<int:pk>/<slug:slug>', views.DetailView.as_view(), name='detail'),
+    path('<int:pk>/<slug:slug>', views.DetailView.as_view(), {"wm_app_name": app_name, "wm_model_name": "Post"}, name='detail'),
     path('category/<int:pk>/<slug:slug>', views.CategoryView.as_view(), name='category'),
     path('tag/<int:pk>/<slug:slug>', RedirectView.as_view(pattern_name='feed:tag'), name='tag'),    
     path('date/<int:year>/', include([

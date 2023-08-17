@@ -1,10 +1,23 @@
 {% extends 'feed/detail.html' %}
 
 {% block meta %}
+{{ block.super }}
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:creator" content="@{{ note.author.twitter_screenname }}" />
 <meta property="og:url" content="{{ permalink }}" />
 <meta property="og:title" content="{{ note.feed_item_header }}" />
 <meta property="og:description" content="{{ note.content }}" />
 <meta property="og:type" content="article" />
+{% endblock %}
+
+{% block postheader %}
+    <header class="article-header">
+        <h1><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.feed_item_header }}</a></h1>
+        {% if object.in_reply_to %}
+        <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% endif %}
+        {% if user.is_staff %}
+            <div><small><a href="{{ object.get_edit_link }}">Edit</a></small></div>
+        {% endif %}
+    </header>
 {% endblock %}

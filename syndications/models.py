@@ -111,7 +111,6 @@ class TwitterSyndicatable(models.Model):
 
     def get_tweet_datetime(self):
         tweet_created_at = self.tweet.get().created_at
-        print(tweet_created_at)
 
         if tweet_created_at is not None:
             return tweet_created_at
@@ -427,7 +426,7 @@ class MastodonSyndicatable(models.Model):
         # Get the basic Mastodon Status object from the content.
         status = MastodonStatusUpdate(self.to_mastodon_status())
 
-        status.idempotency_key = self.get_mastodon_idempotency_key();
+        status.idempotency_key = self.get_mastodon_idempotency_key()
 
         # Check the reply for a Mastodon Id.
         in_reply_to_id = MastodonSyndicatable.parse_mastodon_url(self.get_mastodon_reply_to_url())

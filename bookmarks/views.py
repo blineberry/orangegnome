@@ -3,8 +3,8 @@ from django.db.models.query import QuerySet
 from .models import Bookmark
 from django.views import generic
 from base.views import PermalinkResponseMixin
-from datetime import datetime
 from django.utils import timezone
+from webmentions.views import WebmentionableMixin
 
 # Create your views here.
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
@@ -19,7 +19,7 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     def get_queryset(self):
         return Bookmark.objects.filter(published__lte=timezone.now()).order_by('-published')
 
-class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
+class DetailView(WebmentionableMixin, PermalinkResponseMixin, generic.detail.DetailView):
     canonical_viewname = 'bookmarks:detail'
 
     def get_canonical_view_args(self, context):

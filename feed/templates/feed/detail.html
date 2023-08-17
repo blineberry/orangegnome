@@ -1,5 +1,10 @@
 {% extends 'base/extended_hcard.html' %}
 
+{% block meta %}
+    {{ block.super }}
+    <link href="{% url 'webmentions:webmention_handler' %}" rel="webmention" />
+{% endblock %}
+
 {% block body %}
 <article class="article h-entry {{ object.html_class }}">
 {% block postheader %}
@@ -23,7 +28,7 @@
         <div class="meta">
             {% if object.is_published %}
             <div class="postmeta-published">Published by 
-                <span class="p-author h-card">{{ object.author.name }}</span> on 
+                <a class="h-card p-name u-url postmeta-published-author" href="{{ object.get_site_url }}"><img class="u-photo" href="{{ object.author.photo.url }}" />{{ object.author.name }}</a> on 
                 <time class="dt-published" datetime="{{ object.published|date:'c' }}">
                     <a href="{% url 'feed:month' object.published|date:'Y' object.published|date:'m' %}">{{ object.published|date:'F' }}</a>
                     <a href="{% url 'feed:day' object.published|date:'Y' object.published|date:'m' object.published|date:'d' %}">{{ object.published|date:'j' }}</a>, 
@@ -45,7 +50,7 @@
                 </ul>
             </div>
             {% endif %}
-            <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ object.get_absolute_url }}">{{ request.get_host }}{{ object.get_absolute_url }}</a></div>
+            <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ object.get_permalink }}">{{ request.get_host }}{{ object.get_absolute_url }}</a></div>
             {% if object.is_syndicated_to_twitter %}
             <div class="postmeta-syndication">Posted to <a class="u-syndication" href="{{ object.tweet.get.get_url }}">Twitter</a> on {{ object.get_tweet_datetime|date }}</div>
             {% endif %}
@@ -55,5 +60,8 @@
         </div>
     </footer>
 {% endblock %}
+    {% block webmentions %}
+        {% include 'feed/_webmentions.html' with webmentions=webmentions %}        
+    {% endblock webmentions %}
 </article>
 {% endblock %}

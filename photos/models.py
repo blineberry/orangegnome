@@ -73,7 +73,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     image_tag.short_description = 'Preview'
 
     def caption_html(self):
-        markdown = mistune.markdown(plugins=['url'])
+        markdown = mistune.create_markdown(plugins=['url'])
         return markdown(self.caption)
 
     def content_html(self):
