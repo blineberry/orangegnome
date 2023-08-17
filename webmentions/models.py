@@ -783,11 +783,11 @@ class OutgoingWebmention(Webmention):
     def __str__(self):
         return self.source + " -> " + self.target
     
-    def _split_header(header):
+    def _split_header(self, header):
         return header.split(',')
 
-    def _get_webmention_endpoint_from_header(linkHeader):
-        links = Webmention._split_header(linkHeader)
+    def _get_webmention_endpoint_from_header(self, linkHeader):
+        links = self._split_header(linkHeader)
 
         for link in links:
             linkParts = link.split(';')
@@ -813,7 +813,7 @@ class OutgoingWebmention(Webmention):
         url = response.url
 
         if 'link' in response.headers:
-            link_endpoint = Webmention._get_webmention_endpoint_from_header(response.headers['link'])
+            link_endpoint = self._get_webmention_endpoint_from_header(response.headers['link'])
             
             if link_endpoint is not None:
                 return urljoin(url, link_endpoint)
