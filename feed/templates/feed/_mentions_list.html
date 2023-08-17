@@ -4,13 +4,16 @@
         <li class="h-cite mentions-list-item">Mentioned by 
             {% if mention.author %}
                 {% if mention.author.url %}
-                    <a class="u-author h-card" href="mention.author.url">{{ mention.author.name }}</a>
+                    <a class="u-author h-card" href="{{ mention.author.url }}">{{ mention.author.name }}</a>
                 {% else %}
                     <span class="p-author h-card" >{{ mention.author.name }}</span>
                 {% endif %}
             {% else %}
                 Anonymous
             {% endif %} 
+            {% if mention.name %}
+                in “{{ mention.name }}”
+            {% endif %}
             on 
             {% if mention.published %}
                 {% if mention.permalink %}

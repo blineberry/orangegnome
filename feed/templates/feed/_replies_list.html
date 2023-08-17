@@ -2,6 +2,11 @@
     <ul class="mentions-list replies-list">
     {% for reply in replies.items %}
         <li class="h-cite u-comment mentions-list-item replies-list-item">
+            {% if reply.name %}
+                <header>
+                    <p class="p-name display6">{{ reply.name }}</p>
+                </header>
+            {% endif %}
             {% if reply.content_html %}
                 <div class="e-content mentions-content">{{ reply.content_html|safe }}</div>
             {% else %}

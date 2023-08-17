@@ -111,7 +111,6 @@ class TwitterSyndicatable(models.Model):
 
     def get_tweet_datetime(self):
         tweet_created_at = self.tweet.get().created_at
-        print(tweet_created_at)
 
         if tweet_created_at is not None:
             return tweet_created_at

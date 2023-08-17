@@ -484,8 +484,27 @@ a.u-bookmark-of::after {
   width: 10em;
 }
 
+.webmentions {
+  margin-top: 2em;
+}
+
+/* .webmentions section + section {
+  margin-top: 1em;
+} */
+
 .mentions-list {
   list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.replies-list-item {
+  border-left: 0.25em solid #CC8400;
+  padding-left: 1em;
+}
+
+.replies-list {
+  border-left: 0 none;
 }
 
 .mentions-list-item {
@@ -496,10 +515,6 @@ a.u-bookmark-of::after {
 .replies-list-item {
   font-size: inherit;
   font-family: inherit;
-}
-
-.webmentions section + section {
-  margin-top: 2em;
 }
 /*
 .mentions-list-item {

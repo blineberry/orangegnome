@@ -1,12 +1,8 @@
-from typing import Any, Dict
-from django.shortcuts import redirect
 from django.views.generic import detail, list, dates, ListView
-from django.views.generic.base import RedirectView
 from .models import Tag, FeedItem
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
 from django.utils import timezone
-from django.http import HttpResponse
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):

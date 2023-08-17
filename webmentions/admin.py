@@ -1,8 +1,5 @@
-from typing import Optional
 from django.contrib import admin
-from bs4 import BeautifulSoup
-from django.http.request import HttpRequest
-from .models import Webmention, PendingOutgoingWebmention, OutgoingWebmention,PendingIncomingWebmention,IncomingWebmention
+from .models import OutgoingContent, OutgoingWebmention,IncomingWebmention
 
 
 
@@ -11,44 +8,61 @@ class ReadOnlyAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None) -> bool:
         return False
     
-class PendingOutgoingWebmentionAdmin(ReadOnlyAdmin):
+class OutgoingContentAdmin(admin.ModelAdmin):
     actions = ["process_pending_outgoing_webmentions"]
+
+    list_display = ["__str__", "tries"]
 
     @admin.action(description="Process selected webmentions")
     def process_pending_outgoing_webmentions(self, request, queryset):
         for obj in queryset:
             obj.process()
 
-class OutgoingWebmentionAdmin(ReadOnlyAdmin):
+class OutgoingWebmentionAdmin(admin.ModelAdmin):
     actions = ["try_notify_receivers"]
+
+    list_display = ["__str__", "success", "tries"]
 
     @admin.action(description="Notify selected webmentions' receivers")
     def try_notify_receivers(self, request, queryset):
         for obj in queryset:
             obj.try_notify_receiver()
 
-class PendingIncomingWebmentionAdmin(ReadOnlyAdmin):
-    actions = ["process_pending_incoming_webmentions"]
+class IncomingWebmentionAdmin(admin.ModelAdmin):
+    actions = ["fetch_source", "verify", "parse_content", "attach", "process", "approve"]
 
-    @admin.action(description="Process selected webmentions")
-    def process_pending_incoming_webmentions(self, request, queryset):
+    list_display = ["__str__", "is_content_fetched", "verified", "is_parsed", "is_attached", "approved", "tries"]
+
+    @admin.action(description="Fetch the source content")
+    def fetch_source(self, request, queryset):
         for obj in queryset:
-            obj.process_and_save()
+            obj.try_fetch_source_content_and_save(True)
 
-class IncomingWebmentionAdmin(ReadOnlyAdmin):
-    actions = ["parse_content", "attach"]
+    @admin.action(description="Verify")
+    def verify(self, request, queryset):
+        for obj in queryset:
+            obj.try_verify_webmention_and_save(True)
 
-    @admin.action(description="Parse selected webmentions' content")
+    @admin.action(description="Parse content")
     def parse_content(self, request, queryset):
         for obj in queryset:
-            obj.try_parse_source_content_and_save()
+            obj.try_parse_source_content_and_save(True)
     
     @admin.action(description="Attach webmentions to webmentionables")
     def attach(self, request, queryset):
         for obj in queryset:
-            obj.try_attach_to_webmentionable()
+            obj.try_attach_to_webmentionable_and_save(True)
 
-admin.site.register(PendingOutgoingWebmention,PendingOutgoingWebmentionAdmin)
+    @admin.action(description="Process")
+    def process(self, request, queryset):
+        for obj in queryset:
+            obj.process_and_save(True)
+
+    @admin.action(description="Approve")
+    def approve(self, request, queryset):
+        for obj in queryset:
+            obj.approve_and_save()
+
+admin.site.register(OutgoingContent,OutgoingContentAdmin)
 admin.site.register(OutgoingWebmention,OutgoingWebmentionAdmin)
 admin.site.register(IncomingWebmention,IncomingWebmentionAdmin)
-admin.site.register(PendingIncomingWebmention,PendingIncomingWebmentionAdmin)

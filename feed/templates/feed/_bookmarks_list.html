@@ -4,13 +4,16 @@
         <li class="h-cite mentions-list-item">Bookmarked by 
             {% if bookmark.author %}
                 {% if bookmark.author.url %}
-                    <a class="u-author h-card" href="bookmark.author.url">{{ bookmark.author.name }}</a>
+                    <a class="u-author h-card" href="{{ bookmark.author.url }}">{{ bookmark.author.name }}</a>
                 {% else %}
                     <span class="p-author h-card" >{{ bookmark.author.name }}</span>
                 {% endif %}
             {% else %}
                 Anonymous
             {% endif %} 
+            {% if bookmark.name %}
+            in “{{ bookmark.name }}”
+            {% endif %}
             on 
             {% if bookmark.published %}
                 {% if bookmark.permalink %}

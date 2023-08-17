@@ -79,8 +79,6 @@ class Client(object):
             "token_type": "Bearer"
         }))
 
-        print(response)
-
     def get_activities(self, before=None, after=None, activities=[], per_page=30, page=1):
         data = {
             'per_page': per_page,

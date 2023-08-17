@@ -1,13 +1,8 @@
-from typing import Any
-from django.db.models.query import QuerySet
-from django.shortcuts import render, get_object_or_404, redirect
 from .models import Note
-from django.urls import reverse
-from django.core.paginator import Paginator
-from datetime import date, datetime
 from django.views import generic
 from base.views import PermalinkResponseMixin
 from django.utils import timezone
+from webmentions.views import WebmentionableMixin
 
 # Create your views here.
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
@@ -23,7 +18,7 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
         return Note.objects.filter(published__lte=timezone.now()).order_by('-published')
 
 
-class DetailView(PermalinkResponseMixin, generic.detail.DetailView):
+class DetailView(WebmentionableMixin, PermalinkResponseMixin, generic.detail.DetailView):
     canonical_viewname = 'notes:detail'
 
     def get_canonical_view_args(self, context):
