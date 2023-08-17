@@ -12,12 +12,14 @@
 
 {% block postheader %}
     <header class="article-header">
-        <h1><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.feed_item_header }}</a></h1>
         {% if object.in_reply_to %}
         <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
         {% endif %}
-        {% if user.is_staff %}
-            <div><small><a href="{{ object.get_edit_link }}">Edit</a></small></div>
-        {% endif %}
     </header>
+{% endblock %}
+
+{% block postcontent %}
+    <div class="article-content e-content">
+        {{ object.feed_item_content|safe }}
+    </div>
 {% endblock %}

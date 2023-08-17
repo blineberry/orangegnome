@@ -378,6 +378,10 @@ blockquote {
   margin-top: 1em;
 }
 
+.article-summary {
+  display: none;
+}
+
 .article-content + .article-footer {
   margin-top: 1em;
 }
@@ -411,6 +415,19 @@ blockquote {
 
 .article .tags li:last-child::after {
   content: '';
+}
+
+.article.note .article-header,
+.article.photo .article-header {
+  margin-top: 2.11em;
+}
+
+.article.note .article-content {
+  font-size: 1.5em;
+}
+
+.postmeta-published-author img {
+  display: none;
 }
 
 .postmeta-tags ul {
@@ -453,7 +470,7 @@ blockquote {
   margin-right: 1em;
 }
 
-.photo img {
+.photo .article-content img {
   width: 100%;
   max-width: 594px;
   height: auto;
@@ -484,8 +501,8 @@ a.u-bookmark-of::after {
   width: 10em;
 }
 
-.webmentions {
-  margin-top: 2em;
+.webmentions section {
+  margin: 2em 0;
 }
 
 /* .webmentions section + section {
@@ -503,6 +520,10 @@ a.u-bookmark-of::after {
   padding-left: 1em;
 }
 
+.replies-list-item + .replies-list-item {
+  margin-top: 1em;
+}
+
 .replies-list {
   border-left: 0 none;
 }
@@ -512,20 +533,56 @@ a.u-bookmark-of::after {
   font-family: 'Open Sans', sans-serif;
 }
 
-.replies-list-item {
+.mentions-list-item .mentions-content {
+  margin: 1em 0;
+}
+
+.replies-list-item, .firstpartymentions-list-item {
   font-size: inherit;
   font-family: inherit;
 }
-/*
-.mentions-list-item {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 0.85em;
-  line-height: 1.4583;
+
+.firstpartymentions-list-item {
+  margin: 1em 0;
 }
 
-.mentions-content {
-  font-family: 'EB Garamond', serif;
-  font-size: 1.16em;
+.firstpartymentions-list-item .h-card {
+  display: none;
+}
+
+@media screen and (min-width: 360px) {
+  .firstpartymentions-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .firstpartymentions-list-item {
+    box-sizing: border-box;
+    width: 50%;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .firstpartymentions-list-item:nth-child(odd) {
+    padding-right: 0.5em;
+  }
+  .firstpartymentions-list-item:nth-child(even) {
+    padding-left: 0.5em;
+  }
+}
+
+.firstpartymentions-list-item .mentions-content, 
+.firstpartymentions-list-item .mentions-content :first-child,
+.firstpartymentions-list-item .mentions-content-title + .mentions-content :first-child {
+  margin-top: 0;
+}
+
+.firstpartymentions-list-item .mentions-content {
+  margin-bottom: 0;
   line-height: 1.5;
 }
-*/
+
+.firstpartymentions-list-item .mentions-content-title {
+  font-weight: bold;
+}

@@ -58,6 +58,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     """The alternative text description of the photo."""
 
     html_class = 'photo'
+    postheader_template = "photos/_postheader_template.html"
 
     def __str__(self):
         return self.caption
@@ -89,7 +90,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         return render_to_string('photos/_photo_content.html', { 'photo': self })
 
     def feed_item_header(self):
-        return timezone.localtime(self.published).strftime('%b. %d, %Y, %I:%M %p')
+        return self.caption
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""

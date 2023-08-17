@@ -9,12 +9,11 @@
 <article class="article h-entry {{ object.html_class }}">
 {% block postheader %}
     <header class="article-header">
-        <h1 class="p-name"><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.feed_item_header }}</a></h1>
-        {% if object.in_reply_to %}
-        <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% if object.feed_item_header %}
+            <h1 class="p-name"><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.feed_item_header }}</a></h1>
         {% endif %}
-        {% if user.is_staff %}
-            <div><small><a href="{{ object.get_edit_link }}">Edit</a></small></div>
+        {% if object.in_reply_to %}
+            <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
         {% endif %}
     </header>
 {% endblock %}
@@ -25,10 +24,13 @@
 {% endblock %}
 {% block postfooter %}
     <footer class="article-footer">
+        {% if user.is_staff %}
+            <div><small><a href="{{ object.get_edit_link }}">Edit</a></small></div>
+        {% endif %}
         <div class="meta">
             {% if object.is_published %}
             <div class="postmeta-published">Published by 
-                <a class="h-card p-name u-url postmeta-published-author" href="{{ object.get_site_url }}"><img class="u-photo" href="{{ object.author.photo.url }}" />{{ object.author.name }}</a> on 
+                <span class="h-card p-author postmeta-published-author"><a class="u-url" href="{{ object.get_site_url }}"><img class="u-photo" src="{{ object.author.photo.url }}" alt="{{ object.author.name }}" />{{ object.author.name }}</a></span> on 
                 <time class="dt-published" datetime="{{ object.published|date:'c' }}">
                     <a href="{% url 'feed:month' object.published|date:'Y' object.published|date:'m' %}">{{ object.published|date:'F' }}</a>
                     <a href="{% url 'feed:day' object.published|date:'Y' object.published|date:'m' object.published|date:'d' %}">{{ object.published|date:'j' }}</a>, 

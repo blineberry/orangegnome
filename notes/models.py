@@ -19,6 +19,9 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     content = models.CharField(max_length=560, help_text="Markdown supported.")
     """The Note content. Max length is 560 characters."""
 
+    html_class = "note"
+    postheader_template = "notes/_postheader_template.html"
+
     def __str__(self):
         return self.content
 
@@ -37,7 +40,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
-        return timezone.localtime(self.published).strftime('%b. %d, %Y, %I:%M %p')
+        return self.content_html() #timezone.localtime(self.published).strftime('%b. %d, %Y, %I:%M %p')
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""

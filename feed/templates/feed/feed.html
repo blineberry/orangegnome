@@ -15,18 +15,18 @@
                 <article class="article h-entry {{ item.html_class }}">
                 {% block postheader %}
                     {% include item.postheader_template with item=item %}
-                {% endblock %}
-                {% if user.is_staff %}
-                    <div><small><a href="{{ item.get_edit_link }}">Edit</a></small></div>
-                {% endif %}
+                {% endblock %}                
                 {% block postcontent %}
                     {% include item.postcontent_template with item=item %}
                 {% endblock %}
                 {% block postfooter %}
                     <footer class="article-footer">
+                        {% if user.is_staff %}
+                            <div><small><a href="{{ item.get_edit_link }}">Edit</a></small></div>
+                        {% endif %}
                         <div class="meta">
                             <div class="postmeta-published">Published by 
-                                <span class="p-author h-card">{{ item.author.name }}</span> on 
+                                <span class="p-author h-card postmeta-published-author"><a class="u-url" href="{{ item.get_site_url }}"><img class="u-photo" src="{{ item.author.photo.url }}" alt="{{ item.author.name }}" />{{ item.author.name }}</a></span> on 
                                 <time class="dt-published" datetime="{{ item.published|date:'c' }}">
                                     <a href="{% url 'feed:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a>
                                     <a href="{% url 'feed:day' item.published|date:'Y' item.published|date:'m' item.published|date:'d' %}">{{ item.published|date:'j' }}</a>, 
