@@ -1,4 +1,3 @@
-import json
 from urllib.parse import urlparse
 import re
 
@@ -10,7 +9,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from syndications.mastodon_client import Client as MastodonClient
-import io
 
 # Create your models here.
 class Syndication():
@@ -478,12 +476,6 @@ class MastodonSyndicatable(models.Model):
         tagsToAppend = list()
 
         for tag in tags:
-            tagPattern = re.compile(r"\b(%s)\b" % tag.name, re.IGNORECASE)
-            
-            if bool(tagPattern.search(status)):
-                status = tagPattern.sub(tag.to_hashtag(), status, 1)
-                continue
-
             tagsToAppend.append(tag.to_hashtag())
 
         if len(tagsToAppend) > 0:
