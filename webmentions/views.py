@@ -10,7 +10,7 @@ from .models import WebmentionList
 # Create your views here.
 @method_decorator(csrf_exempt, name='dispatch')
 class IncomingWebmentionHandler(View):
-    http_method_names = ["get","post"]
+    http_method_names = ["post"]
 
     def dispatch(self, request, *args, **kwargs):    
 
