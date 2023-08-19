@@ -436,6 +436,13 @@ class IncomingWebmention(Webmention):
             result["validation_error_message"] = "Source url and Target url are the same."
             return result
         
+        parsed_source = urlparse(self.source)
+        parsed_target = urlparse(self.target)
+
+        if parsed_source.netloc == parsed_target.netloc and parsed_source.path == parsed_target.path and parsed_source.params == parsed_target.params and parsed_source.query == parsed_target.query:
+            result["validation_error_message"] = "Source url and Target url are the same (excluding fragment)"
+            return result
+        
         if not self._can_target_accept_webmentions():
             result["validation_error_message"] = "Target cannot accept webmentions."
             return result
@@ -589,6 +596,20 @@ class IncomingWebmention(Webmention):
         self.try_attach_to_webmentionable(force)
         self.save()
 
+    def is_autoapproved(self):
+        parsed_source = urlparse(self.source)
+
+        return AllowedDomain.objects.filter(domain=parsed_source.netloc).exists()
+    
+    def autoapprove(self):
+        if self.is_autoapproved():
+            self.approved = True
+
+    def add_domain_to_allowlist(self):
+        parsed_source = urlparse(self.source)        
+        allowed_domain = AllowedDomain.objects.get_or_create(domain=parsed_source.netloc)
+        allowed_domain[0].save()
+
     def process(self, force=False):        
         self.tries += 1
 
@@ -602,10 +623,11 @@ class IncomingWebmention(Webmention):
         if not self.try_verify_webmention():
             return
         #parse
-        if not self.try_parse_source_content():
-            return
+        self.try_parse_source_content()
         #attach
         self.try_attach_to_webmentionable()
+
+        self.autoapprove()
     
     def process_and_save(self, force=False):
         try:
@@ -836,5 +858,19 @@ class OutgoingWebmention(Webmention):
             UniqueConstraint(
                 fields=("source", "target"),
                 name="unique_source_url_per_target_url_outgoingwebmention",
+            ),
+        ]
+
+class AllowedDomain(models.Model):
+    domain = models.CharField(help_text="The domain from which to auto-approve webmentions.", max_length=1000)
+
+    def __str__(self):
+        return self.domain
+        
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=("domain",),
+                name="unique_domain",
             ),
         ]
