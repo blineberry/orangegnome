@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import OutgoingContent, OutgoingWebmention,IncomingWebmention
+from .models import OutgoingContent, OutgoingWebmention,IncomingWebmention,AllowedDomain
 
 
 
@@ -29,7 +29,8 @@ class OutgoingWebmentionAdmin(admin.ModelAdmin):
             obj.try_notify_receiver()
 
 class IncomingWebmentionAdmin(admin.ModelAdmin):
-    actions = ["fetch_source", "verify", "parse_content", "attach", "process", "approve"]
+    #actions = ["fetch_source", "verify", "parse_content", "attach", "process", "approve"]
+    actions = ["process", "approve", "allow_domain"]
 
     list_display = ["__str__", "is_content_fetched", "verified", "is_parsed", "is_attached", "approved", "tries"]
 
@@ -63,6 +64,12 @@ class IncomingWebmentionAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.approve_and_save()
 
+    @admin.action(description="Allowlist domain")
+    def allow_domain(self, request, queryset):
+        for obj in queryset:
+            obj.add_domain_to_allowlist()
+
 admin.site.register(OutgoingContent,OutgoingContentAdmin)
 admin.site.register(OutgoingWebmention,OutgoingWebmentionAdmin)
 admin.site.register(IncomingWebmention,IncomingWebmentionAdmin)
+admin.site.register(AllowedDomain, admin.ModelAdmin)
