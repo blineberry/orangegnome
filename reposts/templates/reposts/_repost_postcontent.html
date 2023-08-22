@@ -1,0 +1,26 @@
+<div class="h-cite u-repost-of">    
+    <blockquote class="e-content">
+        {{item.content|safe}}
+        <footer>—
+            {% if item.url %}
+                <span class="p-author h-card">
+                    {% if item.source_author_url %}
+                        <a class="p-name u-url" href="{{ item.source_author_url }}">{{ item.source_author_name }}</a>,
+                    {% else %}
+                        <span class="p-name">{{ item.source_author_name }}</span>,
+                    {% endif %}
+                </span>
+                <cite><a class="u-url" href="{{ item.url }}">{{ item.source_name|default:item.url }}</a></cite>
+            {% elif item.source_name %}
+                <span class="p-author h-card">
+                    {% if item.source_author_url %}
+                        <a class="p-name u-url" href="{{ item.source_author_url }}">{{ item.source_author_name }}</a>,
+                    {% else %}
+                        <span class="p-name">{{ item.source_author_name }}</span>,
+                    {% endif %}
+                </span>
+                {{ item.source_name }}
+            {% endif %}
+        </footer>
+    </blockquote>
+</div>

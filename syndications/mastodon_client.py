@@ -123,3 +123,27 @@ class Client(object):
         response.raise_for_status()
 
         return response.json()
+    
+    @staticmethod
+    def boost_status(id):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        response = requests.post(Client.get_v1_url() + '/statuses/' + id + "/reblog", headers=headers)
+
+        response.raise_for_status()
+
+        return response.json()
+    
+    @staticmethod
+    def unboost_status(id):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        response = requests.post(Client.get_v1_url() + '/statuses/' + id + "/unreblog", headers=headers)
+
+        response.raise_for_status()
+
+        return response.json()

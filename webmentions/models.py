@@ -76,6 +76,10 @@ class WebmentionList:
                 self.nonreplies.items.append(mention)
                 continue
 
+            if mention.type == IncomingWebmention.REPOST:
+                self.nonreplies.items.append(mention)
+                continue
+
             if mention.type == IncomingWebmention.REPLY:
                 self.replies.items.append(mention)
                 continue
@@ -249,19 +253,13 @@ class IncomingWebmention(Webmention):
         return False
 
     def is_like(self):
-        print("is_like")
-        print("properties" not in self.h_entry)
         if "properties" not in self.h_entry:
             return False
         
-        print("like-of" not in self.h_entry["properties"])
         if "like-of" not in self.h_entry["properties"]:
             return False
         
         for like in self.h_entry["properties"]["like-of"]:
-            print(like)
-            print(self.target)
-            print(like == self.target)
             if like == self.target or (like.get("value") == self.target):
                 return True
             
@@ -275,8 +273,10 @@ class IncomingWebmention(Webmention):
             return False
         
         for repost in self.h_entry["properties"]["repost-of"]:
-            if repost == self.target or (repost.get("value") == self.target):
-                return True
+            if repost.get("properties") is not None:
+                for url in repost["properties"]:
+                    if url == self.target or (repost.get("value") == self.target):
+                        return True
             
         return False
     
@@ -290,8 +290,8 @@ class IncomingWebmention(Webmention):
         if self.is_like():
             return self.LIKE
         
-        #if self.__try_parse_as_repost():
-        #    return True
+        if self.is_repost():
+            return self.REPOST
         
         return self.MENTION
             
@@ -673,7 +673,6 @@ class Webmentionable(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args,**kwargs)
         
-        print('Webmentionable save')
         if self.should_send_webmentions():
             OutgoingContent.objects.get_or_create(content_url=self.get_permalink())            
         return
@@ -713,6 +712,15 @@ class OutgoingContent(models.Model):
                 self.result = "Properties not in h_entry" + "\n\n"
                 result["success"] = False
                 return result
+            
+            if 'repost-of' in h_entry['properties']:
+                for repost in h_entry['properties']['repost-of']:
+                    if repost.get('properties') is not None:
+                        for url in repost["properties"].get("url"):
+                            if "value" in url:
+                                result["mentions"].append(url['value'])
+                            if isinstance(url, str):
+                                result["mentions"].append(url)
             
             if 'like-of' in h_entry['properties']:
                 for like in h_entry['properties']['like-of']:
@@ -754,7 +762,6 @@ class OutgoingContent(models.Model):
         
     def process(self):
         result = self.get_source_content_mentions()
-        print(result)
 
         if not result["success"]:
             self.save()

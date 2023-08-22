@@ -1,0 +1,17 @@
+{% extends 'feed/detail.html' %}
+
+{% block meta %}
+{{ block.super }}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:creator" content="@{{ repost.author.twitter_screenname }}" />
+<meta property="og:url" content="{{ permalink }}" />
+<meta property="og:title" content="{{ repost.to_text }}" />
+{% endblock %}
+
+{% block postheader %}
+{% include "reposts/_repost_postheader.html" with item=repost %}    
+{% endblock %}
+
+{% block postcontent %}
+{% include "reposts/_repost_postcontent.html" with item=repost %}
+{% endblock %}
