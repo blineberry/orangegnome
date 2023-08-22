@@ -63,6 +63,20 @@ class Syndication():
                 status.media_ids = [response['id']]
 
         return MastodonClient.post_status(status.status, status.idempotency_key, status.in_reply_to_id, status.media_ids)
+    
+    @staticmethod
+    def favorite_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.favorite_status(id)
+    
+    @staticmethod
+    def unfavorite_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.unfavorite_status(id)
 
     @staticmethod
     def delete_from_mastodon(id):
@@ -412,6 +426,36 @@ class MastodonSyndicatable(models.Model):
         """Returns True if the Model has media to upload."""
         return False
     
+    def is_mastodon_favorite(self):
+        """Returns True if the interaction is a boost."""
+        return False
+    
+    def is_mastodon_url(self, url):
+        o = urlparse(url)
+
+        return o.netloc == "mastodon.online"
+    
+    def get_mastodon_url(self):
+        raise NotImplementedError("get_mastodon_url not implemented.")
+    
+    def get_status_id_from_url(self):
+        url = self.get_mastodon_url()
+
+        if not url:
+            return None
+        
+        if not self.is_mastodon_url(url):
+            return None
+        
+        o = urlparse(url)
+
+        path_parts = o.path.split("/")
+
+        if len(path_parts) is not 3:
+            return None
+        
+        return path_parts[2]
+
     def get_mastodon_media_image_field(self):
         """Returns the ImageField for the media."""
         raise NotImplementedError("get_mastodon_media_image_field not implemented.")

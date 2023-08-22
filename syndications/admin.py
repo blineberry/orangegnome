@@ -67,6 +67,42 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         obj.syndicated_to_twitter = None
         return obj
+    
+    def __syndicate_mastodon_favorite(self, request, obj):
+        id = obj.get_status_id_from_url()
+
+        if not id:
+            self.message_user(request, f"URL is not a mastodon status")
+            return
+        
+        try: 
+            response = Syndication.favorite_on_mastodon(id)
+            obj.mastodon_status.create(
+                id_str=response['id'],
+                url=response['url'],
+                created_at=response['created_at']
+            )
+            obj.syndicated_to_mastodon = timezone.now()
+        except Exception as e:
+            self.message_user(request, "Unable to favorite mastodon status: " + str(e), messages.ERROR)
+        
+        return obj
+    
+    def __desyndicate_mastodon_favorite(self, request, obj):
+        id = obj.get_status_id_from_url()
+
+        if not id:
+            self.message_user(request, f"URL is not a mastodon status")
+            return
+        
+        try: 
+            response = Syndication.unfavorite_on_mastodon(id)
+            ms = obj.mastodon_status.get()
+            ms.delete()
+        except Exception as e:
+            self.message_user(request, "Unable to favorite mastodon status: " + str(e), messages.ERROR)
+        
+        return obj
 
     def _syndicate_to_mastodon(self, request, obj):
         if obj.is_syndicated_to_mastodon():
@@ -75,6 +111,9 @@ class SyndicatableAdmin(admin.ModelAdmin):
         if not obj.is_published():
             self.message_user(request, "Cannot syndicate an unpublished post.", messages.WARNING)
             return obj
+        
+        if obj.is_mastodon_favorite():
+            return self.__syndicate_mastodon_favorite(request,obj)
 
         try:
             media = obj.get_mastodon_media_upload()
@@ -101,7 +140,10 @@ class SyndicatableAdmin(admin.ModelAdmin):
 
     def _desyndicate_from_mastodon(self, request, obj):
         if not obj.is_syndicated_to_mastodon():
-            return obj
+            return obj        
+
+        if obj.is_mastodon_favorite():
+            return self.__desyndicate_mastodon_favorite(request,obj)
 
         try:
             response = Syndication.delete_from_mastodon(obj.mastodon_status.get().id_str)
@@ -118,6 +160,9 @@ class SyndicatableAdmin(admin.ModelAdmin):
         return obj
 
     def _handle_twitter_syndication(self, request, obj):
+        if not hasattr(obj, 'syndicate_to_twitter'):
+            return obj
+
         if not obj.syndicate_to_twitter:
             return self._desyndicate_from_twitter(request, obj)            
 

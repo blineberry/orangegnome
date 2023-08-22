@@ -26,6 +26,7 @@ urlpatterns = [
     path('exercises/', include('exercises.urls', namespace='exercises')),
     path('photos/', include('photos.urls', namespace='photos')),
     path('bookmarks/', include('bookmarks.urls', namespace='bookmarks')),
+    path('likes/', include('likes.urls', namespace='likes')),
     path('syndications/', include('syndications.urls', namespace='syndications')),
     path('webmentions/', include('webmentions.urls', namespace='webmentions')),
     path('', include('feed.urls', namespace='feed')),

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'profiles.apps.ProfilesConfig',
     'posts.apps.PostsConfig',
     'webmentions.apps.WebmentionsConfig',
+    'likes.apps.LikesConfig',
     'django_sass',
     'django.contrib.admin',
     'django.contrib.auth',

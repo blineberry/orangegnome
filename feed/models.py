@@ -75,6 +75,9 @@ class FeedItem(Webmentionable, models.Model):
     def is_bookmark(self):
         return hasattr(self, 'bookmark')
 
+    def is_like(self):
+        return hasattr(self, 'like')
+
     def get_child(self):
         if self.is_post():
             return self.post
@@ -90,6 +93,9 @@ class FeedItem(Webmentionable, models.Model):
         
         if self.is_bookmark():
             return self.bookmark
+        
+        if self.is_like():
+            return self.like
 
         raise NotImplementedError
     
@@ -121,5 +127,9 @@ class FeedItem(Webmentionable, models.Model):
         return reverse(f"admin:{self._meta.app_label}_{self._meta.model_name}_change", args=(self.pk,))
 
     def should_send_webmentions(self):
+        print('should_send_webmentions')
+        print(self.published == True)
         if self.published:
             return True
+        
+        return False
