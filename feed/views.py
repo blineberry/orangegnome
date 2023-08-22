@@ -36,7 +36,10 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
         context['rss_title'] = LatestEntriesFeed.description
         context['rss_url'] = "%s/feed" % LatestEntriesFeed.link
 
-        return context
+        return context    
+
+    def get_queryset(self):
+        return super().get_queryset().filter(published__lte=timezone.now()).exclude(like__isnull=False).exclude(in_reply_to__isnull=False).exclude(in_reply_to='').order_by('-published')
 
 class FeedItemDateArchiveView(FeedItemArchiveView):
     make_object_list = True
