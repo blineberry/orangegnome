@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.forms import ModelForm
-from .models import Like
+from .models import Repost
 from syndications.admin import SyndicatableAdmin
 from feed.admin import PublishableAdmin
 
 # Register your models here.
 # Customize the Admin form
-class LikeModelForm(ModelForm):
+class RepostModelForm(ModelForm):
     """
     Customizations for the Add and Change admin pages.
 
@@ -14,9 +14,12 @@ class LikeModelForm(ModelForm):
     """
 
     class Meta:
-        model = Like
+        model = Repost
         fields = [
             'url',
+            'content',
+            'source_author_name',
+            'source_author_url',
             'author',
             'tags',
             'syndicate_to_mastodon', 
@@ -24,15 +27,15 @@ class LikeModelForm(ModelForm):
             'published'
         ]
 
-# Admin specs for the Like model
-class LikeAdmin(PublishableAdmin, SyndicatableAdmin):
+# Admin specs for the Repost model
+class RepostAdmin(PublishableAdmin, SyndicatableAdmin):
     """
-    Specifications for the Like Admin page.
+    Specifications for the Repost Admin page.
 
-    Inherits from PublishableAdmin, SyndicatableAdmin, and WebmentionAdmin
+    Inherits from PublishableAdmin, SyndicatableAdmin
     """
 
-    form = LikeModelForm
+    form = RepostModelForm
     """Override the dynamically created form with customizations."""
 
     readonly_fields = ('syndicated_to_mastodon',)
@@ -44,7 +47,7 @@ class LikeAdmin(PublishableAdmin, SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'author','tags')
+            'fields': ('url', 'source_name', 'content', 'source_author_name', 'source_author_url', 'author', 'tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
@@ -66,8 +69,8 @@ class LikeAdmin(PublishableAdmin, SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """
 
-    list_display = ['url',]
+    list_display = ['url', 'source_author_name']
     """The fields to display on the admin list view."""
 
 # Register your models here.
-admin.site.register(Like, LikeAdmin)
+admin.site.register(Repost, RepostAdmin)

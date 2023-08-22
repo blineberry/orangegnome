@@ -10,6 +10,8 @@ class Like(MastodonSyndicatable, FeedItem):
     postheader_template = "likes/_like_postheader.html"
     postcontent_template = "likes/_like_postcontent.html"
 
+    published_verb = "Liked"
+
     def __str__(self):
         return self.url
 

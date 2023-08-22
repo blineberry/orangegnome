@@ -25,7 +25,7 @@
                             <div><small><a href="{{ item.get_edit_link }}">Edit</a></small></div>
                         {% endif %}
                         <div class="meta">
-                            <div class="postmeta-published">Published by 
+                            <div class="postmeta-published">{{ item.published_verb|default:"Published" }} by 
                                 <span class="p-author h-card postmeta-published-author"><a class="u-url" href="{{ item.get_site_url }}"><img class="u-photo" src="{{ item.author.photo.url }}" alt="{{ item.author.name }}" />{{ item.author.name }}</a></span> on 
                                 <time class="dt-published" datetime="{{ item.published|date:'c' }}">
                                     <a href="{% url 'feed:month' item.published|date:'Y' item.published|date:'m' %}">{{ item.published|date:'F' }}</a>

@@ -1,0 +1,13 @@
+{% extends 'feed/feed.html' %}
+
+{% block postheader %}
+
+{% include "reposts/_repost_postheader.html" with item=item %}
+
+{% endblock %}
+
+{% block postcontent %}
+
+{% include "reposts/_repost_postcontent.html" with item=item %}
+
+{% endblock %}

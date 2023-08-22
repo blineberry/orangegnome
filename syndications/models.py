@@ -77,6 +77,20 @@ class Syndication():
             return
         
         return MastodonClient.unfavorite_status(id)
+    
+    @staticmethod
+    def boost_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.boost_status(id)
+    
+    @staticmethod
+    def unboost_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.unboost_status(id)
 
     @staticmethod
     def delete_from_mastodon(id):

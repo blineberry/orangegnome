@@ -88,6 +88,26 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         return obj
     
+    def __syndicate_mastodon_boost(self, request, obj):
+        id = obj.get_status_id_from_url()
+
+        if not id:
+            self.message_user(request, f"URL is not a mastodon status")
+            return
+        
+        try: 
+            response = Syndication.boost_on_mastodon(id)
+            obj.mastodon_status.create(
+                id_str=response['id'],
+                url=response['url'],
+                created_at=response['created_at']
+            )
+            obj.syndicated_to_mastodon = timezone.now()
+        except Exception as e:
+            self.message_user(request, "Unable to boost mastodon status: " + str(e), messages.ERROR)
+        
+        return obj
+    
     def __desyndicate_mastodon_favorite(self, request, obj):
         id = obj.get_status_id_from_url()
 
@@ -97,6 +117,22 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         try: 
             response = Syndication.unfavorite_on_mastodon(id)
+            ms = obj.mastodon_status.get()
+            ms.delete()
+        except Exception as e:
+            self.message_user(request, "Unable to favorite mastodon status: " + str(e), messages.ERROR)
+        
+        return obj
+    
+    def __desyndicate_mastodon_boost(self, request, obj):
+        id = obj.get_status_id_from_url()
+
+        if not id:
+            self.message_user(request, f"URL is not a mastodon status")
+            return
+        
+        try: 
+            response = Syndication.unboost_on_mastodon(id)
             ms = obj.mastodon_status.get()
             ms.delete()
         except Exception as e:
@@ -114,6 +150,9 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         if obj.is_mastodon_favorite():
             return self.__syndicate_mastodon_favorite(request,obj)
+        
+        if obj.is_mastodon_boost():
+            return self.__syndicate_mastodon_boost(request,obj)
 
         try:
             media = obj.get_mastodon_media_upload()
@@ -144,6 +183,9 @@ class SyndicatableAdmin(admin.ModelAdmin):
 
         if obj.is_mastodon_favorite():
             return self.__desyndicate_mastodon_favorite(request,obj)
+        
+        if obj.is_mastodon_boost():
+            return self.__desyndicate_mastodon_boost(request, obj)
 
         try:
             response = Syndication.delete_from_mastodon(obj.mastodon_status.get().id_str)
