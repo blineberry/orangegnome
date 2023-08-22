@@ -451,7 +451,7 @@ class MastodonSyndicatable(models.Model):
 
         path_parts = o.path.split("/")
 
-        if len(path_parts) is not 3:
+        if len(path_parts) != 3:
             return None
         
         return path_parts[2]
