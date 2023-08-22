@@ -1,0 +1,17 @@
+{% extends 'feed/detail.html' %}
+
+{% block meta %}
+{{ block.super }}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:creator" content="@{{ like.author.twitter_screenname }}" />
+<meta property="og:url" content="{{ permalink }}" />
+<meta property="og:title" content="{{ like.to_text }}" />
+{% endblock %}
+
+{% block postheader %}
+    
+{% endblock %}
+
+{% block postcontent %}
+{% include "likes/_like_postcontent.html" with item=like %}
+{% endblock %}

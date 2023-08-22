@@ -4,6 +4,8 @@
         <li class="h-cite mentions-list-item">
             {% if mention.type == "BOOKMARK" %}
             Bookmarked
+            {% elif mention.type == "LIKE" %}
+            Liked
             {% else %}
             Mentioned
             {% endif %} by 

@@ -72,6 +72,10 @@ class WebmentionList:
                 self.nonreplies.items.append(mention)
                 continue
 
+            if mention.type == IncomingWebmention.LIKE:
+                self.nonreplies.items.append(mention)
+                continue
+
             if mention.type == IncomingWebmention.REPLY:
                 self.replies.items.append(mention)
                 continue
@@ -245,13 +249,19 @@ class IncomingWebmention(Webmention):
         return False
 
     def is_like(self):
+        print("is_like")
+        print("properties" not in self.h_entry)
         if "properties" not in self.h_entry:
             return False
         
+        print("like-of" not in self.h_entry["properties"])
         if "like-of" not in self.h_entry["properties"]:
             return False
         
         for like in self.h_entry["properties"]["like-of"]:
+            print(like)
+            print(self.target)
+            print(like == self.target)
             if like == self.target or (like.get("value") == self.target):
                 return True
             
@@ -277,8 +287,8 @@ class IncomingWebmention(Webmention):
         if self.is_bookmark():
             return self.BOOKMARK
         
-        #if self.__try_parse_as_like():
-        #    return True
+        if self.is_like():
+            return self.LIKE
         
         #if self.__try_parse_as_repost():
         #    return True
@@ -656,10 +666,15 @@ class IncomingWebmention(Webmention):
 class Webmentionable(models.Model):
     webmentions = GenericRelation(IncomingWebmention)
 
+    def should_send_webmentions(self):
+        # override this in the inherited model
+        return False
+
     def save(self, *args, **kwargs):
         super().save(*args,**kwargs)
         
-        if self.should_send_webmentions:
+        print('Webmentionable save')
+        if self.should_send_webmentions():
             OutgoingContent.objects.get_or_create(content_url=self.get_permalink())            
         return
     
@@ -686,6 +701,7 @@ class OutgoingContent(models.Model):
 
             if not response.ok:
                 self.result = str(response.status_code) + " " + response.text + "\n\n"
+                result["success"] = False
                 return result
             
             self.result = "200" + "\n\n"
@@ -694,7 +710,17 @@ class OutgoingContent(models.Model):
             h_entry = o.to_dict(filter_by_type="h-entry")[0]
 
             if 'properties' not in h_entry:
+                self.result = "Properties not in h_entry" + "\n\n"
+                result["success"] = False
                 return result
+            
+            if 'like-of' in h_entry['properties']:
+                for like in h_entry['properties']['like-of']:
+                    if "value" in like:
+                        result["mentions"].append(like['value'])
+                    if isinstance(like, str):
+                        result["mentions"].append(like)
+
             
             if 'bookmark-of' in h_entry['properties']:
                 for bookmark in h_entry['properties']['bookmark-of']:
@@ -728,6 +754,7 @@ class OutgoingContent(models.Model):
         
     def process(self):
         result = self.get_source_content_mentions()
+        print(result)
 
         if not result["success"]:
             self.save()

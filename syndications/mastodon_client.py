@@ -99,3 +99,27 @@ class Client(object):
         response.raise_for_status()
 
         return response.json()
+    
+    @staticmethod
+    def favorite_status(id):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        response = requests.post(Client.get_v1_url() + '/statuses/' + id + "/favourite", headers=headers)
+
+        response.raise_for_status()
+
+        return response.json()
+    
+    @staticmethod
+    def unfavorite_status(id):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        response = requests.post(Client.get_v1_url() + '/statuses/' + id + "/unfavourite", headers=headers)
+
+        response.raise_for_status()
+
+        return response.json()
