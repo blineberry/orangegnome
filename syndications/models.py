@@ -106,7 +106,9 @@ class Syndication():
         status = MastodonStatus.objects.filter(id_str=id).first()
 
         if status is None:
-            MastodonReply.objects.filter(in_reply_to_id_str=id).delete()
+            replies = MastodonReply.objects.filter(in_reply_to_id_str=id)
+            for reply in replies:
+                reply.delete()
             return
 
         context = MastodonClient.get_status_context(id)
@@ -115,7 +117,9 @@ class Syndication():
             return
         
         if context.get("descendants") is None:
-            MastodonReply.objects.filter(in_reply_to_id_str=id).delete()
+            replies = MastodonReply.objects.filter(in_reply_to_id_str=id)
+            for reply in replies:
+                reply.delete()
             return
         
         processed_ids = []
@@ -155,13 +159,17 @@ class Syndication():
         status = MastodonStatus.objects.filter(id_str=id).first()
 
         if status is None:
-            MastodonBoost.objects.filter(boost_of_id_str=status.id_str).delete()
+            boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
+            for boost in boosts:
+                boost.delete()
             return
 
         accounts = MastodonClient.get_status_boost_accounts_all(id)
 
         if accounts is None:
-            MastodonBoost.objects.filter(boost_of_id_str=status.id_str).delete()
+            boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
+            for boost in boosts:
+                boost.delete()
             return
                 
         processed_ids = []
@@ -195,13 +203,17 @@ class Syndication():
         status = MastodonStatus.objects.filter(id_str=id).first()
 
         if status is None:
-            MastodonFavourite.objects.filter(like_of_url=status.id_str).delete()
+            favourites = MastodonFavourite.objects.filter(like_of_url=status.id_str)
+            for favourite in favourites:
+                favourite.delete()
             return
 
         accounts = MastodonClient.get_status_favorite_accounts_all(id)
 
         if accounts is None:
-            MastodonFavourite.objects.filter(like_of_url=status.id_str).delete()
+            favourites = MastodonFavourite.objects.filter(like_of_url=status.id_str)
+            for favourite in favourites:
+                favourite.delete()
             return
         
         processed_ids = []
