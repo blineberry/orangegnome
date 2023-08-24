@@ -1,3 +1,4 @@
+from typing import Any, Dict, Tuple
 from urllib.parse import urlparse
 import re
 
@@ -9,6 +10,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from syndications.mastodon_client import Client as MastodonClient
+from django.db.models import UniqueConstraint
+import bleach
+from webmentions.models import OutgoingContent
+from django.urls import reverse
 
 # Create your models here.
 class Syndication():
@@ -95,10 +100,132 @@ class Syndication():
     @staticmethod
     def delete_from_mastodon(id):
         return MastodonClient.delete_status(id)
+    
+    @staticmethod
+    def update_mastodon_replies(id):
+        status = MastodonStatus.objects.filter(id_str=id).first()
+
+        if status is None:
+            MastodonReply.objects.filter(in_reply_to_id_str=id).delete()
+            return
+
+        context = MastodonClient.get_status_context(id)
+
+        if context is None:
+            return
+        
+        if context.get("descendants") is None:
+            MastodonReply.objects.filter(in_reply_to_id_str=id).delete()
+            return
+        
+        processed_ids = []
+        
+        for descendent in context["descendants"]:
+            if descendent.get("in_reply_to_id") != id:
+                continue
+
+            descendent_status = MastodonClient.get_status(descendent.get("id"))
+
+            content = descendent_status["content"]
+            content = bleach.clean(content, tags=bleach.sanitizer.ALLOWED_TAGS.union(('p', 'br')))
+            content = bleach.linkify(content)
+
+            MastodonReply.objects.update_or_create(
+                id_str=descendent_status["id"],                 
+                defaults={
+                    'in_reply_to_id_str':descendent_status["in_reply_to_id"],
+                    'content':content,
+                    'author_name':descendent_status["account"].get("display_name"),
+                    'author_url':descendent_status["account"].get("url"),
+                    'author_photo':descendent_status["account"].get("avatar_static"),
+                    'published':descendent_status["created_at"],
+                    'url':descendent_status["url"],
+                    'reply_to_url':status.content_object.get_permalink()
+                }                
+            )
+
+            processed_ids.append(descendent_status["id"])
+
+        replies = MastodonReply.objects.filter(in_reply_to_id_str=status.id_str).exclude(id_str__in=processed_ids)
+        for reply in replies:
+            reply.delete()
+
+    @staticmethod
+    def update_mastodon_boosts(id):
+        status = MastodonStatus.objects.filter(id_str=id).first()
+
+        if status is None:
+            MastodonBoost.objects.filter(boost_of_id_str=status.id_str).delete()
+            return
+
+        accounts = MastodonClient.get_status_boost_accounts_all(id)
+
+        if accounts is None:
+            MastodonBoost.objects.filter(boost_of_id_str=status.id_str).delete()
+            return
+                
+        processed_ids = []
+        
+        for account in accounts:
+            boost = MastodonBoost.objects.update_or_create(
+                account_id_str=account["id"],
+                url=status.url,
+                author_name=account["display_name"],
+                author_url=account["url"],
+                author_photo=account["avatar_static"],
+                boost_of_id_str=status.id_str,
+                repost_of_url=status.content_object.get_permalink()
+            )[0]
+
+            boost_status = MastodonClient.get_account_status_by_reblog_id(id=boost.repost_of_url, account_id=boost.account_id_str)
+
+            if boost_status is None:
+                return
+            
+            boost.published = boost_status.get("created_at")        
+
+            processed_ids.append(account["id"])
+
+        boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids).delete()
+        for boost in boosts:
+            boost.delete()
+
+    @staticmethod
+    def update_mastodon_favourites(id):
+        status = MastodonStatus.objects.filter(id_str=id).first()
+
+        if status is None:
+            MastodonFavourite.objects.filter(like_of_url=status.id_str).delete()
+            return
+
+        accounts = MastodonClient.get_status_favorite_accounts_all(id)
+
+        if accounts is None:
+            MastodonFavourite.objects.filter(like_of_url=status.id_str).delete()
+            return
+        
+        processed_ids = []
+
+        for account in accounts:
+            MastodonFavourite.objects.update_or_create(
+                account_id_str=account["id"],
+                url=status.url,
+                author_name=account["display_name"],
+                author_url=account["url"],
+                author_photo=account["avatar_static"],
+                favourite_of_id_str=status.id_str,
+                like_of_url=status.content_object.get_permalink()
+            )     
+
+            processed_ids.append(account["id"])
+
+        favourites = MastodonFavourite.objects.all().filter(favourite_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids).delete()
+
+        for favourite in favourites:
+            favourite.delete()
 
     class Meta:
         abstract = True
-
 
 class TwitterUser(models.Model):
     id_str = models.CharField(max_length=40,primary_key=True)
@@ -384,6 +511,11 @@ class MastodonStatus(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     created_at = models.DateTimeField()
 
+    def save(self,*args,**kwargs):
+        super().save(*args,**kwargs)
+        
+        MastodonStatusesToProcess.objects.get_or_create(self.id_str)
+
 class MastodonStatusUpdate(object):
     """
     An object to contain the necessary data to publish a Mastodon Status.
@@ -415,7 +547,7 @@ class MastodonSyndicatable(models.Model):
 
     syndicated_to_mastodon = models.DateTimeField(null=True)
     syndicate_to_mastodon = models.BooleanField(default=False)
-    mastodon_status = GenericRelation(MastodonStatus)
+    mastodon_status = GenericRelation(MastodonStatus, related_query_name="mastodon_status")
     
     def is_syndicated_to_mastodon(self):
         return self.mastodon_status.all().exists()
@@ -441,6 +573,10 @@ class MastodonSyndicatable(models.Model):
         return False
     
     def is_mastodon_favorite(self):
+        """Returns True if the interaction is a boost."""
+        return False
+    
+    def is_mastodon_boost(self):
         """Returns True if the interaction is a boost."""
         return False
     
@@ -545,3 +681,139 @@ class MastodonSyndicatable(models.Model):
 
     class Meta:
         abstract = True
+
+class Reply(models.Model):
+    title = models.CharField(max_length=64, null=True, blank=True)
+    reply_to_url = models.URLField()
+    content = models.TextField()
+    author_name = models.CharField(max_length=100, null=True, blank=True)
+    author_url = models.URLField(null=True, blank=True)
+    author_photo = models.URLField(null=True, blank=True)
+    published = models.DateTimeField(null=True, blank=True)
+    url = models.URLField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Repost(models.Model):
+    repost_of_url = models.URLField()
+    author_name = models.CharField(max_length=100, null=True, blank=True)
+    author_url = models.URLField(null=True, blank=True)
+    author_photo = models.URLField(null=True, blank=True)
+    published = models.DateTimeField(null=True, blank=True)
+    url = models.URLField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Like(models.Model):
+    like_of_url = models.URLField()
+    author_name = models.CharField(max_length=100, null=True, blank=True)
+    author_url = models.URLField(null=True, blank=True)
+    author_photo = models.URLField(null=True, blank=True)
+    published = models.DateTimeField(null=True, blank=True)
+    url = models.URLField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+class MastodonReply(Reply):
+    id_str = models.CharField(max_length=40)
+    in_reply_to_id_str = models.CharField(max_length=40)
+    
+    def get_permalink(self):
+        return settings.SITE_URL + reverse('syndications:reply', args=[self.id])
+
+    def delete(self, *args, **kwargs) -> Tuple[int, Dict[str, int]]:
+        permalink = self.get_permalink()
+        super().delete(*args, **kwargs)
+        OutgoingContent.objects.get_or_create(content_url=permalink)
+
+    def save(self, *args, **kwargs):
+        super().save(*args,**kwargs)
+        
+        permalink = settings.SITE_URL + reverse('syndications:reply', args=[self.id])
+        OutgoingContent.objects.get_or_create(content_url=permalink)
+        MastodonStatusesToProcess.objects.get_or_create(id_str=self.in_reply_to_id_str)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=("id_str",),
+                name="unique_mastodon_id",
+            ),
+        ]
+
+class MastodonBoost(Repost):
+    account_id_str = models.CharField(max_length=40)
+    boost_of_id_str = models.CharField(max_length=40)
+    
+    def get_permalink(self):
+        return settings.SITE_URL + reverse('syndications:repost', args=[self.id])
+
+    def delete(self, *args, **kwargs) -> Tuple[int, Dict[str, int]]:
+        permalink = self.get_permalink()
+        super().delete(*args, **kwargs)
+        OutgoingContent.objects.get_or_create(content_url=permalink)
+
+    def save(self, *args, **kwargs):
+        super().save(*args,**kwargs)
+        
+        permalink = settings.SITE_URL + reverse('syndications:repost', args=[self.id])
+        OutgoingContent.objects.get_or_create(content_url=permalink)
+        MastodonStatusesToProcess.objects.get_or_create(id_str=self.boost_of_id_str)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=("account_id_str", "boost_of_id_str"),
+                name="unique_mastodon_account_id_str_boost_of_id_str",
+            ),
+        ]
+
+class MastodonFavourite(Like):
+    account_id_str = models.CharField(max_length=40)
+    favourite_of_id_str = models.CharField(max_length=40)
+
+    def get_permalink(self):
+        return settings.SITE_URL + reverse('syndications:like', args=[self.id])
+
+    def delete(self, *args, **kwargs) -> Tuple[int, Dict[str, int]]:
+        permalink = self.get_permalink()
+        super().delete(*args, **kwargs)
+        OutgoingContent.objects.get_or_create(content_url=permalink)
+
+    def save(self, *args, **kwargs):
+        super().save(*args,**kwargs)
+        
+        permalink = self.get_permalink()
+        OutgoingContent.objects.get_or_create(content_url=permalink)
+        MastodonStatusesToProcess.objects.get_or_create(id_str=self.favourite_of_id_str)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=("account_id_str", "favourite_of_id_str"),
+                name="unique_mastodon_account_id_str_favourite_of_id_str",
+            ),
+        ]
+
+class MastodonStatusesToProcess(models.Model):
+    id_str = models.CharField(max_length=40)
+    result = models.TextField()
+
+    def __str__(self) -> str:
+        return self.id_str
+
+    def process(self):
+        try:
+            Syndication.update_mastodon_replies(self.id_str)
+            Syndication.update_mastodon_boosts(self.id_str)
+            Syndication.update_mastodon_favourites(self.id_str)
+
+            self.delete()
+        except Exception as e:
+            self.result = str(e)
+            self.save()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=("id_str",),
+                name="unique_mastodon_id_str",
+            ),
+        ]
