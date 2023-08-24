@@ -185,7 +185,7 @@ class Syndication():
                 repost_of_url=status.content_object.get_permalink()
             )[0]
 
-            boost_status = MastodonClient.get_account_status_by_reblog_id(id=boost.repost_of_url, account_id=boost.account_id_str)
+            boost_status = MastodonClient.get_account_status_by_reblog_of_id(id=boost.repost_of_url, account_id=boost.account_id_str)
 
             if boost_status is None:
                 return
