@@ -194,7 +194,7 @@ class Syndication():
 
             processed_ids.append(account["id"])
 
-        boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids).delete()
+        boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
         for boost in boosts:
             boost.delete()
 
@@ -231,7 +231,7 @@ class Syndication():
 
             processed_ids.append(account["id"])
 
-        favourites = MastodonFavourite.objects.all().filter(favourite_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids).delete()
+        favourites = MastodonFavourite.objects.all().filter(favourite_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
 
         for favourite in favourites:
             favourite.delete()
