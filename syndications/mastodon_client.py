@@ -18,6 +18,18 @@ class Client(object):
     @staticmethod
     def get_v2_url():
         return Client.get_base_url() + '/v2'
+    
+    @staticmethod
+    def get_status(id):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        response = requests.get(Client.get_v1_url() + '/statuses/' + id, headers=headers)
+
+        response.raise_for_status()
+
+        return response.json()
 
     @staticmethod
     def post_status(status, idempotency_key, in_reply_to_id=None, media_ids=None, visibility='public'):
@@ -50,6 +62,18 @@ class Client(object):
         }
 
         response = requests.delete(Client.get_v1_url() + '/statuses/' + id, headers=headers)
+
+        response.raise_for_status()
+
+        return response.json()
+    
+    @staticmethod
+    def get_status_context(id):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        response = requests.get(Client.get_v1_url() + '/statuses/' + id + "/context", headers=headers)
 
         response.raise_for_status()
 
@@ -147,3 +171,211 @@ class Client(object):
         response.raise_for_status()
 
         return response.json()
+    
+    @staticmethod
+    def get_status_boost_accounts(id, limit=40, endpoint=None, return_json=True):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        params = {}
+
+        for key in ["limit"]:
+            value = eval(key)
+            
+            if value is not None:
+                params[key] = value
+
+        if endpoint is None:
+            endpoint = Client.get_v1_url() + '/statuses/' + id + "/reblogged_by"
+
+        response = requests.get(endpoint, headers=headers, params=params)
+
+        response.raise_for_status()
+
+        if return_json:
+            return response.json()
+        
+        return response
+    
+    @staticmethod
+    def get_status_boost_accounts_all(id):
+        all_accounts = []
+        endpoint = None
+        end = False
+
+        while end is False:
+            response = None
+            
+            if endpoint is None:
+                response = Client.get_status_boost_accounts(id, limit=80, return_json=False)
+            else:
+                response = Client.get_status_boost_accounts(id, endpoint=endpoint, return_json=False)
+
+            if response is None:
+                end = True
+                break
+
+            if not response.ok:
+                end = True
+                break
+
+            accounts = response.json()
+
+            if len(accounts) <= 0:
+                end = True
+                break
+
+            all_accounts.extend(response.json())
+
+            if not response.links.get("next"):
+                end = True
+                break
+            
+            endpoint = response.links.get("next").get("url")
+
+        return all_accounts
+
+    
+    @staticmethod
+    def get_status_favorite_accounts(id, limit=40, endpoint=None, return_json=True):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        params = {}
+
+        for key in ["limit"]:
+            value = eval(key)
+            
+            if value is not None:
+                params[key] = value
+
+        if endpoint is None:
+            endpoint = Client.get_v1_url() + '/statuses/' + id + "/favourited_by"
+
+        response = requests.get(endpoint, headers=headers, params=params)
+
+        response.raise_for_status()
+
+        if return_json:
+            return response.json()
+        
+        return response
+    
+    @staticmethod
+    def get_status_favorite_accounts_all(id):
+        all_accounts = []
+        endpoint = None
+        end = False
+
+        while end is False:
+            response = None
+            
+            if endpoint is None:
+                response = Client.get_status_favorite_accounts(id, limit=80, return_json=False)
+            else:
+                response = Client.get_status_favorite_accounts(id, endpoint=endpoint, return_json=False)
+
+            if response is None:
+                end = True
+                break
+
+            if not response.ok:
+                end = True
+                break
+
+            accounts = response.json()
+
+            if len(accounts) <= 0:
+                end = True
+                break
+
+            all_accounts.extend(response.json())
+
+            if not response.links.get("next"):
+                end = True
+                break
+            
+            endpoint = response.links.get("next").get("url")
+
+        return all_accounts
+    
+    @staticmethod
+    def get_account_statuses(id,max_id=None,since_id=None,min_id=None,limit=20,only_media="false",exclude_replies="false",exclude_reblogs="false",pinned="false",tagged=None,endpoint=None, return_json=True):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
+
+        params = {}
+
+        for key in ["max_id","since_id","min_id","limit","only_media","exclude_replies","exclude_reblogs","pinned","tagged"]:
+            value = eval(key)
+            
+            if value is not None:
+                params[key] = value
+
+        if endpoint is None:
+            endpoint = Client.get_v1_url() + '/accounts/' + id + "/statuses"
+
+        response = requests.get(endpoint, headers=headers, params=params)
+
+        response.raise_for_status()
+
+        if return_json:
+            return response.json()
+        
+        return response
+    
+    @staticmethod
+    def get_account_status_by_reblog_of_id(reblog_of_id, account_id):
+        reblog_status = None
+        endpoint = None
+        end = False
+
+        while reblog_status is None and end is False:
+            response = None
+
+            if endpoint is None:
+                response = Client.get_account_statuses(account_id,max_id=reblog_of_id,return_json=False,exclude_replies="true")
+            else:
+                response = Client.get_account_statuses(account_id,endpoint=endpoint,return_json=False)
+
+            if response is None:
+                end = True
+                break
+
+            if not response.ok:
+                    end = True
+                    break
+            
+            statuses = response.json()
+
+            if len(statuses) == 0:
+                end = True
+                break
+
+            for status in statuses:
+                if status.get("reblog") is None:
+                    continue
+                if status.get("reblog").get("id") != reblog_of_id:
+                    continue
+
+                reblog_status = status
+                break
+
+            if not response.links.get("prev"):
+                end = True
+                break
+            
+            endpoint = response.links.get("prev").get("url")
+
+        return reblog_status
+
+
+
+
+
+                
+
+

@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from tweepy.errors import TweepyException
-from .models import Syndication, TwitterUser, MastodonStatus, MastodonSyndicatable
+from .models import Syndication, TwitterUser, MastodonStatus, MastodonSyndicatable, MastodonStatusesToProcess
 from django.utils import timezone
 from django.conf import settings
 
@@ -229,3 +229,5 @@ class SyndicatableAdmin(admin.ModelAdmin):
         obj.save()
 
         return save_response
+    
+admin.site.register(MastodonStatusesToProcess)

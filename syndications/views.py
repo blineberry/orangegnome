@@ -4,9 +4,10 @@ from django.views import View
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .models import StravaWebhook, StravaActivity, StravaWebhookEvent
+from .models import StravaWebhook, StravaActivity, StravaWebhookEvent, Reply, Repost, Like
 from exercises.models import Exercise
 from profiles.models import Profile
+from django.views.generic.detail import DetailView
 
 # Create your views here.
 @method_decorator(csrf_exempt, name='dispatch')
@@ -155,3 +156,11 @@ class StravaWebhookView(View):
             exercise.save()
             return HttpResponse(status=200)
 
+class ReplyView(DetailView):
+    model = Reply
+
+class RepostView(DetailView):
+    model = Repost
+
+class LikeView(DetailView):
+    model = Like

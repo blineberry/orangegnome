@@ -23,6 +23,7 @@ from django.utils.dateparse import parse_datetime
 import bleach
 from django.utils.text import Truncator
 from django.contrib import admin
+from django.utils import timezone
 
 class Author:
     photo = None
@@ -90,11 +91,13 @@ class WebmentionList:
 
             self.nonreplies.items.append(mention)
 
+        def get_key(mention):
+            return mention.published or timezone.make_aware(timezone.datetime.max, timezone.get_default_timezone())
         
-        self.all.items.sort(key = lambda x: x.published)
-        self.replies.items.sort(key = lambda x: x.published)
-        self.nonreplies.items.sort(key = lambda x: x.published)
-        self.first_party.items.sort(key = lambda x: x.published)            
+        self.all.items.sort(key = get_key)
+        self.replies.items.sort(key = get_key)
+        self.nonreplies.items.sort(key = get_key)
+        self.first_party.items.sort(key = get_key)            
 
 # Create your models here.
 class Webmention(models.Model):
@@ -340,7 +343,12 @@ class IncomingWebmention(Webmention):
         return None
 
     def __get_published(self):
-        return parse_datetime(self.__get_hentry_property_value("published"))
+        published_str = self.__get_hentry_property_value("published")
+
+        if published_str is None:
+            return None
+        
+        return parse_datetime(published_str)
     
     def __get_permalink(self):
         permalink = self.__get_hentry_property_value("url")
@@ -697,6 +705,11 @@ class OutgoingContent(models.Model):
 
         try:
             response = requests.get(self.content_url)
+
+            # if the page is no longer availabe, resend webmentions
+            if response.status_code == 404:
+                result["mentions"] = OutgoingWebmention.objects.filter(source=self.content_url).values_list('target',flat=True)
+                return result
 
             if not response.ok:
                 self.result = str(response.status_code) + " " + response.text + "\n\n"

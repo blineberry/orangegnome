@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <meta robots="noindex">
+    <link rel="canonical" href="{{object.repost_of_url}}">
+    <body>
+        <div class="h-entry">
+            <div class="h-cite u-repost-of">
+              <a class="u-url" href="{{object.repost_of_url}}">Repost</a>              
+            </div>
+            {% if object.author_url %}
+            <a class="p-author h-card" href="{{ object.author_url }}">
+                {% if object.author_photo %}
+                <img alt="" src="{{ object.author_photo }}"/>
+                {% endif %}
+                {{ object.author_name }}</a>
+            {% elif object.author_name %}
+            <span class="p-author h-card">
+                {% if object.author_photo %}
+                <img alt="" src="{{ object.author_photo }}"/>
+                {% endif %}
+                {{ object.author_name }}</span>
+            {% endif %}
+            {% if object.published %}
+            <time class="dt-published" datetime="{{ object.published|date:'c' }}">{{ object.published }}</time>
+            {% endif %}
+            <a href="{{object.url}}" class="u-url">{{object.url}}</a>
+            {% if object.published %}
+                <time class="dt-published" datetime="{{ object.published|date:'c' }}">{{ object.published }}</time>
+            {% endif %}
+          </div>         
+    </body>
+</html>

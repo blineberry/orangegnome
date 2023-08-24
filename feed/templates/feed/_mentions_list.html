@@ -23,17 +23,14 @@
             {% if mention.title %}
                 in “{{ mention.title }}”
             {% endif %}
-            on 
             {% if mention.published %}
                 {% if mention.permalink %}
-                    <a class="u-url" href="{{ mention.permalink }}"><time class="dt-published" datetime="{{ mention.published|date:'c' }}">{{ mention.published }}</time></a>
+                    on <a class="u-url" href="{{ mention.permalink }}"><time class="dt-published" datetime="{{ mention.published|date:'c' }}">{{ mention.published }}</time></a>
                 {% else %}
-                    <time class="dt-published" datetime="{{ mention.published|date:'c' }}">{{ mention.published }}</time>
+                    on <time class="dt-published" datetime="{{ mention.published|date:'c' }}">{{ mention.published }}</time>
                 {% endif %}
             {% elif mention.permalink %}
-                <a class="u-url" href="{{ mention.permalink}}">an unknown date</a>.
-            {% else %}
-                <span>an unknown date</span>.
+                (<a class="u-url" href="{{ mention.permalink}}">link</a>).
             {% endif %}
         </li>
     {% endfor %}
