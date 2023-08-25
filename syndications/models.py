@@ -156,9 +156,11 @@ class Syndication():
 
     @staticmethod
     def update_mastodon_boosts(id):
+        print('updating mastodon boosts for status ' + id)
         status = MastodonStatus.objects.filter(id_str=id).first()
 
         if status is None:
+            print('status is none')
             boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
             for boost in boosts:
                 boost.delete()
@@ -167,6 +169,7 @@ class Syndication():
         accounts = MastodonClient.get_status_boost_accounts_all(id)
 
         if accounts is None:
+            print('accounts is none')
             boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
             for boost in boosts:
                 boost.delete()
@@ -174,6 +177,7 @@ class Syndication():
                 
         processed_ids = []
         
+        print(str(len(accounts)) + ' accounts to process')
         for account in accounts:
             boost = MastodonBoost.objects.update_or_create(
                 account_id_str=account["id"],
@@ -191,14 +195,19 @@ class Syndication():
             boost_status = MastodonClient.get_account_status_by_reblog_of_id(reblog_of_id=boost.repost_of_url, account_id=boost.account_id_str)
 
             if boost_status is None:
-                return
+                print('no status found')
+                continue
             
+            print('boost status id ', boost_status.get('id'))
             boost.published = boost_status.get("created_at")
             boost.save()
 
             processed_ids.append(account["id"])
-
+            
+        print(str(len(processed_ids)) + ' boosts processed')
         boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
+        
+        print(str(len(boosts)) + ' boosts to remove')
         for boost in boosts:
             boost.delete()
 
