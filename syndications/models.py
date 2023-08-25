@@ -177,12 +177,15 @@ class Syndication():
         for account in accounts:
             boost = MastodonBoost.objects.update_or_create(
                 account_id_str=account["id"],
-                url=status.url,
-                author_name=account["display_name"],
-                author_url=account["url"],
-                author_photo=account["avatar_static"],
                 boost_of_id_str=status.id_str,
-                repost_of_url=status.content_object.get_permalink()
+                defaults={
+                    'url': status.url,
+                    'author_name': account["display_name"],
+                    'author_url': account["url"],
+                    'author_photo': account["avatar_static"],
+                    'boost_of_id_str': status.id_str,
+                    'repost_of_url': status.content_object.get_permalink()
+                }
             )[0]
 
             boost_status = MastodonClient.get_account_status_by_reblog_of_id(reblog_of_id=boost.repost_of_url, account_id=boost.account_id_str)
@@ -191,6 +194,7 @@ class Syndication():
                 return
             
             boost.published = boost_status.get("created_at")
+            boost.save()
 
             processed_ids.append(account["id"])
 
@@ -209,7 +213,7 @@ class Syndication():
             return
 
         accounts = MastodonClient.get_status_favorite_accounts_all(id)
-
+        
         if accounts is None:
             favourites = MastodonFavourite.objects.filter(like_of_url=status.id_str)
             for favourite in favourites:
@@ -221,12 +225,15 @@ class Syndication():
         for account in accounts:
             MastodonFavourite.objects.update_or_create(
                 account_id_str=account["id"],
-                url=status.url,
-                author_name=account["display_name"],
-                author_url=account["url"],
-                author_photo=account["avatar_static"],
                 favourite_of_id_str=status.id_str,
-                like_of_url=status.content_object.get_permalink()
+                defaults={
+                    'url':status.url,
+                    'author_name':account["display_name"],
+                    'author_url':account["url"],
+                    'author_photo':account["avatar_static"],
+                    'favourite_of_id_str':status.id_str,
+                    'like_of_url':status.content_object.get_permalink()
+                }
             )     
 
             processed_ids.append(account["id"])
@@ -816,14 +823,28 @@ class MastodonStatusesToProcess(models.Model):
 
     def process(self):
         try:
-            Syndication.update_mastodon_replies(self.id_str)
-            Syndication.update_mastodon_boosts(self.id_str)
-            Syndication.update_mastodon_favourites(self.id_str)
-
-            self.delete()
+            Syndication.update_mastodon_replies(self.id_str)        
         except Exception as e:
             self.result = str(e)
             self.save()
+            return
+        
+        try:
+            Syndication.update_mastodon_boosts(self.id_str)   
+        except Exception as e:
+            self.result = str(e)
+            self.save()
+            return
+        
+        try:
+            Syndication.update_mastodon_favourites(self.id_str)  
+        except Exception as e:
+            self.result = str(e)
+            self.save()
+            return
+        
+
+        self.delete() 
 
     class Meta:
         constraints = [
