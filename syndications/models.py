@@ -192,7 +192,9 @@ class Syndication():
                 }
             )[0]
 
-            boost_status = MastodonClient.get_account_status_by_reblog_of_id(reblog_of_id=boost.repost_of_url, account_id=boost.account_id_str)
+            boost_status = MastodonClient.get_account_status_by_reblog_of_id(reblog_of_id=boost.boost_of_id_str, account_id=boost.account_id_str)
+
+            processed_ids.append(account["id"])
 
             if boost_status is None:
                 print('no status found')
@@ -202,7 +204,6 @@ class Syndication():
             boost.published = boost_status.get("created_at")
             boost.save()
 
-            processed_ids.append(account["id"])
             
         print(str(len(processed_ids)) + ' boosts processed')
         boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
