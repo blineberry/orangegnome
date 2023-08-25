@@ -9,9 +9,9 @@ class Command(BaseCommand):
 
         ids = list()
         ids.extend(MastodonStatus.objects.filter(created_at__gte=datetime).values_list('id_str', flat=True))
-        ids.extend(MastodonReply.objects.filter(updated_at__gte=datetime).values_list('in_reply_to_id_str', flat=True))
-        ids.extend(MastodonBoost.objects.filter(updated_at__gte=datetime).values_list('boost_of_id_str', flat=True))
-        ids.extend(MastodonFavourite.objects.filter(updated_at__gte=datetime).values_list('favourite_of_id_str', flat=True))
+        ids.extend(MastodonReply.objects.filter(created_at__gte=datetime).values_list('in_reply_to_id_str', flat=True))
+        ids.extend(MastodonBoost.objects.filter(created_at__gte=datetime).values_list('boost_of_id_str', flat=True))
+        ids.extend(MastodonFavourite.objects.filter(created_at__gte=datetime).values_list('favourite_of_id_str', flat=True))
 
         return ids
 
