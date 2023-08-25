@@ -190,7 +190,7 @@ class Syndication():
             if boost_status is None:
                 return
             
-            boost.published = boost_status.get("created_at")        
+            boost.published = boost_status.get("created_at")
 
             processed_ids.append(account["id"])
 
@@ -526,7 +526,7 @@ class MastodonStatus(models.Model):
     def save(self,*args,**kwargs):
         super().save(*args,**kwargs)
         
-        MastodonStatusesToProcess.objects.get_or_create(self.id_str)
+        MastodonStatusesToProcess.objects.get_or_create(id_str=self.id_str)
 
 class MastodonStatusUpdate(object):
     """
@@ -704,6 +704,7 @@ class Reply(models.Model):
     published = models.DateTimeField(null=True, blank=True)
     url = models.URLField()
     updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Repost(models.Model):
     repost_of_url = models.URLField()
@@ -713,6 +714,7 @@ class Repost(models.Model):
     published = models.DateTimeField(null=True, blank=True)
     url = models.URLField()
     updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Like(models.Model):
     like_of_url = models.URLField()
@@ -722,6 +724,7 @@ class Like(models.Model):
     published = models.DateTimeField(null=True, blank=True)
     url = models.URLField()
     updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class MastodonReply(Reply):
     id_str = models.CharField(max_length=40)

@@ -172,7 +172,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             )
             obj.syndicated_to_mastodon = timezone.now()
         except Exception as e:
-            self._desyndicate_from_mastodon(response.data.id, obj)
+            self._desyndicate_from_mastodon(response["id"], obj)
             self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }", messages.ERROR)
         
         return obj
@@ -231,3 +231,4 @@ class SyndicatableAdmin(admin.ModelAdmin):
         return save_response
     
 admin.site.register(MastodonStatusesToProcess)
+admin.site.register(MastodonStatus)

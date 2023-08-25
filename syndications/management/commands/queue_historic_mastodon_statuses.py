@@ -9,9 +9,9 @@ class Command(BaseCommand):
 
         ids = list()
         ids.extend(MastodonStatus.objects.filter(created_at__date=seven_days_ago).values_list('id_str', flat=True))
-        ids.extend(MastodonReply.objects.filter(updated_at__date=seven_days_ago).values_list('in_reply_to_id_str', flat=True))
-        ids.extend(MastodonBoost.objects.filter(updated_at__date=seven_days_ago).values_list('boost_of_id_str', flat=True))
-        ids.extend(MastodonFavourite.objects.filter(updated_at__date=seven_days_ago).values_list('favourite_of_id_str', flat=True))
+        ids.extend(MastodonReply.objects.filter(created_at__date=seven_days_ago).values_list('in_reply_to_id_str', flat=True))
+        ids.extend(MastodonBoost.objects.filter(created_at__date=seven_days_ago).values_list('boost_of_id_str', flat=True))
+        ids.extend(MastodonFavourite.objects.filter(created_at__date=seven_days_ago).values_list('favourite_of_id_str', flat=True))
 
         return ids
 
@@ -20,9 +20,9 @@ class Command(BaseCommand):
 
         ids = list()
         ids.extend(MastodonStatus.objects.filter(created_at__date=thirty_days_ago).values_list('id_str', flat=True))
-        ids.extend(MastodonReply.objects.filter(updated_at__date=thirty_days_ago).values_list('in_reply_to_id_str', flat=True))
-        ids.extend(MastodonBoost.objects.filter(updated_at__date=thirty_days_ago).values_list('boost_of_id_str', flat=True))
-        ids.extend(MastodonFavourite.objects.filter(updated_at__date=thirty_days_ago).values_list('favourite_of_id_str', flat=True))
+        ids.extend(MastodonReply.objects.filter(created_at__date=thirty_days_ago).values_list('in_reply_to_id_str', flat=True))
+        ids.extend(MastodonBoost.objects.filter(created_at__date=thirty_days_ago).values_list('boost_of_id_str', flat=True))
+        ids.extend(MastodonFavourite.objects.filter(created_at__date=thirty_days_ago).values_list('favourite_of_id_str', flat=True))
 
         return ids  
 
@@ -31,9 +31,9 @@ class Command(BaseCommand):
 
         ids = list()
         ids.extend(MastodonStatus.objects.filter(created_at__month=now.month,created_at__day=now.day).values_list('id_str', flat=True))
-        ids.extend(MastodonReply.objects.filter(updated_at__month=now.month,updated_at__day=now.day).values_list('in_reply_to_id_str', flat=True))
-        ids.extend(MastodonBoost.objects.filter(updated_at__month=now.month,updated_at__day=now.day).values_list('boost_of_id_str', flat=True))
-        ids.extend(MastodonFavourite.objects.filter(updated_at__month=now.month,updated_at__day=now.day).values_list('favourite_of_id_str', flat=True))
+        ids.extend(MastodonReply.objects.filter(created_at__month=now.month,created_at__day=now.day).values_list('in_reply_to_id_str', flat=True))
+        ids.extend(MastodonBoost.objects.filter(created_at__month=now.month,created_at__day=now.day).values_list('boost_of_id_str', flat=True))
+        ids.extend(MastodonFavourite.objects.filter(created_at__month=now.month,created_at__day=now.day).values_list('favourite_of_id_str', flat=True))
 
         return ids  
 
