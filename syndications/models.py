@@ -863,3 +863,28 @@ class MastodonStatusesToProcess(models.Model):
                 name="unique_mastodon_id_str",
             ),
         ]
+
+class MastodonPushSubscription(models.Model):
+    pk = 'X'
+
+    singleton = models.CharField(max_length=1, null=False, primary_key=True, default=pk)
+    privkey = models.CharField(max_length=100)
+    auth = models.BinaryField()
+    foreign_id = models.IntegerField()
+    endpoint = models.URLField()
+    alerts = models.JSONField()
+    server_key = models.CharField(max_length=100)
+    policy = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.endpoint
+    
+class MastodonNotification(models.Model):
+    access_token = models.CharField(max_length=50, null=True)
+    body = models.TextField(null=True)
+    icon = models.URLField(null=True)
+    notification_id = models.CharField(max_length=40, null=True)
+    notification_type = models.CharField(max_length=10, null=True)
+    preferred_local = models.CharField(max_length=100, null=True)
+    title = models.CharField(max_length=200, null=True)
+    result = models.TextField(null=True)

@@ -4,10 +4,11 @@ from django.views import View
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .models import StravaWebhook, StravaActivity, StravaWebhookEvent, Reply, Repost, Like
+from .models import StravaWebhook, StravaActivity, StravaWebhookEvent, Reply, Repost, Like, MastodonNotification, MastodonPushSubscription
 from exercises.models import Exercise
 from profiles.models import Profile
 from django.views.generic.detail import DetailView
+from .mastodon_client import Client
 
 # Create your views here.
 @method_decorator(csrf_exempt, name='dispatch')
@@ -164,3 +165,34 @@ class RepostView(DetailView):
 
 class LikeView(DetailView):
     model = Like
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MastodonListener(View):
+    def post(self, request):
+        notification = MastodonNotification()
+
+        try:
+            subscription = MastodonPushSubscription.objects.first()
+            n = Client.push_subscription_decrypt_push(
+                data=request.POST, 
+                decrypt_params={
+                    "privkey":subscription.privkey,
+                    "auth": subscription.auth
+                },
+                encryption_header=request.META.get('Encryption'),
+                crypto_key_header=request.META.get('Crypto-Key')
+            )
+            notification.access_token = n.get("access_token")
+            notification.body = n.get("body")
+            notification.icon = n.get("icon")
+            notification.notification_id = n.get("notification_id")
+            notification.notification_type = n.get("notification_type")
+            notification.preferred_local = n.get("preferred_local")
+            notification.title = n.get("title")
+            notification.result = "success"
+            notification.save()
+            return HttpResponse(status=200)
+        except Exception as e:
+            notification.result = str(e)# + "\n\n" + json.dumps(request.__dict__,indent=2)
+            notification.save()
+            return HttpResponse(status=200)

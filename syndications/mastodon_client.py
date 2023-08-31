@@ -1,5 +1,6 @@
 from django.conf import settings
 import requests
+from mastodon import Mastodon
 
 
 class Client(object):
@@ -372,7 +373,93 @@ class Client(object):
 
         return reblog_status
 
+    @staticmethod
+    def push_subscription_subscribe(
+        subscription_endpoint,
+        subscription_keys_p256dh,
+        subscription_keys_auth,
+        data_alerts_mention=False,
+        data_alerts_status=False,
+        data_alerts_reblog=False,
+        data_alerts_follow=False,
+        data_alerts_follow_request=False,
+        data_alerts_favourite=False,
+        data_alerts_poll=False,
+        data_alerts_update=False,
+        data_alerts_admin_sign_up=False,
+        data_alerts_admin_report=False,
+        data_policy="none"
+    ):
+        headers = {
+            'Authorization': Client.get_auth_header()
+        }
 
+        data = {
+            "subscription": {
+                "endpoint": subscription_endpoint,
+                "keys": {
+                    "p256dh": subscription_keys_p256dh,
+                    "auth": subscription_keys_auth
+                }
+            },
+            "data": {
+                "alerts": {
+                    "mention": data_alerts_mention,
+                    "status": data_alerts_status,
+                    "reblog": data_alerts_reblog,
+                    "follow": data_alerts_follow,
+                    "follow_request": data_alerts_follow_request,
+                    "favourite": data_alerts_favourite,
+                    "poll": data_alerts_poll,
+                    "update": data_alerts_update,
+                    "admin.signup": data_alerts_admin_sign_up,
+                    "admin.report": data_alerts_admin_report
+                },
+                "policy": data_policy
+            }            
+        }
+
+        response = requests.post(Client.get_v1_url() + '/push/subscription', headers=headers, data=data)
+
+        response.raise_for_status()
+
+        return response.json()
+    
+    @staticmethod
+    def push_subscription_generate_keys():
+        mastodon = Mastodon(access_token=settings.MASTODON_ACCESS_TOKEN, api_base_url='https://' + settings.MASTODON_INSTANCE)
+
+        return mastodon.push_subscription_generate_keys()
+
+    @staticmethod
+    def push_subscription_set(endpoint,encrypt_params):
+        mastodon = Mastodon(access_token=settings.MASTODON_ACCESS_TOKEN, api_base_url='https://' + settings.MASTODON_INSTANCE)
+
+        #print(keys)
+        #print(keys[1])
+
+        #json_object = json.dumps(keys)
+        #print(json_object)
+        #json_dict = json.loads(json_object)
+        #print(json_dict)
+
+        response = mastodon.push_subscription_set(
+            endpoint=endpoint, 
+            encrypt_params=encrypt_params,
+            favourite_events=1,
+            reblog_events=1)
+
+        print(response)
+
+        return response
+
+        #return MastodonPushSubscription.objects.update_or_create()
+
+    @staticmethod
+    def push_subscription_decrypt_push(data, decrypt_params, encryption_header, crypto_key_header):
+        mastodon = Mastodon(access_token=settings.MASTODON_ACCESS_TOKEN, api_base_url='https://' + settings.MASTODON_INSTANCE)
+
+        return mastodon.push_subscription_decrypt_push(data=data, decrypt_params=decrypt_params,encryption_header=encryption_header,crypto_key_header=crypto_key_header)
 
 
 
