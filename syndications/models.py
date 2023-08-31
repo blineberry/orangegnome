@@ -879,7 +879,7 @@ class MastodonPushSubscription(models.Model):
     def __str__(self):
         return self.endpoint
     
-class MastodonNotification(models.Model):
+class MastodonPush(models.Model):
     access_token = models.CharField(max_length=50, null=True)
     body = models.TextField(null=True)
     icon = models.URLField(null=True)

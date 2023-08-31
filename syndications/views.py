@@ -4,7 +4,7 @@ from django.views import View
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .models import StravaWebhook, StravaActivity, StravaWebhookEvent, Reply, Repost, Like, MastodonNotification, MastodonPushSubscription
+from .models import StravaWebhook, StravaActivity, StravaWebhookEvent, Reply, Repost, Like, MastodonPush, MastodonPushSubscription
 from exercises.models import Exercise
 from profiles.models import Profile
 from django.views.generic.detail import DetailView
@@ -169,7 +169,7 @@ class LikeView(DetailView):
 @method_decorator(csrf_exempt, name='dispatch')
 class MastodonListener(View):
     def post(self, request):
-        notification = MastodonNotification()
+        push = MastodonPush()
 
         try:
             subscription = MastodonPushSubscription.objects.first()
@@ -182,17 +182,17 @@ class MastodonListener(View):
                 encryption_header=request.META.get('Encryption'),
                 crypto_key_header=request.META.get('Crypto-Key')
             )
-            notification.access_token = n.get("access_token")
-            notification.body = n.get("body")
-            notification.icon = n.get("icon")
-            notification.notification_id = n.get("notification_id")
-            notification.notification_type = n.get("notification_type")
-            notification.preferred_local = n.get("preferred_local")
-            notification.title = n.get("title")
-            notification.result = "success"
-            notification.save()
+            push.access_token = n.get("access_token")
+            push.body = n.get("body")
+            push.icon = n.get("icon")
+            push.notification_id = n.get("notification_id")
+            push.notification_type = n.get("notification_type")
+            push.preferred_local = n.get("preferred_local")
+            push.title = n.get("title")
+            push.result = "success"
+            push.save()
             return HttpResponse(status=200)
         except Exception as e:
-            notification.result = str(e)# + "\n\n" + json.dumps(request.__dict__,indent=2)
-            notification.save()
+            push.result = str(e)# + "\n\n" + json.dumps(request.__dict__,indent=2)
+            push.save()
             return HttpResponse(status=200)
