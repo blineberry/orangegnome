@@ -295,7 +295,7 @@ blockquote {
 
 .sitefooter {
   margin-bottom: 0;
-  padding-left: 3em;
+  padding-left: 4em;
   box-sizing: border-box;
   background: url("../images/logo_361x294.png") center left no-repeat;
   background-size: contain;
@@ -303,6 +303,16 @@ blockquote {
 
 .sitefooter-content {
   font-size: 0.77em;
+}
+
+.sitefooter-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sitefooter-nav li {
+  display: inline;
 }
 
 .feed-list {

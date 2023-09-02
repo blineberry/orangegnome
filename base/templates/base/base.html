@@ -45,6 +45,7 @@
                 <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'posts:index' %}">Posts</a></li>
                 <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'notes:index' %}">Notes</a></li>
                 <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'photos:index' %}">Photos</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'bookmarks:index' %}">Links</a></li>
             </ul>
         </nav>
     </header>
@@ -53,6 +54,17 @@
     {% endblock %}
     </div>
     <footer class="sitefooter">
+        <nav class="sitefooter-content sitefooter-nav">
+            <ul>
+                <li class="sitefooter-listitem"><a href="{% url 'posts:index' %}">Posts</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'notes:index' %}">Notes</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'photos:index' %}">Photos</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'bookmarks:index' %}">Links</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'reposts:index' %}">Reposts</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'likes:index' %}">Likes</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'feed:tagindex' %}">Tags</a></li>
+            </ul>
+        </nav>
         <div class="sitefooter-content">Copyright &copy; {% now 'Y' %} Brent Lineberry</div>
         <div class="sitefooter-content">Previous version: <a href="http://2011.orangegnome.com">2011</a></div>
     </footer>
