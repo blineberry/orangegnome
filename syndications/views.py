@@ -172,6 +172,16 @@ class MastodonListener(View):
         push = MastodonPush()
 
         try:
+            result_dict = {
+                "post": request.POST,
+                "encryption_header": request.META.get('Encryption'),
+                "crypto_key_header": request.META.get('Crypto-Key'),
+            }
+
+            push.result = json.dumps(result_dict)
+            push.save()
+            return HttpResponse(status=200)
+
             subscription = MastodonPushSubscription.objects.first()
             n = Client.push_subscription_decrypt_push(
                 data=request.POST, 

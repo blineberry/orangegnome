@@ -446,8 +446,14 @@ class Client(object):
         response = mastodon.push_subscription_set(
             endpoint=endpoint, 
             encrypt_params=encrypt_params,
-            favourite_events=1,
-            reblog_events=1)
+            follow_events=1, 
+            favourite_events=1, 
+            reblog_events=1, 
+            mention_events=1, 
+            poll_events=1, 
+            follow_request_events=1, 
+            status_events=1, 
+            policy='all')
 
         print(response)
 
