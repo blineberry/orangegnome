@@ -173,9 +173,18 @@ class MastodonListener(View):
 
         try:
             result_dict = {
+                #"body": request.body,
+                "body_is_not_none": request.body is not None,
                 "post": request.POST,
-                "encryption_header": request.META.get('Encryption'),
-                "crypto_key_header": request.META.get('Crypto-Key'),
+                "get": request.GET,
+                "encoding": request.encoding,
+                "content_type": request.content_type,
+                "meta_content_type": request.META.get("CONTENT_TYPE"),
+                "meta_content_length": request.META.get("CONTENT_LENGTH"),
+                "meta_encryption_header": request.META.get('Encryption'),
+                "meta_http_encryption_header": request.META.get('HTTP_ENCRYPTION'),
+                "meta_crypto_key_header": request.META.get('Crypto-Key'),
+                "meta_http_crypto_key_header": request.META.get('HTTP_CRYPTO_KEY'),
             }
 
             push.result = json.dumps(result_dict)
