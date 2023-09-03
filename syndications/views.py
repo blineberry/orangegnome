@@ -199,7 +199,7 @@ class MastodonListener(View):
             n = Client.push_subscription_decrypt_push(
                 data=data, 
                 decrypt_params={
-                    "privkey":subscription.privkey,
+                    "privkey":int(subscription.privkey),
                     "auth": subscription.auth
                 },
                 encryption_header=encryption,
