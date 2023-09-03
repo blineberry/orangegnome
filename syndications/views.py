@@ -189,17 +189,21 @@ class MastodonListener(View):
 
             push.result = json.dumps(result_dict)
             push.save()
-            return HttpResponse(status=200)
+            #return HttpResponse(status=200)
 
+            data = request.read(int(request.META.get("CONTENT_LENGTH")))
+            encryption = request.META.get('HTTP_ENCRYPTION')
+            crypto_key = request.META.get('HTTP_CRYPTO_KEY')
             subscription = MastodonPushSubscription.objects.first()
+
             n = Client.push_subscription_decrypt_push(
-                data=request.POST, 
+                data=data, 
                 decrypt_params={
                     "privkey":subscription.privkey,
                     "auth": subscription.auth
                 },
-                encryption_header=request.META.get('Encryption'),
-                crypto_key_header=request.META.get('Crypto-Key')
+                encryption_header=encryption,
+                crypto_key_header=crypto_key
             )
             push.access_token = n.get("access_token")
             push.body = n.get("body")
@@ -208,10 +212,10 @@ class MastodonListener(View):
             push.notification_type = n.get("notification_type")
             push.preferred_local = n.get("preferred_local")
             push.title = n.get("title")
-            push.result = "success"
+            push.result = push.result + "\n\nsuccess"
             push.save()
             return HttpResponse(status=200)
         except Exception as e:
-            push.result = str(e)# + "\n\n" + json.dumps(request.__dict__,indent=2)
+            push.result = push.result + "\n\n" + str(e)# + "\n\n" + json.dumps(request.__dict__,indent=2)
             push.save()
             return HttpResponse(status=200)
