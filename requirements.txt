@@ -50,6 +50,6 @@ tweepy==4.12.1
 twitter-text-parser==1.0.0
 typed-ast==1.4.1
 typing_extensions==4.4.0
-urllib3==1.26.5
+urllib3==1.26.17
 webencodings==0.5.1
 wrapt==1.11.2
