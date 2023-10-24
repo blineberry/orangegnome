@@ -11,7 +11,7 @@ class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     date_field = 'published'
     canonical_viewname = 'photos:index'
     extra_context = {
-        'page_title': 'Photos',
+        'page_title': 'Photos | Brent Lineberry',
         'feed_title': 'Photos',
     }
     paginate_by = 5
@@ -30,4 +30,10 @@ class DetailView(WebmentionableMixin, PermalinkResponseMixin, generic.detail.Det
         if self.request.user.is_staff:
             return Photo.objects
         
-        return Photo.objects.filter(published__lte=timezone.now())
+        return Photo.objects.filter(published__lte=timezone.now())    
+    
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f'A Photo from Brent Lineberry'
+        return context
