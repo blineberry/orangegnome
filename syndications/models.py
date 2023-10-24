@@ -14,6 +14,7 @@ from django.db.models import UniqueConstraint
 import bleach
 from webmentions.models import OutgoingContent
 from django.urls import reverse
+from strava_client import Client as StravaClient
 
 # Create your models here.
 class Syndication():
@@ -526,6 +527,50 @@ class StravaWebhookEvent(models.Model):
     subscription_id = models.IntegerField()
     event_time = models.BigIntegerField()
 
+class StravaToken(models.Model):
+    athlete_id=models.BigIntegerField()
+    scopes=models.CharField(max_length=100)
+    access_token=models.CharField(max_length=80)
+    expires_at=models.IntegerField()
+    expires_in=models.IntegerField()
+    refresh_token=models.CharField(max_length=80)
+
+    def __str__(self):
+        return self.athlete_id
+
+    @staticmethod
+    def get_token_for_athlete(id):
+        token = 
+
+        client = StravaClient(client_id=settings['STRAVA_CLIENT_ID'], client_secret=settings['STRAVA_CLIENT_SECRET'], redirect_uri=settings['STRAVA_REDIRECT_URI'])
+
+        result = client.try_get_tokens()
+
+        if result is False:
+            return None
+        
+        if client.athlete.id != id:
+            return None
+
+        return client
+    
+    @staticmethod
+    def update_or_create_token_for_athlete(id):
+        client = StravaToken.get_token_for_athlete(id)
+
+        if client is None:
+            return client
+        
+        StravaToken.objects.update_or_create(athlete_id=id, defaults={
+            "scopes": client.scopes,
+            "access_token": client.token.access_token,
+            "expires_at": client.token.expires_at,
+            "expires_in": client.token.expires_in,
+            "refresh_token": client.token.refresh_token
+        })
+
+        return client
+
 # 
 # MASTODON SYNDICATION FEATURE
 # 
@@ -888,3 +933,7 @@ class MastodonPush(models.Model):
     preferred_local = models.CharField(max_length=100, null=True)
     title = models.CharField(max_length=200, null=True)
     result = models.TextField(null=True)
+
+class Settings (models.Model):
+    key=models.CharField(max_length=100)
+    value=models.TextField()

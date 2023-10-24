@@ -46,6 +46,7 @@ rope==0.16.0
 six==1.16.0
 soupsieve==2.0
 sqlparse==0.4.4
+swagger-client @ git+https://github.com/blineberry/StravaAPIv3-py.git@2036aa5264bb55329db6f38c12587414e217877a
 tweepy==4.12.1
 twitter-text-parser==1.0.0
 typed-ast==1.4.1
