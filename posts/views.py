@@ -30,7 +30,7 @@ def render_index(request, posts, title, permalink):
 class IndexView(PermalinkResponseMixin, generic.dates.ArchiveIndexView):
     extra_context = {
         'feed_title': 'Posts',
-        'page_title': 'Posts'
+        'page_title': 'Posts | Brent Lineberry'
     }
     paginate_by = 5
     date_field = 'published'
@@ -51,6 +51,12 @@ class DetailView(WebmentionableMixin, PermalinkResponseMixin, ForceSlugMixin, ge
             return Post.objects
         
         return Post.objects.filter(published__lte=timezone.now())
+    
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f'{self.get_object().title} | Brent Lineberry'
+        return context
 
 class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.SingleObjectMixin, generic.ListView, PageTitleResponseMixin):
     paginate_by = 5
@@ -74,5 +80,6 @@ class CategoryView(ForceSlugMixin, PermalinkResponseMixin, generic.detail.Single
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['feed_title'] = context['page_title']
+        context['page_title'] = f"{context['page_title']} | Brent Lineberry"
 
         return context

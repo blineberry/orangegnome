@@ -4,6 +4,7 @@ from syndications.models import MastodonSyndicatable
 from django.urls import reverse
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
+from django.template.loader import render_to_string
 
 # Create your models here.
 class Repost(MastodonSyndicatable, FeedItem):
@@ -33,3 +34,11 @@ class Repost(MastodonSyndicatable, FeedItem):
     
     def to_text(self):
         return "Reposted " + self.source_author_name
+    
+    def feed_item_content(self):
+        """Returns the content for aggregated feed item indexes."""
+        return render_to_string('reposts/_repost_content.html', { 'item': self })
+    
+    def feed_item_header(self):
+        """Returns the title for aggregated feed item indexes."""
+        return f'Reposted {self.source_author_name}'

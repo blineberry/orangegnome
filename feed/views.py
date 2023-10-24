@@ -26,7 +26,7 @@ class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
 class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
     canonical_viewname = 'feed:index'
     extra_context = {
-        'page_title': 'Orange Gnome',
+        'page_title': 'Brent Lineberry',
     }
     template_name = 'feed/feed.html'
 
@@ -52,7 +52,7 @@ class YearView(PermalinkResponseMixin, dates.YearArchiveView, FeedItemDateArchiv
         return [context['year'].strftime("%Y")]
 
     def get_page_title(self, context):
-        return '{d.year} Archives'.format(d = context['year'])
+        return '{d.year} Archives | Brent Lineberry'.format(d = context['year'])
 
 
 class MonthView(PermalinkResponseMixin, dates.MonthArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
@@ -63,7 +63,7 @@ class MonthView(PermalinkResponseMixin, dates.MonthArchiveView, FeedItemDateArch
         return [context['month'].strftime("%Y"), context['month'].strftime("%m")]
 
     def get_page_title(self, context):
-        return '{d:%B} {d.year} Archives'.format(d = context['month'])
+        return '{d:%B} {d.year} Archives | Brent Lineberry'.format(d = context['month'])
 
 class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
     canonical_viewname = 'feed:day'
@@ -73,7 +73,7 @@ class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveV
         return [context['day'].strftime("%Y"), context['day'].strftime("%m"), context['day'].strftime("%d")]
 
     def get_page_title(self, context):
-        return '{d:%B} {d.day}, {d.year} Archives'.format(d = context['day'])
+        return '{d:%B} {d.day}, {d.year} Archives | Brent Lineberry'.format(d = context['day'])
     
 class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
     paginate_by = 5
@@ -93,8 +93,20 @@ class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixi
 
     def get_queryset(self):
         return self.object.feed_items.filter(published__lte=timezone.now()).order_by('-published')
+        
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f'{self.object.name} | Brent Lineberry'
+        return context
     
 class TagIndex(ListView, PageTitleResponseMixin):
     model = Tag
     template_name = 'feed/tags.html'
     ordering = ['name']
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = 'Tags | Brent Lineberry'
+        return context
