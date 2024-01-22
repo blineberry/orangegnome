@@ -33,7 +33,7 @@ msrest==0.7.1
 mysqlclient==1.4.6
 oauthlib==3.2.2
 persisting-theory==0.2.1
-Pillow==10.0.1
+Pillow==10.2.0
 pycparser==2.21
 pylint==2.4.4
 PySocks==1.7.1
