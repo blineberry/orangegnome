@@ -370,7 +370,7 @@ class IncomingWebmention(Webmention):
         html = content.get("html")
 
         if html is not None:
-            html = bleach.clean(html, tags=bleach.sanitizer.ALLOWED_TAGS.union(('p', 'br')))
+            html = bleach.clean(html, tags=bleach.sanitizer.ALLOWED_TAGS.union(('p', 'br')), strip=True)
             html = bleach.linkify(html)
             t = Truncator(html)
             html = t.chars(580, "…", True)
