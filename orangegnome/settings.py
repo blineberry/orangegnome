@@ -34,8 +34,12 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
+#DEBUG = True
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # Application definition
@@ -138,6 +142,7 @@ USE_TZ = True
 SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT')
 SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE')
 CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE')
++CSRF_TRUSTED_ORIGINS = ["https://orangegnome.com"]
 SECURE_REFERRER_POLICY = 'same-origin'
 SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS')
 
@@ -145,8 +150,10 @@ SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS')
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
+#STATIC_URL = '/static/'
+STATIC_URL = 'https://assets.orangegnome.com/orangegnome.com/static/'
+#MEDIA_URL = '/media/'
+MEDIA_URL = 'https://assets.orangegnome.com/orangegnome.com/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, env('MEDIA_ROOT_PATH'))
 STATIC_ROOT = os.path.join(BASE_DIR, env('STATIC_ROOT_PATH'))
