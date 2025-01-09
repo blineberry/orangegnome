@@ -9,7 +9,7 @@ django-sass==1.1.0
 Mastodon.py==1.8.1
 mistune==2.0.5
 mf2py==2.0.1
-mysqlclient==1.4.6
+mysqlclient==2.2.6
 Pillow==10.4.0
 requests==2.32.3
 tweepy==4.14.0
