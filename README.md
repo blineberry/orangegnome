@@ -60,4 +60,4 @@ To deploy updates:
 5. Run `pip install -r requirements.txt`
 6. Run `python manage.py migrate` from the project directory
 7. Run `python manage.py collectstatic` from the project directory (is this a required step?)
-8. Run `touch tmp/restart.txt` from the site root to restart Passenger
+8. Run `systemctl --user restart orangegnome` to restart the gunicorn service
