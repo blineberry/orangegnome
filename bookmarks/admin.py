@@ -24,6 +24,7 @@ class BookmarkModelForm(ModelForm):
         fields = [
             'url',
             'title',
+            'in_reply_to', 
             'quote',
             'commentary',
             'author',
@@ -53,7 +54,7 @@ class BookmarkAdmin(PublishableAdmin, SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'title', 'quote', 'commentary','author','tags')
+            'fields': ('url', 'title', 'quote', 'commentary','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
