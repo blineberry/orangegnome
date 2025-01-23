@@ -3,11 +3,13 @@
 """
 
 from django.db import models
-from feed.models import FeedItem
+from feed.models import FeedItem, convert_commonmark_to_plain_text, convert_commonmark_to_html
 from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 from django.urls import reverse
 from django.utils import timezone
 import mistune
+import pypandoc
+from django.core.exceptions import ValidationError
 
 # An indieweb "Note" contenttype https://indieweb.org/note
 class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
@@ -16,7 +18,9 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
     """
-    content = models.CharField(max_length=560, help_text="Markdown supported.")
+    plain_text_limit = 560
+
+    content = models.TextField(help_text="Markdown")
     """The Note content. Max length is 560 characters."""
 
     html_class = "note"
@@ -31,10 +35,18 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_content(self):
         """Returns the content for aggregated feed item indexes."""
-        return self.content_html()
+        return self.content_plain()
+
+    def content_plain(self):
+        """Returns the content converted from markdown to HTML."""
+        return convert_commonmark_to_plain_text(self.content)
+    
+    def content_plain_count(self):
+        return len(self.content_plain())
 
     def content_html(self):
         """Returns the content converted from markdown to HTML."""
+        return convert_commonmark_to_html(self.content)
         markdown = mistune.create_markdown(plugins=['url'])
         return markdown(self.content)
 
@@ -66,3 +78,12 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def get_mastodon_idempotency_key(self):
         """Return a string to use as the Idempotency key for Status posts."""
         return str(self.id) + str(self.updated)
+    
+    def validate_publishable(self):
+        super().validate_publishable()
+        print("check")
+
+        print(self.content_plain_count())
+
+        if self.content_plain_count() > self.plain_text_limit:
+            raise ValidationError("Plain text count of %s must be less than the limit of %s" % (self.content_plain_count(), self.plain_text_limit))

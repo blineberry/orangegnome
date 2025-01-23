@@ -1,8 +1,14 @@
-from django.views.generic import detail, list, dates, ListView
-from .models import Tag, FeedItem
+from django.views.generic import detail, list, dates, ListView, View
+from .models import Tag, FeedItem, convert_commonmark_to_html, convert_commonmark_to_plain_text
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
 from django.utils import timezone
+import json
+from django.http import HttpResponse, JsonResponse
+from datetime import datetime
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+import uuid
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
@@ -110,3 +116,41 @@ class TagIndex(ListView, PageTitleResponseMixin):
         context = super().get_context_data(**kwargs)
         context["page_title"] = 'Tags | Brent Lineberry'
         return context
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CommonmarkConversion(View):
+    def get(self, request, *args, **kwargs):
+        id = request.GET.get("id")
+
+        if id is None:
+            return HttpResponse("id parameter is required", status=400)
+        
+        conversion = request.session.get(id)
+
+        print(conversion)
+
+        if conversion is None:
+            return HttpResponse("id not found", status=404)
+        
+        return JsonResponse(conversion)
+
+    def post(self, request, *args, **kwargs):
+        body = json.loads(request.body)
+
+        input = body.get("input")
+
+        if input is None:
+            return HttpResponse("input property is required", status=400)
+        
+        id = str(uuid.uuid4())
+
+        request.session[id] = {
+            "input": input,
+            "html": convert_commonmark_to_html(input),
+            "plain": convert_commonmark_to_plain_text(input)
+        }
+
+        return JsonResponse({
+            "success": True,
+            "id": id
+        })    

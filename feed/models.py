@@ -5,6 +5,37 @@ from django.conf import settings
 from datetime import datetime
 from django.utils import timezone
 from webmentions.models import Webmentionable
+from django.core.exceptions import ValidationError
+import pypandoc
+from bs4 import BeautifulSoup
+
+def convert_commonmark_to_plain_text(input):
+    html = pypandoc.convert_text(input, 'html', format='commonmark')
+
+    # convert <cite> to underscores
+    soup = BeautifulSoup(html, 'html.parser')
+
+    for item in soup.find_all("a"):
+        print(item['href'])
+        item.string = "%s (%s)" % (item.string, item['href'])
+        item.unwrap()
+
+    for item in soup.find_all(["cite","i","em"]):
+        item.insert_after("_")
+        item.insert_before("_")
+        item.unwrap()
+
+    for item in soup.find_all(["cite","i","em"]):
+        item.insert_after("*")
+        item.insert_before("*")
+        item.unwrap()
+
+    output = pypandoc.convert_text(str(soup), 'plain', format='html')
+
+    return output
+
+def convert_commonmark_to_html(input):
+    return pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris')
 
 # Create your models here.
 class Tag(models.Model):
@@ -137,3 +168,22 @@ class FeedItem(Webmentionable, models.Model):
             return True
         
         return False
+    
+    def clean(self):
+        super().clean()
+        self.validate_publishable()
+
+    def validate_publishable(self):
+        """
+        Some fields are only required to publish, not to save as drafts. This 
+        method validates those fields.
+        """
+
+        # If the model is not `published`, then the object passes.
+        if not self.published:
+            return
+        
+        # Every feed item needs an author to publish.
+        if not self.author:
+            raise ValidationError("Published posts must have an author.")
+        
