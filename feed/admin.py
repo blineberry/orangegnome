@@ -27,6 +27,14 @@ class PublishableMixin():
         return obj
 
 class PublishableAdmin(PublishableMixin, admin.ModelAdmin):
+    def get_changeform_initial_data(self, request):
+        get_data = super(PublishableAdmin, self).get_changeform_initial_data(request)
+        
+        if hasattr(request.user, "profile"):
+            get_data['author'] = request.user.profile.pk
+        
+        return get_data
+    
     def save_model(self, request, obj, form, change):
         obj = self.publish(request, obj, form, change)
 
