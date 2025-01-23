@@ -9,6 +9,7 @@ from datetime import datetime
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import uuid
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
@@ -118,7 +119,10 @@ class TagIndex(ListView, PageTitleResponseMixin):
         return context
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CommonmarkConversion(View):
+class CommonmarkConversion(UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_staff
+
     def get(self, request, *args, **kwargs):
         id = request.GET.get("id")
 
@@ -126,8 +130,6 @@ class CommonmarkConversion(View):
             return HttpResponse("id parameter is required", status=400)
         
         conversion = request.session.get(id)
-
-        print(conversion)
 
         if conversion is None:
             return HttpResponse("id not found", status=404)
@@ -153,4 +155,4 @@ class CommonmarkConversion(View):
         return JsonResponse({
             "success": True,
             "id": id
-        })    
+        })

@@ -83,7 +83,6 @@ class PlainTextCountTextarea extends HTMLElement {
             body: JSON.stringify({ "input": this.textarea.value }),
             signal: abortController.signal
         }).then(response => {
-            console.info({response});
             if (!response.ok) {
                 throw new Error(`POST Response status: ${response.status}`);
             }
@@ -91,34 +90,30 @@ class PlainTextCountTextarea extends HTMLElement {
             content = response.json()
             return content
         }).then(content => {
-            console.info({content});
             return fetch(`${this.conversionEndpoint}?id=${content['id']}`, {
                 signal: abortController.signal
             });
         }).then(response => {
-            console.info({response});
             if (!response.ok) {
                 throw new Error(`GET Response status: ${response.status}`);
             }
 
             return response.json()
         }).then(content => {
-            console.info({content});
             this.count = content['plain'].length;
             this.countContainer.innerText = this.count;
         }).catch(err => {
-            console.warn({err});
-
             // ignore our own aborted requests
             if (err.name === "AbortError" & err.abortReason === abortReason) {
                 return;
             }
+            if (err === abortReason) {
+                return;
+            }
 
+            console.warn({err})
             this.error.innerText = err.message
         });
-
-        // this.count = this.textarea.value.length;
-        // this.countContainer.innerText = this.count;
     }
 
     handleKeyup(e) {
