@@ -9,7 +9,7 @@ from datetime import datetime
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import uuid
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.admin.views.decorators import staff_member_required
 
 class PublishedMultipleObjectMixin(list.MultipleObjectMixin):
     def get_queryset(self):
@@ -118,8 +118,8 @@ class TagIndex(ListView, PageTitleResponseMixin):
         context["page_title"] = 'Tags | Brent Lineberry'
         return context
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CommonmarkConversion(UserPassesTestMixin, View):
+@method_decorator([staff_member_required, csrf_exempt], name='dispatch')
+class CommonmarkConversion(View):
     def test_func(self):
         return self.request.user.is_staff
 

@@ -80,10 +80,13 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         return str(self.id) + str(self.updated)
     
     def validate_publishable(self):
+        if not self.published:
+            return
+        
         super().validate_publishable()
         print("check")
 
         print(self.content_plain_count())
 
         if self.content_plain_count() > self.plain_text_limit:
-            raise ValidationError("Plain text count of %s must be less than the limit of %s" % (self.content_plain_count(), self.plain_text_limit))
+            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (self.content_plain_count(), self.plain_text_limit))

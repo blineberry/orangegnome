@@ -69,7 +69,8 @@ class PlainTextCountTextarea extends HTMLElement {
         }, milliseconds);
     }
 
-    updateCount() {
+    updateCount = this.debounce(() => {
+        console.log('updateCount');
         let abortReason = "newer request";
         while (this.abortControllers.length > 0) {
             this.abortControllers.shift().abort(abortReason);
@@ -114,6 +115,18 @@ class PlainTextCountTextarea extends HTMLElement {
             console.warn({err})
             this.error.innerText = err.message
         });
+    }, 300);
+
+    debounce(callback, delay) {
+        console.log({ callback, delay });
+        let timeout;
+
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                callback(...args);
+            }, delay)
+        }
     }
 
     handleKeyup(e) {
