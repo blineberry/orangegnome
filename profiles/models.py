@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class ProfileManager(models.Manager):
     def get_owner(self):
@@ -17,6 +18,7 @@ class Profile(models.Model):
     is_owner = models.BooleanField(default=False)
     short_bio = models.CharField(max_length=160, null=True)
     twitter_screenname = models.CharField(max_length=15, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     objects = ProfileManager()
 
