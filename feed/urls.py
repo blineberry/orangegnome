@@ -16,5 +16,6 @@ urlpatterns = [
     path('tags/', views.TagIndex.as_view(), name='tagindex'),
     path('tags/<int:pk>/<slug:slug>', views.TagArchive.as_view(), name='tag'),
     path('tag/<int:pk>/<slug:slug>', RedirectView.as_view(permanent=True, pattern_name='feed:tag'), name='tag_old'),
-    path('feed', LatestEntriesFeed())
+    path('feed', LatestEntriesFeed()),
+    path('api/commonmarkconversion', views.CommonmarkConversion.as_view(), name="commonmarkconversion")
 ]

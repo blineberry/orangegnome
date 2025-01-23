@@ -3,6 +3,7 @@ from .models import Note
 from syndications.admin import SyndicatableAdmin
 from feed.admin import PublishableAdmin
 from django.forms import ModelForm, CharField, Textarea
+from base.widgets import PlainTextCountTextarea
 
 # Customize the Admin form
 class NoteModelForm(ModelForm):
@@ -12,7 +13,7 @@ class NoteModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    content = CharField(widget=Textarea, help_text="Markdown supported.")
+    content = CharField(widget=PlainTextCountTextarea(max=Note.plain_text_limit), help_text="Markdown supported.")
     """Display the content input as a Textarea"""
 
     class Meta:

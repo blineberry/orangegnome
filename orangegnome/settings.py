@@ -82,8 +82,7 @@ ROOT_URLCONF = 'orangegnome.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-        ],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -151,9 +150,9 @@ SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS')
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 #STATIC_URL = '/static/'
-STATIC_URL = 'https://assets.orangegnome.com/orangegnome.com/static/'
+STATIC_URL = env('STATIC_URL')
 #MEDIA_URL = '/media/'
-MEDIA_URL = 'https://assets.orangegnome.com/orangegnome.com/media/'
+MEDIA_URL = env('MEDIA_URL')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, env('MEDIA_ROOT_PATH'))
 STATIC_ROOT = os.path.join(BASE_DIR, env('STATIC_ROOT_PATH'))
