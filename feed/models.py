@@ -16,7 +16,6 @@ def convert_commonmark_to_plain_text(input):
     soup = BeautifulSoup(html, 'html.parser')
 
     for item in soup.find_all("a"):
-        print(item['href'])
         item.string = "%s (%s)" % (item.string, item['href'])
         item.unwrap()
 

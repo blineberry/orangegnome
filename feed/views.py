@@ -120,9 +120,6 @@ class TagIndex(ListView, PageTitleResponseMixin):
 
 @method_decorator([staff_member_required, csrf_exempt], name='dispatch')
 class CommonmarkConversion(View):
-    def test_func(self):
-        return self.request.user.is_staff
-
     def get(self, request, *args, **kwargs):
         id = request.GET.get("id")
 

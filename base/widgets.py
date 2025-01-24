@@ -1,4 +1,4 @@
-from django.forms.widgets import Textarea, Widget
+from django.forms.widgets import Textarea
 
 class PlainTextCountTextarea(Textarea):
     template_name = "widgets/plaintextcounttextarea.html"
@@ -10,13 +10,7 @@ class PlainTextCountTextarea(Textarea):
     def get_context(self, name, value, attrs):
         context = super().get_context(name,value,attrs)
         context.update({ "max": self.max })
-        print(context)
         return context
-    
-    def render(self, name, value, attrs=None, renderer=None):
-        r = super().render(name, value, attrs, renderer)
-        print(r)
-        return r
 
     class Media:
         js = ["base/js/PlainTextCountTextarea.js"]
