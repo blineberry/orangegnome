@@ -25,7 +25,7 @@ def convert_commonmark_to_plain_text(input):
         item.insert_before("_")
         item.unwrap()
 
-    for item in soup.find_all(["cite","i","em"]):
+    for item in soup.find_all(["b", "strong"]):
         item.insert_after("*")
         item.insert_before("*")
         item.unwrap()
