@@ -5,20 +5,20 @@
     <meta charset="utf-8">
     <title>{{page_title|default:"Brent Lineberry"}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes">
 
-    <link rel="stylesheet" href={% static 'base/css/style.css' %} />
+    <link rel="stylesheet" href={% static 'base/css/style.css' %}>
     <link rel="stylesheet" href={% static 'base/js/libs/highlight/styles/default.min.css' %}>
-    <link rel="icon" href="{{ profiles.site_owner.photo.url }}" />
-    <link rel="apple-touch-icon-precomposed" href="{{profiles.site_owner.photo.url }}" />
+    <link rel="icon" href="{{ profiles.site_owner.photo.url }}">
+    <link rel="apple-touch-icon-precomposed" href="{{profiles.site_owner.photo.url }}">
 
     <meta property="og:title" content="{{ page_title }}">
     <meta property="og:url" content="{{ permalink }}">
     <meta property="og:site_name" content="{{ base.site_name }}">
-    <meta name="twitter:site" content="@{{ profiles.site_owner.twitter_screenname }}" />
+    <meta name="twitter:site" content="@{{ profiles.site_owner.twitter_screenname }}">
 
     {% if permalink %}
-    <link rel="canonical" href="{{ permalink }}" />
+    <link rel="canonical" href="{{ permalink }}">
     {% endif %}
 
     {% if rss_url %}
@@ -38,7 +38,7 @@
     {% endif %}
     <header class="siteheader">
         <div class="h-card profile {% block hcard_class %}{% endblock %}">
-            <a rel="me" href="{% url 'feed:index' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="{{ profiles.site_owner.name }}" /></a>
+            <a rel="me" href="{% url 'feed:index' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="A profile photo of {{ profiles.site_owner.name }}"></a>
             <h1 class="p-name profile-name">{{ profiles.site_owner.name }}</h1>
             {% block hcard %}
             {% endblock %}
