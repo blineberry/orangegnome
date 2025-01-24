@@ -35,7 +35,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_content(self):
         """Returns the content for aggregated feed item indexes."""
-        return self.content_plain()
+        return self.content_html()
 
     def content_plain(self):
         """Returns the content converted from markdown to HTML."""
@@ -47,13 +47,10 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def content_html(self):
         """Returns the content converted from markdown to HTML."""
         return convert_commonmark_to_html(self.content)
-        markdown = mistune.create_markdown(plugins=['url'])
-        return markdown(self.content)
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
-        return self.content
-        #return self.content_html() #timezone.localtime(self.published).strftime('%b. %d, %Y, %I:%M %p')
+        return self.content_plain()
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""
@@ -65,7 +62,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
-        return self.content
+        return self.content_plain()
     
     def get_mastodon_reply_to_url(self):
         """Return the url that should be checked for the in_reply_to_id."""
