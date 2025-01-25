@@ -172,7 +172,7 @@ pre code {
 
 blockquote {
   margin-left: 1em;
-  border-left: 0.33em solid #CC8400;
+  border-left: 0.33em solid #A36A00;
   padding-left: 1em;
 }
 
@@ -451,7 +451,7 @@ blockquote {
 
 .photo .article-content img {
   width: 100%;
-  max-width: 594px;
+  max-width: 100%;
   height: auto;
   display: block;
   margin: 0 auto;
