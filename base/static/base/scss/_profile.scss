@@ -1,3 +1,5 @@
+@use "colors";
+
 .profile {
     text-align: center;
 }
@@ -9,19 +11,19 @@
 }
 
 .profile-bio, .profile-linkedprofilelist {
-    font-size: $fontSmall;
+    font-size: colors.$fontSmall;
 }
 
 .profile-link + .profile-name {
-    margin-top: 0.4284em;
+    margin-top: colors.$space1;
 }
 
 .profile-name + .profile-bio {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-top: colors.$space2;
+    margin-bottom: colors.$space2;
 }
 .profile-linkedprofilelist {
-    margin: 0.5em 0 0 0;
+    margin: colors.$space2 0 0 0;
     padding: 0;
     list-style: none;
 }
@@ -34,7 +36,7 @@
     font-family: 'Open Sans', sans-serif;
 
     display: inline-block;
-    margin-left: 0.5em;
+    margin-left: colors.$space2;
 
     &:first-child {
         margin-left: 0;

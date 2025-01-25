@@ -1,7 +1,10 @@
-@import 'fonts';
-@import 'base';
-@import 'site';
-@import 'feed';
-@import 'article';
-@import 'posts';
-@import 'exercises';
+@use 'fonts';
+@use 'base';
+@use 'site';
+@use 'feed';
+@use 'article';
+@use 'posts';
+@use 'exercises';
+@use 'photos';
+@use 'bookmarks';
+@use 'webmentions';

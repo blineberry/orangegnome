@@ -1,13 +1,13 @@
-@import 'colors';
+@use 'colors';
 
 body {
-    padding: 0.5em;
+    padding: colors.$space2;
 
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 18px;
+    line-height: 1.6;
     font-family: 'EB Garamond', serif;
-    background: $lightBackground;
-    color: $darkText;
+    background: colors.$lightBackground;
+    color: colors.$darkText;
     font-weight: normal;
 }
 
@@ -15,31 +15,31 @@ h1,h2,h3,h4,h5,h6,
 .display1, .display2, .display3, .display4, .display5, .display6 {
     font-weight: normal;
     line-height: 1;
-    margin-top: 1em;
+    margin-top: colors.$space3;
     margin-bottom: 0;
 }
 
 h1, .display1 {
-    font-size: $font6;
+    font-size: colors.$font6;
 }
 h2, .display2 {
-    font-size: $font5;
+    font-size: colors.$font5;
 }
 h3, .display3 {
-    font-size: $font4;
+    font-size: colors.$font4;
 }
 h4, .display4 {
-    font-size: $font3;
+    font-size: colors.$font3;
 }
 h5, .display5 {
-    font-size: $font2;
+    font-size: colors.$font2;
 }
 h6, .display6 {
-    font-size: $font1;
+    font-size: colors.$font1;
 }
 
 a:link, a:visited, a:hover, a:active {
-    color: $darkAccent;
+    color: colors.$darkAccent;
     text-decoration: none;
 
     &:hover, &:active {
@@ -55,7 +55,7 @@ a.alt {
     }
 
     &:hover, &:active {
-        border-bottom-color: $darkText;
+        border-bottom-color: colors.$darkText;
         text-decoration: none;
     }
 }
@@ -80,18 +80,34 @@ h6,
 }
 
 hr {
-    margin: 1em;
+    margin: colors.$space3;
     opacity: 0.5;
 }
 
-@media screen and (min-width: 360px) {
-    body {
-        font-size: 16px;
-    }
-}
+/* code blocks */
+pre code {
+    border-radius: colors.$space2;
+    background: #f3f3f3;
+    color: #444;
+    display: block;
+    overflow-x: auto;
+    padding: colors.$space3;
+  }
+  
+  blockquote {
+    margin-left: colors.$space3;
+    border-left: colors.$space1 solid #CC8400;
+    padding-left: colors.$space3;
+  }
 
 @media screen and (min-width: 410px) {
     body {
-        font-size: 18px;
+        font-size: 21px;
+    }
+}
+
+@media screen and (min-width: 465px) {
+    body {
+        font-size: 24px;
     }
 }

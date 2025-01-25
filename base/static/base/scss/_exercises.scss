@@ -1,5 +1,7 @@
+@use "colors";
+
 .exercisemeta {
-    margin: 1em 0;
+    margin: colors.$space3 0;
 
     dt, dd {
         display: inline;
@@ -15,6 +17,6 @@
 
     dd {
         margin-left: 0;
-        margin-right: 1em;
+        margin-right: colors.$space3;
     }
 }
