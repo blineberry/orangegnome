@@ -1,11 +1,13 @@
+@use 'colors';
+
 .feed-list {
     list-style:none;
-    margin: 1em 0;
+    margin: colors.$space6 0;
     padding: 0;
 }
 
 .feed-item {
-    margin-top: 2em;
+    margin-top: colors.$space3;
 
     &:first-child {
         margin-top: 0;
@@ -14,22 +16,22 @@
 
 .feed-list {
     h1, .display1 {
-        font-size: $font5;
+        font-size: colors.$font5;
     }
     h2, .display2 {
-        font-size: $font4;
+        font-size: colors.$font4;
     }
     h3, .display3 {
-        font-size: $font3;
+        font-size: colors.$font3;
     }
     h4, .display4 {
-        font-size: $font2;
+        font-size: colors.$font2;
     }
     h5, .display5 {
-        font-size: $font1;
+        font-size: colors.$font1;
     }
     h6, .display6 {
-        font-size: $fontBase;
+        font-size: colors.$fontBase;
         text-transform: uppercase;
     }
 }

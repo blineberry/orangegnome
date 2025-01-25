@@ -1,5 +1,5 @@
-@import 'profile';
-@import 'colors';
+@use 'profile';
+@use 'colors';
 
 .siteheader, .sitemain, .sitefooter {
     margin: 2em auto;
@@ -9,7 +9,7 @@
     margin-top: 0;
 
     .profile + .sitenav {
-        margin-top: 1em;
+        margin-top: colors.$space3;
     }
 }
 
@@ -26,7 +26,7 @@
 
 .sitenav-listitem {
     display: inline-block;
-    margin-left: 0.5em;
+    margin-left:colors.$space2;
 
     &:first-child {
         margin-left: 0;
@@ -34,17 +34,27 @@
 }
 
 .sitemain, .sitefooter {
-    max-width: 33em;
+    max-width: 28em;
 }
 
 .sitefooter {
     margin-bottom: 0;
-    padding-left: 3em;
+    padding-left: 4em;
     box-sizing: border-box;
     background: url("../images/logo_361x294.png") center left no-repeat;
     background-size: contain;
 }
 
 .sitefooter-content {
-    font-size: $fontSmall;
+    font-size: colors.$fontSmall;
+}
+
+.sitefooter-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sitefooter-nav li {
+    display: inline;
 }

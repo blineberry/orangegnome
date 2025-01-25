@@ -1,81 +1,57 @@
 @charset "UTF-8";
 /* eb-garamond-regular - latin */
 @font-face {
-  font-family: 'EB Garamond';
+  font-family: "EB Garamond";
   font-style: normal;
   font-weight: 400;
-  src: url("../fonts/eb-garamond-v13-latin-regular.eot");
-  font-display: swap;
-  /* IE9 Compat Modes */
-  src: local(""), url("../fonts/eb-garamond-v13-latin-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-regular.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-regular.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-regular.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-regular.svg#EBGaramond") format("svg");
-  /* Legacy iOS */
+  src: url("../fonts/eb-garamond-v13-latin-regular.eot"); /* IE9 Compat Modes */
+  src: local(""), url("../fonts/eb-garamond-v13-latin-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-regular.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-regular.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-regular.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-regular.svg#EBGaramond") format("svg"); /* Legacy iOS */
 }
-
 /* eb-garamond-700 - latin */
 @font-face {
-  font-family: 'EB Garamond';
+  font-family: "EB Garamond";
   font-style: normal;
   font-weight: 700;
-  src: url("../fonts/eb-garamond-v13-latin-700.eot");
-  font-display: swap;
-  /* IE9 Compat Modes */
-  src: local(""), url("../fonts/eb-garamond-v13-latin-700.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-700.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-700.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-700.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-700.svg#EBGaramond") format("svg");
-  /* Legacy iOS */
+  src: url("../fonts/eb-garamond-v13-latin-700.eot"); /* IE9 Compat Modes */
+  src: local(""), url("../fonts/eb-garamond-v13-latin-700.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-700.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-700.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-700.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-700.svg#EBGaramond") format("svg"); /* Legacy iOS */
 }
-
 /* eb-garamond-italic - latin */
 @font-face {
-  font-family: 'EB Garamond';
+  font-family: "EB Garamond";
   font-style: italic;
   font-weight: 400;
-  src: url("../fonts/eb-garamond-v13-latin-italic.eot");
-  font-display: swap;
-  /* IE9 Compat Modes */
-  src: local(""), url("../fonts/eb-garamond-v13-latin-italic.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-italic.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-italic.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-italic.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-italic.svg#EBGaramond") format("svg");
-  /* Legacy iOS */
+  src: url("../fonts/eb-garamond-v13-latin-italic.eot"); /* IE9 Compat Modes */
+  src: local(""), url("../fonts/eb-garamond-v13-latin-italic.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-italic.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-italic.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-italic.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-italic.svg#EBGaramond") format("svg"); /* Legacy iOS */
 }
-
 /* eb-garamond-700italic - latin */
 @font-face {
-  font-family: 'EB Garamond';
+  font-family: "EB Garamond";
   font-style: italic;
   font-weight: 700;
-  src: url("../fonts/eb-garamond-v13-latin-700italic.eot");
-  font-display: swap;
-  /* IE9 Compat Modes */
-  src: local(""), url("../fonts/eb-garamond-v13-latin-700italic.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-700italic.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-700italic.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-700italic.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-700italic.svg#EBGaramond") format("svg");
-  /* Legacy iOS */
+  src: url("../fonts/eb-garamond-v13-latin-700italic.eot"); /* IE9 Compat Modes */
+  src: local(""), url("../fonts/eb-garamond-v13-latin-700italic.eot?#iefix") format("embedded-opentype"), url("../fonts/eb-garamond-v13-latin-700italic.woff2") format("woff2"), url("../fonts/eb-garamond-v13-latin-700italic.woff") format("woff"), url("../fonts/eb-garamond-v13-latin-700italic.ttf") format("truetype"), url("../fonts/eb-garamond-v13-latin-700italic.svg#EBGaramond") format("svg"); /* Legacy iOS */
 }
-
 /* open-sans-regular - latin */
 @font-face {
-  font-family: 'Open Sans';
+  font-family: "Open Sans";
   font-style: normal;
   font-weight: 400;
-  src: url("../fonts/open-sans-v17-latin-regular.eot");
-  font-display: swap;
-  /* IE9 Compat Modes */
-  src: local("Open Sans Regular"), local("OpenSans-Regular"), url("../fonts/open-sans-v17-latin-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/open-sans-v17-latin-regular.woff2") format("woff2"), url("../fonts/open-sans-v17-latin-regular.woff") format("woff"), url("../fonts/open-sans-v17-latin-regular.ttf") format("truetype"), url("../fonts/open-sans-v17-latin-regular.svg#OpenSans") format("svg");
-  /* Legacy iOS */
+  src: url("../fonts/open-sans-v17-latin-regular.eot"); /* IE9 Compat Modes */
+  src: local("Open Sans Regular"), local("OpenSans-Regular"), url("../fonts/open-sans-v17-latin-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/open-sans-v17-latin-regular.woff2") format("woff2"), url("../fonts/open-sans-v17-latin-regular.woff") format("woff"), url("../fonts/open-sans-v17-latin-regular.ttf") format("truetype"), url("../fonts/open-sans-v17-latin-regular.svg#OpenSans") format("svg"); /* Legacy iOS */
 }
-
 /* open-sans-700 - latin */
 @font-face {
-  font-family: 'Open Sans';
+  font-family: "Open Sans";
   font-style: normal;
   font-weight: 700;
-  src: url("../fonts/open-sans-v17-latin-700.eot");
-  font-display: swap;
-  /* IE9 Compat Modes */
-  src: local("Open Sans Bold"), local("OpenSans-Bold"), url("../fonts/open-sans-v17-latin-700.eot?#iefix") format("embedded-opentype"), url("../fonts/open-sans-v17-latin-700.woff2") format("woff2"), url("../fonts/open-sans-v17-latin-700.woff") format("woff"), url("../fonts/open-sans-v17-latin-700.ttf") format("truetype"), url("../fonts/open-sans-v17-latin-700.svg#OpenSans") format("svg");
-  /* Legacy iOS */
+  src: url("../fonts/open-sans-v17-latin-700.eot"); /* IE9 Compat Modes */
+  src: local("Open Sans Bold"), local("OpenSans-Bold"), url("../fonts/open-sans-v17-latin-700.eot?#iefix") format("embedded-opentype"), url("../fonts/open-sans-v17-latin-700.woff2") format("woff2"), url("../fonts/open-sans-v17-latin-700.woff") format("woff"), url("../fonts/open-sans-v17-latin-700.ttf") format("truetype"), url("../fonts/open-sans-v17-latin-700.svg#OpenSans") format("svg"); /* Legacy iOS */
 }
-
 body {
-  padding: 0.5em;
-  font-size: 16px;
-  line-height: 1.5;
-  font-family: 'EB Garamond', serif;
+  padding: 0.66em;
+  font-size: 18px;
+  line-height: 1.6;
+  font-family: "EB Garamond", serif;
   background: #FEFEFE;
   color: #444;
   font-weight: normal;
@@ -90,34 +66,33 @@ h1, h2, h3, h4, h5, h6,
 }
 
 h1, .display1 {
-  font-size: 2.33em;
-}
-
-h2, .display2 {
-  font-size: 2.11em;
-}
-
-h3, .display3 {
-  font-size: 1.88em;
-}
-
-h4, .display4 {
   font-size: 1.66em;
 }
 
+h2, .display2 {
+  font-size: 1.66em;
+}
+
+h3, .display3 {
+  font-size: 1.33em;
+}
+
+h4, .display4 {
+  font-size: 1.33em;
+}
+
 h5, .display5 {
-  font-size: 1.44em;
+  font-size: 1.33em;
 }
 
 h6, .display6 {
-  font-size: 1.22em;
+  font-size: 1em;
 }
 
 a:link, a:visited, a:hover, a:active {
   color: #CC8400;
   text-decoration: none;
 }
-
 a:link:hover, a:link:active, a:visited:hover, a:visited:active, a:hover:hover, a:hover:active, a:active:hover, a:active:active {
   text-decoration: underline;
 }
@@ -127,7 +102,6 @@ a.alt:link, a.alt:visited, a.alt:hover, a.alt:active {
   font-weight: bold;
   border-bottom: 1px solid transparent;
 }
-
 a.alt:hover, a.alt:active {
   border-bottom-color: #444;
   text-decoration: none;
@@ -188,7 +162,7 @@ hr {
 
 /* code blocks */
 pre code {
-  border-radius: 0.5em;
+  border-radius: 0.66em;
   background: #f3f3f3;
   color: #444;
   display: block;
@@ -197,23 +171,21 @@ pre code {
 }
 
 blockquote {
-  margin-left: 2em;
-  border-left: 0.25em solid #CC8400;
+  margin-left: 1em;
+  border-left: 0.33em solid #CC8400;
   padding-left: 1em;
-}
-
-@media screen and (min-width: 360px) {
-  body {
-    font-size: 16px;
-  }
 }
 
 @media screen and (min-width: 410px) {
   body {
-    font-size: 18px;
+    font-size: 21px;
   }
 }
-
+@media screen and (min-width: 465px) {
+  body {
+    font-size: 24px;
+  }
+}
 .profile {
   text-align: center;
 }
@@ -225,34 +197,33 @@ blockquote {
 }
 
 .profile-bio, .profile-linkedprofilelist {
-  font-size: 0.77em;
+  font-size: 0.66em;
 }
 
 .profile-link + .profile-name {
-  margin-top: 0.4284em;
+  margin-top: 0.33em;
 }
 
 .profile-name + .profile-bio {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  margin-top: 0.66em;
+  margin-bottom: 0.66em;
 }
 
 .profile-linkedprofilelist {
-  margin: 0.5em 0 0 0;
+  margin: 0.66em 0 0 0;
   padding: 0;
   list-style: none;
 }
 
 .profile-bio {
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 .profile-linkedprofileitem {
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   display: inline-block;
-  margin-left: 0.5em;
+  margin-left: 0.66em;
 }
-
 .profile-linkedprofileitem:first-child {
   margin-left: 0;
 }
@@ -264,13 +235,12 @@ blockquote {
 .siteheader {
   margin-top: 0;
 }
-
 .siteheader .profile + .sitenav {
   margin-top: 1em;
 }
 
 .sitenav {
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   text-align: center;
 }
 
@@ -282,15 +252,14 @@ blockquote {
 
 .sitenav-listitem {
   display: inline-block;
-  margin-left: 0.5em;
+  margin-left: 0.66em;
 }
-
 .sitenav-listitem:first-child {
   margin-left: 0;
 }
 
 .sitemain, .sitefooter {
-  max-width: 33em;
+  max-width: 28em;
 }
 
 .sitefooter {
@@ -302,7 +271,7 @@ blockquote {
 }
 
 .sitefooter-content {
-  font-size: 0.77em;
+  font-size: 0.66em;
 }
 
 .sitefooter-nav ul {
@@ -317,38 +286,32 @@ blockquote {
 
 .feed-list {
   list-style: none;
-  margin: 1em 0;
+  margin: 2em 0;
   padding: 0;
 }
 
 .feed-item {
-  margin-top: 2em;
+  margin-top: 1em;
 }
-
 .feed-item:first-child {
   margin-top: 0;
 }
 
 .feed-list h1, .feed-list .display1 {
-  font-size: 2.11em;
-}
-
-.feed-list h2, .feed-list .display2 {
-  font-size: 1.88em;
-}
-
-.feed-list h3, .feed-list .display3 {
   font-size: 1.66em;
 }
-
+.feed-list h2, .feed-list .display2 {
+  font-size: 1.33em;
+}
+.feed-list h3, .feed-list .display3 {
+  font-size: 1.33em;
+}
 .feed-list h4, .feed-list .display4 {
-  font-size: 1.44em;
+  font-size: 1.33em;
 }
-
 .feed-list h5, .feed-list .display5 {
-  font-size: 1.22em;
+  font-size: 1em;
 }
-
 .feed-list h6, .feed-list .display6 {
   font-size: 1em;
   text-transform: uppercase;
@@ -356,32 +319,34 @@ blockquote {
 
 .feed-nav {
   overflow: hidden;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 .feed-nav-older {
   float: left;
 }
-
 .feed-nav-older::before {
-  content: '← ';
+  content: "← ";
 }
 
 .feed-nav-newer {
   float: right;
 }
-
 .feed-nav-newer::after {
-  content: ' →';
+  content: " →";
 }
 
 .article .meta {
-  font-size: 0.77em;
-  font-family: 'Open Sans', sans-serif;
+  font-size: 0.66em;
+  font-family: "Open Sans", sans-serif;
 }
 
 .article {
   overflow-x: scroll;
+}
+
+.article img {
+  max-width: 100%;
 }
 
 .article-header + .article-content {
@@ -397,15 +362,15 @@ blockquote {
 }
 
 .article-content code {
-  font-size: .75em;
+  font-size: 0.66em;
   font-weight: bold;
 }
 
 .article-readmore {
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   display: block;
   margin: 1em 0;
-  font-size: 0.85em;
+  font-size: 0.66em;
 }
 
 .article .tags ul {
@@ -414,26 +379,23 @@ blockquote {
   padding: 0;
   display: inline;
 }
-
 .article .tags li {
   display: inline;
 }
-
 .article .tags li::after {
-  content: ',';
+  content: ",";
 }
-
 .article .tags li:last-child::after {
-  content: '';
+  content: "";
 }
 
 .article.note .article-header,
 .article.photo .article-header {
-  margin-top: 2.11em;
+  margin-top: 1em;
 }
 
 .article.note .article-content {
-  font-size: 1.5em;
+  font-size: 1.33em;
 }
 
 .postmeta-published-author img {
@@ -446,35 +408,42 @@ blockquote {
   padding: 0;
   display: inline;
 }
-
 .postmeta-tags li {
   display: inline;
 }
-
 .postmeta-tags li::after {
-  content: ',';
+  content: ",";
+}
+.postmeta-tags li:last-child::after {
+  content: "";
 }
 
-.postmeta-tags li:last-child::after {
-  content: '';
+.linklist {
+  list-style: none;
+  margin: 2em 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.linklist-item {
+  padding: 0.33em 0;
+  width: 9em;
 }
 
 .exercisemeta {
   margin: 1em 0;
 }
-
 .exercisemeta dt, .exercisemeta dd {
   display: inline;
 }
-
 .exercisemeta dt {
   font-weight: bold;
 }
-
 .exercisemeta dt::after {
-  content: ':';
+  content: ":";
 }
-
 .exercisemeta dd {
   margin-left: 0;
   margin-right: 1em;
@@ -489,26 +458,11 @@ blockquote {
 }
 
 a.u-bookmark-of {
-  position:relative;
+  position: relative;
 }
 
 a.u-bookmark-of::after {
-  content: ' \1F517';
-}
-
-.linklist {
-  list-style: none;
-  margin: 2em 0;
-  padding: 0;
-
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-.linklist-item {
-  padding: 0.25em 0;
-  width: 10em;
+  content: " 🔗";
 }
 
 .webmentions section {
@@ -518,7 +472,6 @@ a.u-bookmark-of::after {
 /* .webmentions section + section {
   margin-top: 1em;
 } */
-
 .mentions-list {
   list-style: none;
   margin-left: 0;
@@ -526,7 +479,7 @@ a.u-bookmark-of::after {
 }
 
 .replies-list-item {
-  border-left: 0.25em solid #CC8400;
+  border-left: 0.33em solid #CC8400;
   padding-left: 1em;
 }
 
@@ -539,8 +492,8 @@ a.u-bookmark-of::after {
 }
 
 .mentions-list-item {
-  font-size: 0.77em;
-  font-family: 'Open Sans', sans-serif;
+  font-size: 0.66em;
+  font-family: "Open Sans", sans-serif;
 }
 
 .mentions-list-item .mentions-content {
@@ -566,23 +519,20 @@ a.u-bookmark-of::after {
     flex-direction: row;
     flex-wrap: wrap;
   }
-
   .firstpartymentions-list-item {
     box-sizing: border-box;
     width: 50%;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-top: 0.66em;
+    margin-bottom: 0.66em;
   }
-
   .firstpartymentions-list-item:nth-child(odd) {
-    padding-right: 0.5em;
+    padding-right: 0.66em;
   }
   .firstpartymentions-list-item:nth-child(even) {
-    padding-left: 0.5em;
+    padding-left: 0.66em;
   }
 }
-
-.firstpartymentions-list-item .mentions-content, 
+.firstpartymentions-list-item .mentions-content,
 .firstpartymentions-list-item .mentions-content :first-child,
 .firstpartymentions-list-item .mentions-content-title + .mentions-content :first-child {
   margin-top: 0;
@@ -590,9 +540,11 @@ a.u-bookmark-of::after {
 
 .firstpartymentions-list-item .mentions-content {
   margin-bottom: 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .firstpartymentions-list-item .mentions-content-title {
   font-weight: bold;
 }
+
+/*# sourceMappingURL=style.css.map */

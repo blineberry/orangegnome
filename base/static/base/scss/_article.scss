@@ -1,5 +1,7 @@
+@use "colors";
+
 .article .meta {
-    font-size: $fontSmall;
+    font-size: colors.$fontSmall;
     font-family: 'Open Sans', sans-serif;
 }
 
@@ -7,13 +9,34 @@
     overflow-x: scroll;
 }
 
+.article img {
+    max-width: 100%;
+}
+
 .article-header + .article-content {
-    margin-top: 1em;
+    margin-top: colors.$space3;
+}
+
+.article-summary {
+    display: none;
 }
 
 .article-content + .article-footer {
-    margin-top: 1em;
+    margin-top: colors.$space3;
 }
+
+.article-content code {
+    font-size: colors.$fontSmall;
+    font-weight: bold;
+  }
+  
+  .article-readmore {
+    font-family: 'Open Sans', sans-serif;
+    display: block;
+    margin: colors.$space3 0;
+    font-size: colors.$fontSmall;
+  }
+  
 
 .article .tags {
     ul {
@@ -34,4 +57,13 @@
             content: '';
         }
     }
+}
+
+.article.note .article-header,
+.article.photo .article-header {
+    margin-top: colors.$space3;
+}
+
+.article.note .article-content {
+    font-size: colors.$font3;
 }
