@@ -2,10 +2,12 @@ from django.contrib import admin
 from .models import Tag, Syndication
 from django import forms
 from django.utils import timezone
+from syndications.admin import SyndicatableAdmin as SAAdmin
 
 # Register your models here.
 class SyndicationInline(admin.TabularInline):
     model = Syndication
+    extra = 1
 
 class PublishableMixin():
     is_published = 'is_published'
@@ -47,5 +49,8 @@ class TagAdmin(admin.ModelAdmin):
     prepopulated_fields = { 'slug': ('name',)}
     readonly_fields = ('test',)
     fieldsets = ((None, { 'fields': ('name', 'slug', 'test')}),)
+
+class SyndicatableAdmin(PublishableAdmin, SAAdmin):
+    inlines = [SyndicationInline]
 
 admin.site.register(Tag, TagAdmin)

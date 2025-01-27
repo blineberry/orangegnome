@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Note
-from syndications.admin import SyndicatableAdmin
-from feed.admin import PublishableAdmin, SyndicationInline
+from feed.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
 from base.widgets import PlainTextCountTextarea
 
@@ -29,7 +28,7 @@ class NoteModelForm(ModelForm):
         ]
 
 # Admin specs for the Note model
-class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
+class NoteAdmin(SyndicatableAdmin):
     """
     Specifications for the Note Admin page.
 
@@ -38,9 +37,6 @@ class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
 
     form = NoteModelForm
     """Override the dynamically created form with customizations."""
-
-
-    inlines = [SyndicationInline]
 
     readonly_fields = ('syndicated_to_twitter', 'syndicated_to_mastodon')
     """

@@ -77,10 +77,16 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         try: 
             response = SyndicationAbstract.favorite_on_mastodon(id)
+
+            s = obj.syndications.create(
+                name=MastodonStatus.instance_name, 
+                url=response['url'])
+            
             obj.mastodon_status.create(
                 id_str=response['id'],
                 url=response['url'],
-                created_at=response['created_at']
+                created_at=response['created_at'],
+                syndication=s
             )
             obj.syndicated_to_mastodon = timezone.now()
         except Exception as e:
@@ -97,11 +103,18 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         try: 
             response = SyndicationAbstract.boost_on_mastodon(id)
+
+            s = obj.syndications.create(
+                name=MastodonStatus.instance_name, 
+                url=response['url'])
+            
             obj.mastodon_status.create(
                 id_str=response['id'],
                 url=response['url'],
-                created_at=response['created_at']
+                created_at=response['created_at'],
+                syndication=s
             )
+
             obj.syndicated_to_mastodon = timezone.now()
         except Exception as e:
             self.message_user(request, "Unable to boost mastodon status: " + str(e), messages.ERROR)
@@ -117,8 +130,8 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         try: 
             response = SyndicationAbstract.unfavorite_on_mastodon(id)
-            ms = obj.mastodon_status.get()
-            ms.delete()
+
+            s = obj.syndications.filter(name=MastodonStatus.instance_name).delete()
         except Exception as e:
             self.message_user(request, "Unable to favorite mastodon status: " + str(e), messages.ERROR)
         
@@ -133,8 +146,8 @@ class SyndicatableAdmin(admin.ModelAdmin):
         
         try: 
             response = SyndicationAbstract.unboost_on_mastodon(id)
-            ms = obj.mastodon_status.get()
-            ms.delete()
+
+            s = obj.syndications.filter(name=MastodonStatus.instance_name).delete()
         except Exception as e:
             self.message_user(request, "Unable to favorite mastodon status: " + str(e), messages.ERROR)
         
@@ -165,13 +178,18 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
 
         try:
+            syndication = obj.syndications.create(
+                name=MastodonStatus.instance_name,
+                url=response['url'])
+            
             obj.mastodon_status.create(
                 id_str=response['id'], 
                 url=response['url'],
-                created_at=response['created_at']
+                created_at=response['created_at'],
+                syndication=syndication
             )
+            
             obj.syndicated_to_mastodon = timezone.now()
-            obj.syndications.add(Syndication())
         except Exception as e:
             self._desyndicate_from_mastodon(response["id"], obj)
             self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }", messages.ERROR)
@@ -194,8 +212,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             self.message_user(request, f"Error desyndicating to Mastodon: { str(e) }", messages.ERROR)
 
         try:
-            ms = obj.mastodon_status.get()
-            ms.delete()
+            s = obj.syndications.filter(name=MastodonStatus.instance_name).delete()
         except Exception as e:
             self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }", messages.ERROR)
         

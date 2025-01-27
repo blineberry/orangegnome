@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.forms import ModelForm
 from .models import Repost
-from syndications.admin import SyndicatableAdmin
-from feed.admin import PublishableAdmin
+from feed.admin import SyndicatableAdmin
 
 # Register your models here.
 # Customize the Admin form
@@ -28,7 +27,7 @@ class RepostModelForm(ModelForm):
         ]
 
 # Admin specs for the Repost model
-class RepostAdmin(PublishableAdmin, SyndicatableAdmin):
+class RepostAdmin(SyndicatableAdmin):
     """
     Specifications for the Repost Admin page.
 

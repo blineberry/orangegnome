@@ -547,6 +547,8 @@ class MastodonStatus(models.Model):
     created_at = models.DateTimeField()
     syndication = models.OneToOneField(Syndication, on_delete=models.CASCADE, null=True)
 
+    instance_name = settings.MASTODON_INSTANCE
+
     def save(self,*args,**kwargs):
         super().save(*args,**kwargs)
         

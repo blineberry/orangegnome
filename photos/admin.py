@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Photo
-from syndications.admin import SyndicatableAdmin
-from feed.admin import PublishableAdmin
+from feed.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
 
 # Customize the Admin form
@@ -33,7 +32,7 @@ class PhotoModelForm(ModelForm):
         ]
 
 # Admin specs for the Photo model
-class PhotoAdmin(PublishableAdmin, SyndicatableAdmin):
+class PhotoAdmin(SyndicatableAdmin):
     """
     Specifications for the Note Admin page.
 
