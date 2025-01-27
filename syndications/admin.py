@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from tweepy.errors import TweepyException
-from .models import Syndication, TwitterUser, MastodonStatus, MastodonSyndicatable, MastodonStatusesToProcess, MastodonPush
+from .models import SyndicationAbstract, TwitterUser, MastodonStatus, MastodonSyndicatable, MastodonStatusesToProcess, MastodonPush
 from django.utils import timezone
 from django.conf import settings
 
@@ -19,7 +19,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
         try:
             media = obj.get_twitter_media()
             update = obj.to_twitter_status_update()
-            response = Syndication.syndicate_to_twitter(update, media)
+            response = SyndicationAbstract.syndicate_to_twitter(update, media)
         except Exception as e:
             obj.syndicate_to_twitter = False
             self.message_user(request, f"Error syndicating to Twitter: { str(e) }", messages.ERROR)
@@ -52,7 +52,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return obj
 
         try:
-            response = Syndication.delete_from_twitter(obj.tweet.get().id_str)
+            response = SyndicationAbstract.delete_from_twitter(obj.tweet.get().id_str)
         except TweepyException as e:
             self.message_user(request, f"Error desyndicating to Twitter: { str(e) }", messages.ERROR)
             return obj
@@ -76,7 +76,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return
         
         try: 
-            response = Syndication.favorite_on_mastodon(id)
+            response = SyndicationAbstract.favorite_on_mastodon(id)
             obj.mastodon_status.create(
                 id_str=response['id'],
                 url=response['url'],
@@ -96,7 +96,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return
         
         try: 
-            response = Syndication.boost_on_mastodon(id)
+            response = SyndicationAbstract.boost_on_mastodon(id)
             obj.mastodon_status.create(
                 id_str=response['id'],
                 url=response['url'],
@@ -116,7 +116,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return
         
         try: 
-            response = Syndication.unfavorite_on_mastodon(id)
+            response = SyndicationAbstract.unfavorite_on_mastodon(id)
             ms = obj.mastodon_status.get()
             ms.delete()
         except Exception as e:
@@ -132,7 +132,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return
         
         try: 
-            response = Syndication.unboost_on_mastodon(id)
+            response = SyndicationAbstract.unboost_on_mastodon(id)
             ms = obj.mastodon_status.get()
             ms.delete()
         except Exception as e:
@@ -157,7 +157,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
         try:
             media = obj.get_mastodon_media_upload()
             status = obj.get_mastodon_status_update()
-            response = Syndication.syndicate_to_mastodon(status, media)
+            response = SyndicationAbstract.syndicate_to_mastodon(status, media)
         except Exception as e:
             obj.syndicate_to_mastodon = False
             self._desyndicate_from_mastodon(None, obj)
@@ -171,6 +171,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
                 created_at=response['created_at']
             )
             obj.syndicated_to_mastodon = timezone.now()
+            obj.syndications.add(Syndication())
         except Exception as e:
             self._desyndicate_from_mastodon(response["id"], obj)
             self.message_user(request, f"Error updating Mastodon syndication info: { str(e) }", messages.ERROR)
@@ -188,7 +189,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return self.__desyndicate_mastodon_boost(request, obj)
 
         try:
-            response = Syndication.delete_from_mastodon(obj.mastodon_status.get().id_str)
+            response = SyndicationAbstract.delete_from_mastodon(obj.mastodon_status.get().id_str)
         except Exception as e:
             self.message_user(request, f"Error desyndicating to Mastodon: { str(e) }", messages.ERROR)
 

@@ -402,19 +402,35 @@ blockquote {
   display: none;
 }
 
-.postmeta-tags ul {
+.postmeta-tags ul, .commalist ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: inline;
 }
-.postmeta-tags li {
+.postmeta-tags li, .commalist li {
   display: inline;
 }
-.postmeta-tags li::after {
+.postmeta-tags li::after, .commalist li::after {
   content: ",";
 }
-.postmeta-tags li:last-child::after {
+.postmeta-tags li:last-child::after, .commalist li:last-child::after {
+  content: "";
+}
+
+ul.commalist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+ul.commalist li {
+  display: inline;
+}
+ul.commalist li::after {
+  content: ",";
+}
+ul.commalist li:last-child::after {
   content: "";
 }
 

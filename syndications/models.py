@@ -16,7 +16,12 @@ from webmentions.models import OutgoingContent
 from django.urls import reverse
 
 # Create your models here.
-class Syndication():
+class Syndication(models.Model):
+    name = models.CharField(max_length=50)
+    url = models.URLField()
+
+
+class SyndicationAbstract():
     name = models.TextField(max_length=50)
     url = models.TextField(max_length=2000)
 
@@ -38,11 +43,11 @@ class Syndication():
 
     @staticmethod
     def syndicate_to_twitter(update=None, media=None):
-        client = Syndication.get_twitter_v2_client()
+        client = SyndicationAbstract.get_twitter_v2_client()
         media_ids = None
 
         if media is not None:
-            api = Syndication.get_twitter_v1_client()
+            api = SyndicationAbstract.get_twitter_v1_client()
             media_response = api.media_upload(media.filename, file=media.file)
             media_id = media_response.media_id_string
             api.create_media_metadata(media_id, media.alt_text)
@@ -54,7 +59,7 @@ class Syndication():
 
     @staticmethod
     def delete_from_twitter(id_str):
-        client = Syndication.get_twitter_v2_client()
+        client = SyndicationAbstract.get_twitter_v2_client()
         
         response = client.delete_tweet(id_str, user_auth=True)
         return response
@@ -272,6 +277,7 @@ class Tweet(models.Model):
     user = models.ForeignKey(TwitterUser, on_delete=models.PROTECT, related_name='tweets', null=True)
     in_reply_to_status_id_str=models.CharField(max_length=40, blank=True, null=True)
     in_reply_to_screen_name=models.CharField(max_length=100, blank=True, null=True)
+    syndication = models.OneToOneField(Syndication, on_delete=models.CASCADE, null=True)
 
     def get_url(self):
         screen_name = self.screen_name
@@ -282,7 +288,7 @@ class Tweet(models.Model):
         return f'https://twitter.com/{screen_name}/status/{self.id_str}'
 
     def to_syndication(self):
-        return Syndication(name='Twitter',url=self.get_url())
+        return SyndicationAbstract(name='Twitter',url=self.get_url())
 
 class TwitterSyndicatable(models.Model):
     syndicated_to_twitter = models.DateTimeField(null=True)
@@ -539,6 +545,7 @@ class MastodonStatus(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     created_at = models.DateTimeField()
+    syndication = models.OneToOneField(Syndication, on_delete=models.CASCADE, null=True)
 
     def save(self,*args,**kwargs):
         super().save(*args,**kwargs)
@@ -833,21 +840,21 @@ class MastodonStatusesToProcess(models.Model):
 
     def process(self):
         try:
-            Syndication.update_mastodon_replies(self.id_str)        
+            SyndicationAbstract.update_mastodon_replies(self.id_str)        
         except Exception as e:
             self.result = str(e)
             self.save()
             return
         
         try:
-            Syndication.update_mastodon_boosts(self.id_str)   
+            SyndicationAbstract.update_mastodon_boosts(self.id_str)   
         except Exception as e:
             self.result = str(e)
             self.save()
             return
         
         try:
-            Syndication.update_mastodon_favourites(self.id_str)  
+            SyndicationAbstract.update_mastodon_favourites(self.id_str)  
         except Exception as e:
             self.result = str(e)
             self.save()

@@ -35,23 +35,19 @@
                             {% if item.tags.all %}
                             <div class="postmeta-tags">Tags:
                                 <ul>
-                                {% for tag in item.tags.all %}
+                                {% for tag in item.tags.all|dictsort:"name" %}
                                     <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
                                 {% endfor %}
                                 </ul>
                             </div>
                             {% endif %}                            
-                            {% if item.is_syndicated_to_twitter or item.is_syndicated_to_mastodon %}
-                            <div class="postmeta-syndication">Posted to 
-                                {% if item.is_syndicated_to_twitter %}
-                                <a class="u-syndication" href="{{ item.tweet.get.get_url }}">Twitter</a>
-                                {% endif %}
-                                {% if item.is_syndicated_to_twitter and item.is_syndicated_to_mastodon %}
-                                and 
-                                {% endif %}
-                                {% if item.is_syndicated_to_mastodon %}
-                                <a class="u-syndication" href="{{ item.mastodon_status.get.url }}">Mastodon</a>
-                                {% endif %}
+                            {% if item.syndications.all %}
+                            <div class="postmeta-syndication">Also on: 
+                                <ul class="commalist">
+                                {% for s in item.syndications.all|dictsort:"name" %}
+                                    <li><a class="u-syndication" href="{{ s.url }}">{{ s.name }}</a></li>
+                                {% endfor %}
+                                </ul>
                             </div>    
                             {% endif %}
                         </div>                        

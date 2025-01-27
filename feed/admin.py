@@ -1,9 +1,12 @@
 from django.contrib import admin
-from .models import Tag
+from .models import Tag, Syndication
 from django import forms
 from django.utils import timezone
 
 # Register your models here.
+class SyndicationInline(admin.TabularInline):
+    model = Syndication
+
 class PublishableMixin():
     is_published = 'is_published'
     published_date = 'published'
