@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from syndications.models import Syndication as SyndicationsSyndication
 
 def convert_commonmark_to_plain_text(input):
-    html = pypandoc.convert_text(input, 'html', format='commonmark')
+    html = pypandoc.convert_text(input, 'html', format='commonmark', extra_args=["--wrap=preserve"])
 
     # convert <cite> to underscores
     soup = BeautifulSoup(html, 'html.parser')
@@ -30,12 +30,12 @@ def convert_commonmark_to_plain_text(input):
         item.insert_before("*")
         item.unwrap()
 
-    output = pypandoc.convert_text(str(soup), 'plain', format='html')
+    output = pypandoc.convert_text(str(soup), 'plain', format='html', extra_args=["--wrap=preserve"])
 
     return output
 
 def convert_commonmark_to_html(input):
-    return pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris')
+    return pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
 
 # Create your models here.
 class Tag(models.Model):
