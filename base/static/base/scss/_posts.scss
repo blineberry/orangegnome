@@ -4,13 +4,32 @@
     display: none;
   }
 
-.postmeta-tags {
+.postmeta-tags, .commalist {
     ul {
         list-style: none;
         margin: 0;
         padding: 0;
         display: inline;
     }
+
+    li {
+        display: inline;
+
+        &::after {
+            content: ',';
+        }
+
+        &:last-child::after {
+            content: '';
+        }
+    }
+}
+
+ul.commalist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline;
 
     li {
         display: inline;

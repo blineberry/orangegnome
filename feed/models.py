@@ -8,6 +8,7 @@ from webmentions.models import Webmentionable
 from django.core.exceptions import ValidationError
 import pypandoc
 from bs4 import BeautifulSoup
+from syndications.models import Syndication as SyndicationsSyndication
 
 def convert_commonmark_to_plain_text(input):
     html = pypandoc.convert_text(input, 'html', format='commonmark')
@@ -186,3 +187,5 @@ class FeedItem(Webmentionable, models.Model):
         if not self.author:
             raise ValidationError("Published posts must have an author.")
         
+class Syndication(SyndicationsSyndication):
+    syndicated_post = models.ForeignKey(FeedItem, on_delete=models.CASCADE, related_name="syndications")

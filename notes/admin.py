@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Note
-from syndications.admin import SyndicatableAdmin
-from feed.admin import PublishableAdmin
+from feed.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
 from base.widgets import PlainTextCountTextarea
 
@@ -29,7 +28,7 @@ class NoteModelForm(ModelForm):
         ]
 
 # Admin specs for the Note model
-class NoteAdmin(PublishableAdmin, SyndicatableAdmin):
+class NoteAdmin(SyndicatableAdmin):
     """
     Specifications for the Note Admin page.
 

@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Post, Category
-from syndications.admin import SyndicatableAdmin
-from notes.admin import PublishableAdmin
+from notes.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
 
 class PostModelForm(ModelForm):
@@ -32,7 +31,7 @@ class PostModelForm(ModelForm):
             'tags',
         ]
 
-class PostAdmin(SyndicatableAdmin, PublishableAdmin):
+class PostAdmin(SyndicatableAdmin):
     form = PostModelForm
 
     prepopulated_fields = { 'slug': ('title',)}

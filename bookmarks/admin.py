@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.forms import ModelForm, CharField, Textarea
 from .models import Bookmark
-from syndications.admin import SyndicatableAdmin
-from feed.admin import PublishableAdmin
+from feed.admin import SyndicatableAdmin
 
 # Register your models here.
 # Customize the Admin form
@@ -35,7 +34,7 @@ class BookmarkModelForm(ModelForm):
         ]
 
 # Admin specs for the Bookmark model
-class BookmarkAdmin(PublishableAdmin, SyndicatableAdmin):
+class BookmarkAdmin(SyndicatableAdmin):
     """
     Specifications for the Bookmark Admin page.
 
