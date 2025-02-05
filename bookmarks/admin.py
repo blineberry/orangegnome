@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django.forms import ModelForm, CharField, Textarea
+from django.forms import ModelForm, CharField, Textarea,TextInput
 from .models import Bookmark
 from feed.admin import SyndicatableAdmin
+from base.widgets import PlainTextCountTextarea, PlainTextCountTextInput
 
 # Register your models here.
 # Customize the Admin form
@@ -12,10 +13,19 @@ class BookmarkModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    quote = CharField(widget=Textarea, required=False)
+    title = CharField(
+        widget=PlainTextCountTextInput(max=Bookmark.title_max),
+        required=False)
+    #title = CharField(widget=TextInput)
+
+    quote = CharField(
+        widget=PlainTextCountTextarea(max=Bookmark.quote_max), 
+        required=False)
     """Display the quote input as a Textarea"""
 
-    commentary = CharField(widget=Textarea, required=False)
+    commentary = CharField(
+        widget=PlainTextCountTextarea(max=Bookmark.commentary_max), 
+        required=False)
     """Display the commentary input as a Textarea"""
 
     class Meta:
@@ -75,7 +85,7 @@ class BookmarkAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """
 
-    list_display = ['url', 'title']
+    list_display = ['url', 'title_plain']
     """The fields to display on the admin list view."""
 
 # Register your models here.

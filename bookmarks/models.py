@@ -6,7 +6,7 @@ https://indieweb.org/bookmark
 from typing import Iterable, Optional
 from django.db import models
 from django.urls import reverse
-from feed.models import FeedItem
+from feed.models import FeedItem, convert_commonmark_to_html, convert_commonmark_to_plain_text
 from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 from django.template.loader import render_to_string
 
@@ -17,24 +17,54 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     """
 
     url = models.CharField(max_length=2000)
+    #url = models.URLField(max_length=2048)
     """
     The URL of the bookmark.
     """
 
-    title = models.CharField(max_length=100, blank=True)
+    title_txt = models.CharField(max_length=100, blank=True)
+    title_max = 100
+    title_md = models.TextField(blank=True)
     """
     The title of the bookmark, probably the title of the URL page.
     """
-
-    commentary = models.CharField(max_length=280, blank=True)
+    commentary_txt = models.CharField(max_length=280, blank=True)
+    commentary_max = 280
+    commentary_md = models.TextField(blank=True)
     """
     Content commenting on the content of the bookmark.
     """
 
-    quote = models.CharField(max_length=280, blank=True)
+    quote_txt = models.CharField(max_length=280, blank=True)
+    quote_max = 280
+    quote_md = models.TextField(blank=True)
+    # quote = models.TextField(blank=True)
     """
     Quote from the bookmarked content.
     """
+
+    @property
+    def title_plain(self):
+        return self.commonmark_to_plain(self.title)
+    @property
+    def title_html(self):
+        return self.commonmark_to_html(self.title, block_content=False)
+    
+    @property
+    def quote_plain(self):
+        return self.commonmark_to_plain(self.quote)
+    
+    @property
+    def quote_html(self):
+        return self.commonmark_to_html(self.quote)
+    
+    @property
+    def commentary_plain(self):
+        return self.commonmark_to_plain(self.commentary)
+    
+    @property
+    def commentary_html(self):
+        return self.commonmark_to_html(self.commentary)
 
     postheader_template = "bookmarks/_bookmark_postheader.html"
     postcontent_template = "bookmarks/_bookmark_postcontent.html"
@@ -84,12 +114,12 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         """Returns True if Bookmark has both quote and commentary."""
         return self.has_quote() and self.has_commentary()
 
-    def get_title_or_url(self):
+    def get_title_or_url_html(self):
         """
         Returns the bookmark title if it exists, otherwise returns the url.
         """
         if self.title is not None and self.title.isspace() == False and self.title != "":
-            return self.title
+            return self.title_html
 
         return self.url    
     

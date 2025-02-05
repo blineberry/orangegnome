@@ -126,7 +126,7 @@ class CommonmarkConversion(View):
         if id is None:
             return HttpResponse("id parameter is required", status=400)
         
-        conversion = request.session.get(id)
+        conversion = request.session.pop(id, None)
 
         if conversion is None:
             return HttpResponse("id not found", status=404)

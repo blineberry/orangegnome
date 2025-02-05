@@ -2,11 +2,11 @@
 <div class="article-content e-content">
     {% if item.quote %}
     <blockquote>
-        {{ item.quote }}
+        {{ item.quote_html|safe }}
     </blockquote>
     {% endif %}
     {% if item.commentary %}
-    <p>{{ item.commentary }}</p>
+    <div>{{ item.commentary_html|safe }}</div>
     {% endif %}
 </div>
 {% endif %}
