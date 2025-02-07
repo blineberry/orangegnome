@@ -9,33 +9,62 @@ from django.core.exceptions import ValidationError
 import pypandoc
 from bs4 import BeautifulSoup
 from syndications.models import Syndication as SyndicationsSyndication
+import re
+import os
 
-def convert_commonmark_to_plain_text(input):
-    html = pypandoc.convert_text(input, 'html', format='commonmark', extra_args=["--wrap=preserve"])
 
-    # convert <cite> to underscores
-    soup = BeautifulSoup(html, 'html.parser')
+def convert_commonmark_to_plain_text(input, strip=True):
+    output = pypandoc.convert_text(input, os.path.join(settings.BASE_DIR, 'feed/pandocfilters/plaintext_writer.lua'), format='commonmark+raw_html', extra_args=["--wrap=preserve"])
 
-    for item in soup.find_all("a"):
-        item.string = "%s (%s)" % (item.string, item['href'])
+    if not strip:
+        return output
+    
+    return output.strip()
+
+def convert_commonmark_to_html(input:str, block_content:bool=True):
+    conversion = pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
+
+    if block_content:
+        return conversion
+    
+    block_elements = ["address",
+        "article",
+        "aside",
+        "blockquote",
+        "canvas",
+        "dd",
+        "div",
+        "dl",
+        "dt",
+        "fieldset",
+        "figcaption",
+        "figure",
+        "footer",
+        "form",
+        "h1>-<h6",
+        "header",
+        "hr",
+        "li",
+        "main",
+        "nav",
+        "noscript",
+        "ol",
+        "p",
+        "pre",
+        "section",
+        "table",
+        "tfoot",
+        "ul",
+        "video"
+    ]
+
+    soup = BeautifulSoup(input, "html.parser")
+
+    for item in soup.find_all(block_elements):
         item.unwrap()
 
-    for item in soup.find_all(["cite","i","em"]):
-        item.insert_after("_")
-        item.insert_before("_")
-        item.unwrap()
+    return str(soup)
 
-    for item in soup.find_all(["b", "strong"]):
-        item.insert_after("*")
-        item.insert_before("*")
-        item.unwrap()
-
-    output = pypandoc.convert_text(str(soup), 'plain', format='html', extra_args=["--wrap=preserve"])
-
-    return output
-
-def convert_commonmark_to_html(input):
-    return pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
 
 # Create your models here.
 class Tag(models.Model):
@@ -186,6 +215,12 @@ class FeedItem(Webmentionable, models.Model):
         # Every feed item needs an author to publish.
         if not self.author:
             raise ValidationError("Published posts must have an author.")
+        
+    def commonmark_to_html(self, commonmark:str, block_content:bool=True):
+        return convert_commonmark_to_html(commonmark, block_content)
+    
+    def commonmark_to_plain(self, commonmark:str, strip:bool=True):
+        return convert_commonmark_to_plain_text(commonmark, strip)
         
 class Syndication(SyndicationsSyndication):
     syndicated_post = models.ForeignKey(FeedItem, on_delete=models.CASCADE, related_name="syndications")

@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Note
 from feed.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
-from base.widgets import PlainTextCountTextarea
+from feed.widgets import PlainTextCountTextarea
 
 # Customize the Admin form
 class NoteModelForm(ModelForm):
