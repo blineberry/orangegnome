@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.forms import ModelForm, CharField, Textarea,TextInput
 from .models import Bookmark
 from feed.admin import SyndicatableAdmin
-from base.widgets import PlainTextCountTextarea, PlainTextCountTextInput
+from feed.widgets import PlainTextCountTextarea, PlainTextCountTextInput
 
 # Register your models here.
 # Customize the Admin form
@@ -13,17 +13,17 @@ class BookmarkModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    title = CharField(
+    title_md = CharField(
         widget=PlainTextCountTextInput(max=Bookmark.title_max),
         required=False)
     #title = CharField(widget=TextInput)
 
-    quote = CharField(
+    quote_md = CharField(
         widget=PlainTextCountTextarea(max=Bookmark.quote_max), 
         required=False)
     """Display the quote input as a Textarea"""
 
-    commentary = CharField(
+    commentary_md = CharField(
         widget=PlainTextCountTextarea(max=Bookmark.commentary_max), 
         required=False)
     """Display the commentary input as a Textarea"""
@@ -32,10 +32,10 @@ class BookmarkModelForm(ModelForm):
         model = Bookmark
         fields = [
             'url',
-            'title',
+            'title_md',
             'in_reply_to', 
-            'quote',
-            'commentary',
+            'quote_md',
+            'commentary_md',
             'author',
             'tags',
             'syndicate_to_twitter', 
@@ -63,7 +63,7 @@ class BookmarkAdmin(SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'title', 'quote', 'commentary','in_reply_to','author','tags')
+            'fields': ('url', 'title_md', 'quote_md', 'commentary_md','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
@@ -85,8 +85,9 @@ class BookmarkAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """
 
-    list_display = ['url', 'title_plain']
+    list_display = ['url', 'title_txt']
     """The fields to display on the admin list view."""
+       
 
 # Register your models here.
 admin.site.register(Bookmark, BookmarkAdmin)

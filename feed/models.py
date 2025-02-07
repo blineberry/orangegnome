@@ -10,10 +10,11 @@ import pypandoc
 from bs4 import BeautifulSoup
 from syndications.models import Syndication as SyndicationsSyndication
 import re
+import os
 
 
 def convert_commonmark_to_plain_text(input, strip=True):
-    output = pypandoc.convert_text(input, './pandocfilters/plaintext_writer.lua', format='commonmark+raw_html', extra_args=["--wrap=preserve"])
+    output = pypandoc.convert_text(input, os.path.join(settings.BASE_DIR, 'feed/pandocfilters/plaintext_writer.lua'), format='commonmark+raw_html', extra_args=["--wrap=preserve"])
 
     if not strip:
         return output

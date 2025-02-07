@@ -3,5 +3,5 @@
         <div>In reply to <a class="u-in-reply-to" href="{{item.in_reply_to}}">{{item.in_reply_to}}</a></div>
     {% endif %}
 
-    <h1><a class="article-link alt u-bookmark-of {% if item.title %}h-cite{% endif %}" href="{{ item.url }}">{{ item.get_title_or_url_html|safe }}</a></h1>
+    <h1><a class="article-link alt u-bookmark-of {% if item.title_md %}h-cite{% endif %}" href="{{ item.url }}">{{ item.get_title_or_url_html|safe }}</a></h1>
 </header>
