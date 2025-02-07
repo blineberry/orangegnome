@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profiles', '0001_initial'),
+        ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
         ('posts', '0005_auto_20200317_1708'),
     ]
 

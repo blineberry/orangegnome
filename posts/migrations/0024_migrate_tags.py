@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('posts', '0023_post_feeditem'),
-        ('feed', '0003_feeditem_tags'),
+        ('feed', '0001_squashed_0003_feeditem_tags'),
     ]
 
     operations = [

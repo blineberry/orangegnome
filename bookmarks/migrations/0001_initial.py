@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('feed', '0007_feeditem_in_reply_to'),
+        ('feed', '0004_auto_20200417_2246_squashed_0009_alter_feeditem_published'),
     ]
 
     operations = [

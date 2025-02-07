@@ -12,7 +12,7 @@ def up(apps, schema_editor):
 def down(apps, schema_editor):
     Note = apps.get_model('notes','Note')
 
-    for post in Note.objects.all():
+    for note in Note.objects.all():
         note.tags.set(note.feeditem.tags.all())
         note.save()
 

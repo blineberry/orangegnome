@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('contenttypes','__first__'),
         ('posts', '0013_auto_20200401_1332'),
-        ('syndications', '0001_initial'),
+        ('syndications', '0001_squashed_0016_data_migration'),
     ]
 
     operations = [
