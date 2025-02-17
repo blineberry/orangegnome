@@ -10,6 +10,7 @@ from feed.models import FeedItem, convert_commonmark_to_html, convert_commonmark
 from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 from django.template.loader import render_to_string
 from feed.fields import CommonmarkField, CommonmarkInlineField
+from django.utils import timezone
 
 # Create your models here.
 class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
@@ -17,8 +18,7 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     The Django model representing the bookmark.
     """
 
-    url = models.CharField(max_length=2000)
-    #url = models.URLField(max_length=2048)
+    url = models.URLField(max_length=2048)
     """
     The URL of the bookmark.
     """
@@ -42,10 +42,11 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     quote_html = models.TextField(blank=True)
     quote_max = 280
     quote_md = CommonmarkField(blank=True, txt_field='quote_txt', html_field='quote_html', verbose_name="quote", help_text="CommonMark supported.")
-    # quote = models.TextField(blank=True)
     """
     Quote from the bookmarked content.
     """
+
+    commonmark_rendered_at = models.DateTimeField(null=True)
 
     postheader_template = "bookmarks/_bookmark_postheader.html"
     postcontent_template = "bookmarks/_bookmark_postcontent.html"
@@ -177,3 +178,27 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def get_mastodon_tags(self):
         """Return the tags that should be parsed and added to the status."""
         return self.tags.all()
+    
+    def render_title(self):
+        self.title_txt = CommonmarkInlineField.md_to_txt(self.title_md)
+        self.title_html = CommonmarkInlineField.md_to_html(self.title_md)
+    
+    def render_quote(self):
+        self.quote_txt = CommonmarkField.md_to_txt(self.quote_md)
+        self.quote_html = CommonmarkField.md_to_html(self.quote_md)
+    
+    def render_commentary(self):
+        self.commentary_txt = CommonmarkField.md_to_txt(self.commentary_md)
+        self.commentary_html = CommonmarkField.md_to_html(self.commentary_md)
+    
+    def render_commonmark_fields(self):
+        self.render_title()
+        self.render_quote()
+        self.render_commentary()
+        self.commonmark_rendered_at = timezone.now()
+    
+    def save(self, *args, **kwargs):
+        self.render_commonmark_fields()
+
+        result = super().save(*args, **kwargs)
+        return result

@@ -111,10 +111,13 @@ class PlainTextCountTextarea extends HTMLElement {
             }
             if (err === abortReason) {
                 return;
-            }
+            }            
 
             console.warn({err})
-            this.error.innerText = err.message
+            
+            if (err.message == "GET Response status: 404") {
+                this.updateCount();
+            }
         });
     }, 300);
 

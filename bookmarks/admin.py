@@ -87,6 +87,14 @@ class BookmarkAdmin(SyndicatableAdmin):
 
     list_display = ['url', 'title_txt']
     """The fields to display on the admin list view."""
+
+    actions = ["render_commonmark"]
+
+    @admin.action(description="Render commonmark")
+    def render_commonmark(self, request, queryset):
+        for obj in queryset:
+            obj.render_commonmark_fields()
+            obj.save()
        
 
 # Register your models here.

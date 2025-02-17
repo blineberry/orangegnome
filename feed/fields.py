@@ -1,7 +1,72 @@
 from django.db import models
-from .models import convert_commonmark_to_html, convert_commonmark_to_plain_text
+import pypandoc
+from bs4 import BeautifulSoup
+import os
+from django.conf import settings
+
+# Borrowed/ stolen from https://github.com/dmptrluke/django-markdownfield/tree/master
 
 class CommonmarkField(models.TextField):
+    @staticmethod
+    def md_to_txt(input, strip=True):
+        if input == "":
+            return ""
+        
+        output = pypandoc.convert_text(input, os.path.join(settings.BASE_DIR, 'feed/pandocfilters/plaintext_writer.lua'), format='commonmark+raw_html', extra_args=["--wrap=preserve"])
+
+        if not strip:
+            return output
+        
+        return output.strip()
+    
+    @staticmethod
+    def md_to_html(input:str, block_content:bool=True):
+        if input == "":
+            return ""
+
+        conversion = pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
+
+        if block_content:
+            return conversion
+        
+        block_elements = ["address",
+            "article",
+            "aside",
+            "blockquote",
+            "canvas",
+            "dd",
+            "div",
+            "dl",
+            "dt",
+            "fieldset",
+            "figcaption",
+            "figure",
+            "footer",
+            "form",
+            "h1>-<h6",
+            "header",
+            "hr",
+            "li",
+            "main",
+            "nav",
+            "noscript",
+            "ol",
+            "p",
+            "pre",
+            "section",
+            "table",
+            "tfoot",
+            "ul",
+            "video"
+        ]
+
+        soup = BeautifulSoup(input, "html.parser")
+
+        for item in soup.find_all(block_elements):
+            item.unwrap()
+
+        return str(soup)
+
     def __init__(self, *args, txt_field: str = None, html_field: str = None, **kwargs):
         self.txt_field = txt_field
         self.html_field = html_field
@@ -23,7 +88,7 @@ class CommonmarkField(models.TextField):
         if not self.html_field:
             return value
         
-        html = convert_commonmark_to_html(value)
+        html = CommonmarkField.md_to_html(value)
 
         setattr(model_instance, self.html_field, html)
 
@@ -33,7 +98,7 @@ class CommonmarkField(models.TextField):
         if not self.txt_field:
             return value
         
-        txt = convert_commonmark_to_plain_text(value)
+        txt = CommonmarkField.md_to_txt(value)
 
         setattr(model_instance, self.txt_field, txt)
 
@@ -48,12 +113,15 @@ class CommonmarkField(models.TextField):
         return value
         
 class CommonmarkInlineField(CommonmarkField):
+    @staticmethod
+    def md_to_html(input:str, block_content:bool=True):
+        return CommonmarkField(input,block_content)
+
     def _render_html(self, value, model_instance):
-        print("CommonmarkInlineField _render_html")
         if not self.html_field:
             return value
         
-        html = convert_commonmark_to_html(value, block_content=False)
+        html = CommonmarkField.md_to_html(value, block_content=False)
 
         setattr(model_instance, self.html_field, html)
 

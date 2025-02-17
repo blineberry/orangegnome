@@ -1,6 +1,7 @@
 from bookmarks.models import Bookmark
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Q
+from django.db.models import Q, F
+from datetime import timedelta
 
 class Command(BaseCommand):
     help = "Saves all bookmarks, prompting a render of markdown to txt and html"
@@ -9,16 +10,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         bookmarks = Bookmark.objects.filter(
-            ((Q(commentary_txt="") | Q(commentary_html="")) & ~Q(commentary_md="")) | 
-            ((Q(quote_txt="") | Q(quote_html="")) & ~Q(quote_md="")) |
-            ((Q(title_txt="") | Q(title_html="")) & ~Q(title_md="")))
+            Q(updated=None) | 
+            Q(commonmark_rendered_at=None) |
+            Q(commonmark_rendered_at__lt=F("updated") - timedelta(seconds=1))
+        )
         
         self.stdout.write(f"{len(bookmarks)} bookmarks to render.")
 
         for bookmark in bookmarks:
             self.stdout.write(str(bookmark.pk))
-            bookmark.commentary_md.pre_save()
-            self.stdout.write(bookmark.commentary_txt)
+            bookmark.render_commonmark_fields()
             bookmark.save()
             
         self.stdout.write("Bookmarks rendered.")

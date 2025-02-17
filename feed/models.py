@@ -2,68 +2,18 @@ from django.db import models
 from django.urls import reverse
 from profiles.models import Profile
 from django.conf import settings
-from datetime import datetime
 from django.utils import timezone
 from webmentions.models import Webmentionable
 from django.core.exceptions import ValidationError
-import pypandoc
-from bs4 import BeautifulSoup
 from syndications.models import Syndication as SyndicationsSyndication
-import re
-import os
+from .fields import CommonmarkField
 
 
-def convert_commonmark_to_plain_text(input, strip=True):
-    output = pypandoc.convert_text(input, os.path.join(settings.BASE_DIR, 'feed/pandocfilters/plaintext_writer.lua'), format='commonmark+raw_html', extra_args=["--wrap=preserve"])
-
-    if not strip:
-        return output
-    
-    return output.strip()
+def convert_commonmark_to_plain_text(input:str, strip:bool=True):
+    return CommonmarkField.md_to_txt(input, strip)
 
 def convert_commonmark_to_html(input:str, block_content:bool=True):
-    conversion = pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
-
-    if block_content:
-        return conversion
-    
-    block_elements = ["address",
-        "article",
-        "aside",
-        "blockquote",
-        "canvas",
-        "dd",
-        "div",
-        "dl",
-        "dt",
-        "fieldset",
-        "figcaption",
-        "figure",
-        "footer",
-        "form",
-        "h1>-<h6",
-        "header",
-        "hr",
-        "li",
-        "main",
-        "nav",
-        "noscript",
-        "ol",
-        "p",
-        "pre",
-        "section",
-        "table",
-        "tfoot",
-        "ul",
-        "video"
-    ]
-
-    soup = BeautifulSoup(input, "html.parser")
-
-    for item in soup.find_all(block_elements):
-        item.unwrap()
-
-    return str(soup)
+    return CommonmarkField.md_to_html(input, block_content)
 
 
 # Create your models here.
@@ -92,7 +42,8 @@ class Tag(models.Model):
         return "#" + self.to_pascale_case(strip_special_characters)
 
 class FeedItem(Webmentionable, models.Model):
-    updated = models.DateTimeField(null=True)
+    created = models.DateTimeField(null=True, auto_now_add=True)
+    updated = models.DateTimeField(null=True, auto_now=True)
     author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
