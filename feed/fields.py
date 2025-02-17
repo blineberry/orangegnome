@@ -43,7 +43,12 @@ class CommonmarkField(models.TextField):
             "figure",
             "footer",
             "form",
-            "h1>-<h6",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
             "header",
             "hr",
             "li",
@@ -60,7 +65,7 @@ class CommonmarkField(models.TextField):
             "video"
         ]
 
-        soup = BeautifulSoup(input, "html.parser")
+        soup = BeautifulSoup(conversion, "html.parser")
 
         for item in soup.find_all(block_elements):
             item.unwrap()
