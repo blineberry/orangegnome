@@ -3,14 +3,14 @@ Implementation of the IndieWeb Bookmark post type.
 https://indieweb.org/bookmark
 """
 
-from typing import Iterable, Optional
 from django.db import models
 from django.urls import reverse
-from feed.models import FeedItem, convert_commonmark_to_html, convert_commonmark_to_plain_text
+from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 from django.template.loader import render_to_string
 from feed.fields import CommonmarkField, CommonmarkInlineField
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
@@ -198,7 +198,49 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         self.commonmark_rendered_at = timezone.now()
     
     def save(self, *args, **kwargs):
-        self.render_commonmark_fields()
-
         result = super().save(*args, **kwargs)
         return result
+    
+    # def clean(self, *args, **kwargs):
+    #     return super().clean()
+    #     self.render_commonmark_fields()
+
+    #     self.validate_publishable()
+    #     return super().clean()
+    
+    def is_publishable(self):
+        title_txt = self.title_txt
+        quote_txt = self.quote_txt
+        commentary_txt = self.commentary_txt
+
+        limits = (
+            ("Title", len(title_txt), Bookmark.title_max),
+            ("Quote", len(quote_txt), Bookmark.quote_max),
+            ("Commentary", len(commentary_txt), Bookmark.commentary_max),
+        )
+
+        for limit in limits:
+            if limit[1] > limit[2]:
+                return False
+            
+        return True
+    
+    # def validate_publishable(self):
+    #     return
+    #     if not self.published:
+    #         return
+        
+    #     title_txt = self.title_txt
+    #     quote_txt = self.quote_txt
+    #     commentary_txt = self.commentary_txt
+
+    #     limits = (
+    #         ("Title", len(title_txt), Bookmark.title_max),
+    #         ("Quote", len(quote_txt), Bookmark.quote_max),
+    #         ("Commentary", len(commentary_txt), Bookmark.commentary_max),
+    #     )
+
+    #     for limit in limits:
+    #         if limit[1] > limit[2]:
+    #             raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
+    

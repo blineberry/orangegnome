@@ -161,7 +161,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, env('MEDIA_ROOT_PATH')),
 ]
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+    }
+}
 
 # Twitter Settings
 TWITTER_CONSUMER_KEY = env('TWITTER_API_KEY')

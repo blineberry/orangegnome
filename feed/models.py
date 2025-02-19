@@ -41,7 +41,7 @@ class Tag(models.Model):
     def to_hashtag(self, strip_special_characters = True):
         return "#" + self.to_pascale_case(strip_special_characters)
 
-class FeedItem(Webmentionable, models.Model):
+class FeedItem(Webmentionable):
     created = models.DateTimeField(null=True, auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True)
     author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
