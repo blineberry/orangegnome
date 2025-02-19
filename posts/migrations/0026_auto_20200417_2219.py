@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0003_feeditem_tags'),
+        ('feed', '0001_squashed_0003_feeditem_tags'),
         ('posts', '0025_remove_post_tags'),
     ]
 

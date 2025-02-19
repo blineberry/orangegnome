@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0001_initial'),
+        ('feed', '0001_squashed_0003_feeditem_tags'),
         ('notes', '0002_note_tags'),
     ]
 

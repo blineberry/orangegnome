@@ -10,8 +10,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('feed', '0007_feeditem_in_reply_to'),
-        ('profiles', '0002_profile_twitter_screenname'),
-        ('syndications', '0007_stravaactivity'),
+        ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
+        ('syndications', '0001_squashed_0016_data_migration'),
     ]
 
     operations = [

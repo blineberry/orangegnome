@@ -2,40 +2,19 @@ from django.db import models
 from django.urls import reverse
 from profiles.models import Profile
 from django.conf import settings
-from datetime import datetime
 from django.utils import timezone
 from webmentions.models import Webmentionable
 from django.core.exceptions import ValidationError
-import pypandoc
-from bs4 import BeautifulSoup
 from syndications.models import Syndication as SyndicationsSyndication
+from .fields import CommonmarkField
 
-def convert_commonmark_to_plain_text(input):
-    html = pypandoc.convert_text(input, 'html', format='commonmark', extra_args=["--wrap=preserve"])
 
-    # convert <cite> to underscores
-    soup = BeautifulSoup(html, 'html.parser')
+def convert_commonmark_to_plain_text(input:str, strip:bool=True):
+    return CommonmarkField.md_to_txt(input, strip)
 
-    for item in soup.find_all("a"):
-        item.string = "%s (%s)" % (item.string, item['href'])
-        item.unwrap()
+def convert_commonmark_to_html(input:str, block_content:bool=True):
+    return CommonmarkField.md_to_html(input, block_content)
 
-    for item in soup.find_all(["cite","i","em"]):
-        item.insert_after("_")
-        item.insert_before("_")
-        item.unwrap()
-
-    for item in soup.find_all(["b", "strong"]):
-        item.insert_after("*")
-        item.insert_before("*")
-        item.unwrap()
-
-    output = pypandoc.convert_text(str(soup), 'plain', format='html', extra_args=["--wrap=preserve"])
-
-    return output
-
-def convert_commonmark_to_html(input):
-    return pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
 
 # Create your models here.
 class Tag(models.Model):
@@ -62,8 +41,9 @@ class Tag(models.Model):
     def to_hashtag(self, strip_special_characters = True):
         return "#" + self.to_pascale_case(strip_special_characters)
 
-class FeedItem(Webmentionable, models.Model):
-    updated = models.DateTimeField(null=True)
+class FeedItem(Webmentionable):
+    created = models.DateTimeField(null=True, auto_now_add=True)
+    updated = models.DateTimeField(null=True, auto_now=True)
     author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
@@ -186,6 +166,12 @@ class FeedItem(Webmentionable, models.Model):
         # Every feed item needs an author to publish.
         if not self.author:
             raise ValidationError("Published posts must have an author.")
+        
+    def commonmark_to_html(self, commonmark:str, block_content:bool=True):
+        return convert_commonmark_to_html(commonmark, block_content)
+    
+    def commonmark_to_plain(self, commonmark:str, strip:bool=True):
+        return convert_commonmark_to_plain_text(commonmark, strip)
         
 class Syndication(SyndicationsSyndication):
     syndicated_post = models.ForeignKey(FeedItem, on_delete=models.CASCADE, related_name="syndications")

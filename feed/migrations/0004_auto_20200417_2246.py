@@ -7,8 +7,8 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profiles', '0002_profile_twitter_screenname'),
-        ('feed', '0003_feeditem_tags'),
+        ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
+        ('feed', '0001_squashed_0003_feeditem_tags'),
     ]
 
     operations = [

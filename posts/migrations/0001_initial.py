@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('pages', '0005_profile_short_bio'),
+        ('pages', '0001_squashed_0005_profile_short_bio'),
     ]
 
     operations = [

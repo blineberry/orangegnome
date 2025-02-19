@@ -22,7 +22,7 @@ def down(apps,schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0003_feeditem_tags'),
+        ('feed', '0001_squashed_0003_feeditem_tags'),
         ('notes', '0005_remove_note_feeditem'),
     ]
 

@@ -22,7 +22,7 @@ class PlainTextCountTextarea extends HTMLElement {
     }
 
     renderedCallback() {
-        this.textarea = this.querySelector("textarea")
+        this.textarea = this.querySelector("textarea, input")
 
         let countDiv = document.createElement("div");
         this.error = document.createElement("div");
@@ -57,7 +57,7 @@ class PlainTextCountTextarea extends HTMLElement {
         }
 
         window.setTimeout(() => {
-            let textarea = this.querySelector("textarea");
+            let textarea = this.querySelector("textarea, input");
 
             if (!textarea) {
                 return this.setup(milliseconds+5);
@@ -70,7 +70,6 @@ class PlainTextCountTextarea extends HTMLElement {
     }
 
     updateCount = this.debounce(() => {
-        console.log('updateCount');
         let abortReason = "newer request";
         while (this.abortControllers.length > 0) {
             this.abortControllers.shift().abort(abortReason);
@@ -103,6 +102,8 @@ class PlainTextCountTextarea extends HTMLElement {
         }).then(content => {
             this.count = content['plain'].length;
             this.countContainer.innerText = this.count;
+
+            this.error.innerText = "";
         }).catch(err => {
             // ignore our own aborted requests
             if (err.name === "AbortError" & err.abortReason === abortReason) {
@@ -110,15 +111,17 @@ class PlainTextCountTextarea extends HTMLElement {
             }
             if (err === abortReason) {
                 return;
-            }
+            }            
 
             console.warn({err})
-            this.error.innerText = err.message
+            
+            if (err.message == "GET Response status: 404") {
+                this.updateCount();
+            }
         });
     }, 300);
 
     debounce(callback, delay) {
-        console.log({ callback, delay });
         let timeout;
 
         return (...args) => {
