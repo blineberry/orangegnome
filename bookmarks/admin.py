@@ -124,8 +124,6 @@ class BookmarkAdmin(SyndicatableAdmin):
             obj.save()
 
     def save_model(self, request:HttpRequest, obj:Bookmark, form:BookmarkModelForm, change:bool):
-        obj.render_commonmark_fields()
-
         if obj.published and not obj.is_publishable():
             obj.published = None
             messages.add_message(request, messages.WARNING, "Unable to publish.")

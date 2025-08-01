@@ -3,6 +3,8 @@ import pypandoc
 from bs4 import BeautifulSoup
 import os
 from django.conf import settings
+from mf2py.dom_helpers import get_textContent
+import mistune
 
 # Borrowed/ stolen from https://github.com/dmptrluke/django-markdownfield/tree/master
 
@@ -12,19 +14,14 @@ class CommonmarkField(models.TextField):
         if input == "":
             return ""
         
-        output = pypandoc.convert_text(input, os.path.join(settings.BASE_DIR, 'feed/pandocfilters/plaintext_writer.lua'), format='commonmark+raw_html', extra_args=["--wrap=preserve"])
-
-        if not strip:
-            return output
-        
-        return output.strip()
+        return get_textContent(BeautifulSoup(CommonmarkField.md_to_html(input), "html.parser"), replace_img=True)
     
     @staticmethod
     def md_to_html(input:str, block_content:bool=True):
         if input == "":
             return ""
 
-        conversion = pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
+        conversion = mistune.html(input) #pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
 
         if block_content:
             return conversion
@@ -119,8 +116,8 @@ class CommonmarkField(models.TextField):
         
 class CommonmarkInlineField(CommonmarkField):
     @staticmethod
-    def md_to_html(input:str, block_content:bool=True):
-        return CommonmarkField(input,block_content)
+    def md_to_html(input:str, block_content:bool=False):
+        return CommonmarkField.md_to_html(input,block_content)
 
     def _render_html(self, value, model_instance):
         if not self.html_field:
