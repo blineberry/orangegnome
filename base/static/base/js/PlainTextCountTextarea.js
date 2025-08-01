@@ -5,15 +5,42 @@ class PlainTextCountTextarea extends HTMLElement {
     conversionEndpoint;
     error;
     abortControllers = [];
+    inlineOnly = false;
 
 
     constructor() {
         super();
+        this.attachShadow({ mode: "open"});
+        
+        this.shadowRoot.innerHTML = `
+            <div>
+                <div id="markdown">
+                    <slot></slot>
+                    <div>Count: <span id="markdown-count">?</span></div>
+                    <div id="error"></div>
+                </div>
+                <details id="html">
+                    <summary>HTML: <span id="html-count">?</span></summary>
+                    <p><code id="html-content"></code></p>                    
+                </details>
+                <details id="plain">
+                    <summary>Plain Text: <span id="plain-count">?</span> / <span id="plain-max">?</span></summary>
+                    <p><code id="plain-content"></code></p>                    
+                </details>
+            </div>
+        `;
     }
 
     connectedCallback() {
         this.conversionEndpoint = this.getAttribute("conversion-endpoint");
-        this.setup(0)
+        this.inlineOnly = this.hasAttribute("inline-only");
+
+        if (document.readyState !== 'loading') {
+            this.setup();
+            return;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => this.setup());
     }
 
     disconnectedCallback() {
@@ -21,52 +48,36 @@ class PlainTextCountTextarea extends HTMLElement {
         this.textarea.removeEventListener('change', this.handleChange.bind(this));
     }
 
-    renderedCallback() {
-        this.textarea = this.querySelector("textarea, input")
+    setup() {        
+        this.textarea = this.querySelector("textarea, input");
 
-        let countDiv = document.createElement("div");
-        this.error = document.createElement("div");
+        this.htmlCode = this.shadowRoot.querySelector("#html code");
+        this.plainCode = this.shadowRoot.querySelector("#plain code");
+        this.errorDiv = this.shadowRoot.getElementById("error");
 
-        this.textarea.after(countDiv);
-        countDiv.after(this.error);
+        this.markdownCount = this.shadowRoot.getElementById("markdown-count");
+        this.htmlCount = this.shadowRoot.getElementById("html-count");
+        this.plainCount = this.shadowRoot.getElementById("plain-count");
 
-        this.max = this.getAttribute("max");
-        let maxHtmlString = "";
-
-        if (!!this.max) 
-        {
-            maxHtmlString = ` / ${this.max}`;
-        }
-
-        countDiv.innerHTML = `Plain text count: <span>?</span>${maxHtmlString}`;
-        
-
-        this.countContainer = countDiv.querySelector("span");
+        this.shadowRoot.getElementById('plain-max').innerHTML = this.getAttribute("max");
 
         this.textarea.addEventListener('keyup', this.handleKeyup.bind(this));
         this.textarea.addEventListener('change', this.handleChange.bind(this));
-
+        
         this.updateCount();
     }
 
-    setup(milliseconds) {
-        let failsafe = 5000;
+    updateContent(content) {
+        this.markdownCount.innerText = content.input.length;
+        this.htmlCount.innerText = content.html.length;
+        this.plainCount.innerText = content.plain.length;
 
-        if (milliseconds > 1000) {
-            return;
-        }
+        this.htmlCode.innerText = content.html;
+        this.plainCode.innerText = content.plain;
+    }
 
-        window.setTimeout(() => {
-            let textarea = this.querySelector("textarea, input");
-
-            if (!textarea) {
-                return this.setup(milliseconds+5);
-            }
-
-            this.renderedCallback()
-
-            
-        }, milliseconds);
+    updateError(errMessage) {
+        this.errorDiv.innerText = errMessage;
     }
 
     updateCount = this.debounce(() => {
@@ -80,7 +91,10 @@ class PlainTextCountTextarea extends HTMLElement {
 
         fetch(this.conversionEndpoint, {
             method: "POST",
-            body: JSON.stringify({ "input": this.textarea.value }),
+            body: JSON.stringify({ 
+                "input": this.textarea.value, 
+                "blockContent": !this.inlineOnly
+            }),
             signal: abortController.signal
         }).then(response => {
             if (!response.ok) {
@@ -100,10 +114,10 @@ class PlainTextCountTextarea extends HTMLElement {
 
             return response.json()
         }).then(content => {
-            this.count = content['plain'].length;
-            this.countContainer.innerText = this.count;
+            console.log(content);
 
-            this.error.innerText = "";
+            this.updateContent(content);
+            this.updateError("");
         }).catch(err => {
             // ignore our own aborted requests
             if (err.name === "AbortError" & err.abortReason === abortReason) {
@@ -113,7 +127,8 @@ class PlainTextCountTextarea extends HTMLElement {
                 return;
             }            
 
-            console.warn({err})
+            console.warn({err});
+            this.updateError(err.message);
             
             if (err.message == "GET Response status: 404") {
                 this.updateCount();

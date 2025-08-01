@@ -137,6 +137,7 @@ class CommonmarkConversion(View):
         body = json.loads(request.body)
 
         input = body.get("input")
+        block_content = body.get("blockContent", True)
 
         if input is None:
             return HttpResponse("input property is required", status=400)
@@ -145,7 +146,7 @@ class CommonmarkConversion(View):
 
         request.session[id] = {
             "input": input,
-            "html": convert_commonmark_to_html(input),
+            "html": convert_commonmark_to_html(input, block_content),
             "plain": convert_commonmark_to_plain_text(input)
         }
 
