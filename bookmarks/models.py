@@ -23,28 +23,45 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     The URL of the bookmark.
     """
 
-    title_txt = models.TextField(blank=True)
-    title_max = 100
-    title_md = CommonmarkInlineField(blank=True, txt_field='title_txt', html_field='title_html', verbose_name="title", help_text="CommonMark supported. Inline elements only.")
-    title_html = models.TextField(blank=True)
+    title_md = models.TextField(blank=True, verbose_name="title", help_text="Markdown supported. Inline elements only.")
     """
     The title of the bookmark, probably the title of the URL page.
     """
-    commentary_txt = models.TextField(blank=True)
-    commentary_html = models.TextField(blank=True)
-    commentary_max = 280
-    commentary_md = CommonmarkField(blank=True, txt_field='commentary_txt', html_field='commentary_html', verbose_name="commentary", help_text="CommonMark supported.")
+
+    title_max = 100
+
+    def title_txt(self):
+        return CommonmarkInlineField.md_to_txt(self.title_md)
+    
+    def title_html(self):
+        return CommonmarkInlineField.md_to_html(self.title_md)
+
+    
+    commentary_md = models.TextField(blank=True, verbose_name="commentary", help_text="Markdown supported.")
     """
     Content commenting on the content of the bookmark.
     """
 
-    quote_txt = models.TextField(blank=True)
-    quote_html = models.TextField(blank=True)
-    quote_max = 280
-    quote_md = CommonmarkField(blank=True, txt_field='quote_txt', html_field='quote_html', verbose_name="quote", help_text="CommonMark supported.")
+    commentary_max = 280    
+    
+    def commentary_txt(self):
+        return CommonmarkField.md_to_txt(self.commentary_md)
+    
+    def commentary_html(self):
+        return CommonmarkField.md_to_html(self.commentary_md)
+
+    quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported.")
     """
     Quote from the bookmarked content.
     """
+
+    quote_max = 280
+
+    def quote_txt(self):
+        return CommonmarkField.md_to_txt(self.quote_md)
+    
+    def quote_html(self):
+        return CommonmarkField.md_to_html(self.quote_md)
 
     commonmark_rendered_at = models.DateTimeField(null=True)
 
@@ -100,19 +117,22 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         """
         Returns the bookmark title if it exists, otherwise returns the url.
         """
-        if self.title_html is not None and self.title_html.isspace() == False and self.title_html != "":
-            return self.title_html
+        html = self.title_html()
+        if html is None or html.isspace() or html == "":
+            return self.url
 
-        return self.url    
+        return html
 
     def get_title_or_url_txt(self):
         """
         Returns the bookmark title if it exists, otherwise returns the url.
         """
-        if self.title_txt is not None and self.title_txt.isspace() == False and self.title_txt != "":
-            return self.title_txt
+        txt = self.title_txt()
 
-        return self.url  
+        if txt is None or txt.isspace() or txt == "":
+            return self.url  
+        
+        return txt        
     
     def feed_item_header(self):
         """
@@ -180,18 +200,23 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         return self.tags.all()
     
     def render_title(self):
+        raise NotImplementedError()
+        return
         self.title_txt = CommonmarkInlineField.md_to_txt(self.title_md)
         self.title_html = CommonmarkInlineField.md_to_html(self.title_md)
     
     def render_quote(self):
+        raise NotImplementedError()
         self.quote_txt = CommonmarkField.md_to_txt(self.quote_md)
         self.quote_html = CommonmarkField.md_to_html(self.quote_md)
     
     def render_commentary(self):
+        raise NotImplementedError()
         self.commentary_txt = CommonmarkField.md_to_txt(self.commentary_md)
         self.commentary_html = CommonmarkField.md_to_html(self.commentary_md)
     
     def render_commonmark_fields(self):
+        raise NotImplementedError()
         self.render_title()
         self.render_quote()
         self.render_commentary()
@@ -209,9 +234,9 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     #     return super().clean()
     
     def is_publishable(self):
-        title_txt = self.title_txt
-        quote_txt = self.quote_txt
-        commentary_txt = self.commentary_txt
+        title_txt = self.title_txt()
+        quote_txt = self.quote_txt()
+        commentary_txt = self.commentary_txt()
 
         limits = (
             ("Title", len(title_txt), Bookmark.title_max),
