@@ -84,7 +84,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def content_html(self):
         """Returns an html representation of the content."""
-        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><div class="p-content">' + self.caption_html() + '</div></div>'
+        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><div class="e-content">' + self.caption_html() + '</div></div>'
 
     def get_absolute_url(self):
         """Returns the url for the photo relative to the root."""
