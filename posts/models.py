@@ -3,10 +3,7 @@ from django.forms import ValidationError
 from django.urls import reverse
 from feed.fields import CommonmarkField
 from feed.models import FeedItem
-from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
-from feed.models import Tag
-from profiles.models import Profile
-import mistune
+from syndications.models import TwitterSyndicatable, MastodonSyndicatable
 
 # Create your models here.
 class Category(models.Model):

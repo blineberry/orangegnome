@@ -15,8 +15,6 @@ from datetime import date
 from django_resized import ResizedImageField
 from django.utils.html import mark_safe
 from django.template.loader import render_to_string
-import mistune
-from django.utils import timezone
 
 # Custom upload_to callable
 # Heavily influenced from https://stackoverflow.com/a/15141228/814492
