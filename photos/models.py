@@ -4,6 +4,8 @@ https://indieweb.org/photo
 """
 
 from django.db import models
+from django.forms import ValidationError
+from feed.fields import CommonmarkField
 from feed.models import FeedItem
 from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
 from django.urls import reverse
@@ -13,8 +15,6 @@ from datetime import date
 from django_resized import ResizedImageField
 from django.utils.html import mark_safe
 from django.template.loader import render_to_string
-import mistune
-from django.utils import timezone
 
 # Custom upload_to callable
 # Heavily influenced from https://stackoverflow.com/a/15141228/814492
@@ -51,17 +51,18 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     image_width = models.PositiveIntegerField()
     """The width of the image."""
 
-    caption = models.CharField(max_length=560, blank=True, help_text="Markdown supported.")
+    caption_max = 560
+    caption_md = models.TextField(blank=True, help_text="Markdown supported.")
     """The caption for the photo."""
 
-    alternative_text = models.CharField(max_length=255)
+    alternative_text = models.CharField(blank=True, max_length=255)
     """The alternative text description of the photo."""
 
     html_class = 'photo'
     postheader_template = "photos/_postheader_template.html"
 
     def __str__(self):
-        return self.caption
+        return self.caption_md
 
     # From https://stackoverflow.com/a/37965068/814492
     def image_tag(self):
@@ -74,12 +75,14 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     image_tag.short_description = 'Preview'
 
     def caption_html(self):
-        markdown = mistune.create_markdown(plugins=['url'])
-        return markdown(self.caption)
+        return CommonmarkField.md_to_html(self.caption_md)
+    
+    def caption_txt(self):
+        return CommonmarkField.md_to_txt(self.caption_md)
 
     def content_html(self):
         """Returns an html representation of the content."""
-        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><div class="p-content">' + self.caption_html() + '</div></div>'
+        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><div class="e-content">' + self.caption_html() + '</div></div>'
 
     def get_absolute_url(self):
         """Returns the url for the photo relative to the root."""
@@ -90,11 +93,11 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         return render_to_string('photos/_photo_content.html', { 'photo': self })
 
     def feed_item_header(self):
-        return self.caption
+        return self.caption_txt()
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""
-        return self.caption
+        return self.caption_txt()
     
     def get_twitter_reply_to_url(self):
         """Return the url that should be checked for the in_reply_to_id."""
@@ -114,7 +117,7 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
-        return self.caption
+        return self.caption_txt()
     
     def get_mastodon_idempotency_key(self):
         """Return a string to use as the Idempotency key for Status posts."""
@@ -139,3 +142,23 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def get_mastodon_media_description(self):
         """Returns the description for the media."""
         return self.alternative_text
+    
+    def clean(self):
+        super().clean()
+        self.validate_publishable()
+
+    def validate_publishable(self):
+        if not self.published:
+            return
+        
+        super().validate_publishable()
+
+
+        if not self.alternative_text or self.alternative_text.isspace():
+            raise ValidationError("Alternative text is required.")
+
+        caption_txt = self.caption_txt()
+
+        if len(caption_txt) > self.caption_max:
+            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(caption_txt), self.caption_max))
+        

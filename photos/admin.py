@@ -1,4 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.http import HttpRequest
+from feed.widgets import PlainTextCountTextarea
 from .models import Photo
 from feed.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
@@ -11,17 +13,17 @@ class PhotoModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    caption = CharField(widget=Textarea, help_text="Markdown supported.")
+    caption_md = CharField(widget=PlainTextCountTextarea(max=Photo.caption_max), required=False, help_text="Markdown supported.")
     """Display the caption input as a Textarea"""
 
-    alternative_text = CharField(widget=Textarea)
+    alternative_text = CharField(widget=Textarea, required=False)
     """Display the caption input as a Textarea"""
 
     class Meta:
         model = Photo
         fields = [
             'image',
-            'caption',
+            'caption_md',
             'alternative_text',
             'in_reply_to',
             'author',
@@ -51,7 +53,7 @@ class PhotoAdmin(SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('image_tag', 'image', 'caption', 'alternative_text','in_reply_to','author','tags')
+            'fields': ('image_tag', 'image', 'caption_md', 'alternative_text','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
@@ -73,7 +75,7 @@ class PhotoAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """
 
-    list_display = ['image_tag', 'caption']    
+    list_display = ['image_tag', 'caption_md']
 
 # Register your models here.
 admin.site.register(Photo, PhotoAdmin)

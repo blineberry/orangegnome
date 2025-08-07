@@ -226,12 +226,9 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         result = super().save(*args, **kwargs)
         return result
     
-    # def clean(self, *args, **kwargs):
-    #     return super().clean()
-    #     self.render_commonmark_fields()
-
-    #     self.validate_publishable()
-    #     return super().clean()
+    def clean(self):
+        super().clean()
+        self.validate_publishable()
     
     def is_publishable(self):
         title_txt = self.title_txt()
@@ -250,22 +247,21 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
             
         return True
     
-    # def validate_publishable(self):
-    #     return
-    #     if not self.published:
-    #         return
+    def validate_publishable(self):
+        if not self.published:
+            return
         
-    #     title_txt = self.title_txt
-    #     quote_txt = self.quote_txt
-    #     commentary_txt = self.commentary_txt
+        title_txt = self.title_txt()
+        quote_txt = self.quote_txt()
+        commentary_txt = self.commentary_txt()
 
-    #     limits = (
-    #         ("Title", len(title_txt), Bookmark.title_max),
-    #         ("Quote", len(quote_txt), Bookmark.quote_max),
-    #         ("Commentary", len(commentary_txt), Bookmark.commentary_max),
-    #     )
+        limits = (
+            ("Title", len(title_txt), Bookmark.title_max),
+            ("Quote", len(quote_txt), Bookmark.quote_max),
+            ("Commentary", len(commentary_txt), Bookmark.commentary_max),
+        )
 
-    #     for limit in limits:
-    #         if limit[1] > limit[2]:
-    #             raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
+        for limit in limits:
+            if limit[1] > limit[2]:
+                raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
     

@@ -15,16 +15,16 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
     """
-    plain_text_limit = 560
+    content_max = 560
 
-    content = models.TextField(help_text="Markdown")
+    content_md = models.TextField(help_text="Markdown supported.")
     """The Note content. Max length is 560 characters."""
 
     html_class = "note"
     postheader_template = "notes/_postheader_template.html"
 
     def __str__(self):
-        return self.content
+        return self.content_md
 
     def get_absolute_url(self):
         """Returns the url for the note relative to the root."""
@@ -34,24 +34,24 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         """Returns the content for aggregated feed item indexes."""
         return self.content_html()
 
-    def content_plain(self):
+    def content_txt(self):
         """Returns the content converted from markdown to HTML."""
-        return convert_commonmark_to_plain_text(self.content)
+        return convert_commonmark_to_plain_text(self.content_md)
     
-    def content_plain_count(self):
-        return len(self.content_plain())
+    #def content_plain_count(self):
+    #    return len(self.content_txt())
 
     def content_html(self):
         """Returns the content converted from markdown to HTML."""
-        return convert_commonmark_to_html(self.content)
+        return convert_commonmark_to_html(self.content_md)
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
-        return self.content_plain()
+        return self.content_txt()
 
     def to_twitter_status(self):        
         """Return the content that should be the tweet status."""
-        return self.content
+        return self.content_md
     
     def get_twitter_reply_to_url(self):
         """Return the url that should be checked for the in_reply_to_id."""
@@ -59,7 +59,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
-        return self.content_plain()
+        return self.content_txt()
     
     def get_mastodon_reply_to_url(self):
         """Return the url that should be checked for the in_reply_to_id."""
@@ -83,5 +83,7 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         
         super().validate_publishable()
 
-        if self.content_plain_count() > self.plain_text_limit:
-            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (self.content_plain_count(), self.plain_text_limit))
+        content_txt = self.content_txt()
+
+        if len(content_txt) > self.content_max:
+            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max))

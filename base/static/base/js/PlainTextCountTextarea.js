@@ -13,6 +13,9 @@ class PlainTextCountTextarea extends HTMLElement {
         this.attachShadow({ mode: "open"});
         
         this.shadowRoot.innerHTML = `
+            <style>
+                pre { text-wrap: wrap; }
+            </style>
             <div>
                 <div id="markdown">
                     <slot></slot>
@@ -21,11 +24,11 @@ class PlainTextCountTextarea extends HTMLElement {
                 </div>
                 <details id="html">
                     <summary>HTML: <span id="html-count">?</span></summary>
-                    <p><code id="html-content"></code></p>                    
+                    <pre><code id="html-content"></code></pre>                    
                 </details>
                 <details id="plain">
                     <summary>Plain Text: <span id="plain-count">?</span> / <span id="plain-max">?</span></summary>
-                    <p><code id="plain-content"></code></p>                    
+                    <pre><code id="plain-content"></code></pre>                    
                 </details>
             </div>
         `;

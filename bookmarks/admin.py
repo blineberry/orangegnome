@@ -114,23 +114,6 @@ class BookmarkAdmin(SyndicatableAdmin):
 
     list_display = ['url', 'title_txt']
     """The fields to display on the admin list view."""
-
-    actions = ["render_commonmark"]
-
-    @admin.action(description="Render commonmark")
-    def render_commonmark(self, request, queryset):
-        for obj in queryset:
-            obj.render_commonmark_fields()
-            obj.save()
-
-    def save_model(self, request:HttpRequest, obj:Bookmark, form:BookmarkModelForm, change:bool):
-        if obj.published and not obj.is_publishable():
-            obj.published = None
-            messages.add_message(request, messages.WARNING, "Unable to publish.")
-
-        return super().save_model(request,obj,form,change)
-        
-
        
 
 # Register your models here.

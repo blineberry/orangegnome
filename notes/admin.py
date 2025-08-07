@@ -12,13 +12,13 @@ class NoteModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    content = CharField(widget=PlainTextCountTextarea(max=Note.plain_text_limit), help_text="Markdown supported.")
+    content_md = CharField(widget=PlainTextCountTextarea(max=Note.content_max), help_text="Markdown supported.")
     """Display the content input as a Textarea"""
 
     class Meta:
         model = Note
         fields = [
-            'content',
+            'content_md',
             'in_reply_to',
             'author',
             'tags',
@@ -47,7 +47,7 @@ class NoteAdmin(SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('content','in_reply_to','author','tags')
+            'fields': ('content_md','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')

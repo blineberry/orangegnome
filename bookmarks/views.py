@@ -36,5 +36,5 @@ class DetailView(WebmentionableMixin, PermalinkResponseMixin, generic.detail.Det
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
         # Add in a QuerySet of all the books
-        context["page_title"] = f'{self.get_object().title_txt} | Bookmarked by Brent Lineberry'
+        context["page_title"] = f'{self.get_object().title_txt()} | Bookmarked by Brent Lineberry'
         return context

@@ -1,20 +1,132 @@
+import re
 from django.db import models
 import pypandoc
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment, NavigableString
 import os
 from django.conf import settings
 from mf2py.dom_helpers import get_textContent
 import mistune
+from mistune.renderers.markdown import MarkdownRenderer
+from typing import cast
+import html2text
 
-# Borrowed/ stolen from https://github.com/dmptrluke/django-markdownfield/tree/master
+class PlainTextRenderer(MarkdownRenderer):
+    def link(self, token, state):
+        text = self.render_children(token, state)
+        out = text
 
-class CommonmarkField(models.TextField):
+        attrs = token["attrs"]
+        url = attrs["url"]
+
+        if text == url:
+            return text
+        elif "mailto:" + text == url:
+            return text
+        
+        return out + " (" + url + ")"
+    
+    def image(self, token, state):
+
+        alt = self.render_children(token, state)
+
+        if alt is not None:
+            return " " + alt + " "
+        
+        attrs = token["attrs"]
+        print(str(attrs))
+        src = attrs.get("url")
+
+        if src is not None:
+            return " " + src + " "
+
+        return ""
+
+_whitespace_to_space_regex = re.compile(r"[\n\t\r]+")
+_reduce_spaces_regex = re.compile(r" {2,}")
+
+class CommonmarkField(models.TextField):   
+    block_elements = ["address",
+        "article",
+        "aside",
+        "blockquote",
+        "canvas",
+        "dd",
+        "div",
+        "dl",
+        "dt",
+        "fieldset",
+        "figcaption",
+        "figure",
+        "footer",
+        "form",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "header",
+        "hr",
+        "li",
+        "main",
+        "nav",
+        "noscript",
+        "ol",
+        "p",
+        "pre",
+        "section",
+        "table",
+        "tfoot",
+        "ul",
+        "video"
+    ]
+
     @staticmethod
     def md_to_txt(input, strip=True):
         if input == "":
             return ""
         
-        return get_textContent(BeautifulSoup(CommonmarkField.md_to_html(input), "html.parser"), replace_img=True)
+        html = CommonmarkField.md_to_html(input)
+        soup = BeautifulSoup(CommonmarkField.md_to_html(input), "html.parser")
+        for el in soup.find_all(["script", "style", "template"]):
+            el.decompose()
+
+        for el in soup.find_all("img"):
+            alt = el.get("alt")
+            if alt is not None:
+                el.replace_with(" " + alt + " ")
+                continue
+            
+            src = el.get("src")
+            if src is not None:
+                el.replace_with(" " + src + " ")
+                continue
+            
+            el.decompose()
+
+        for el in soup.find_all("a"):
+            href = el.get("href")
+            text = el.get_text()
+
+            if href is not None and href != text:
+                el.append(" (" + href + ")")
+
+            el.unwrap()
+
+        for el in soup.find_all(["h1","h2","h3","h4","h5","h6"]):
+            el.name = "p"
+
+        html = str(soup)
+
+        parser = html2text.HTML2Text()
+        parser.strong_mark = "*"
+        parser.unicode_snob = True
+        parser.body_width = 0
+        parser.wrap_links = True
+        parser.images_to_alt = True
+        parser.ul_item_mark = "-"
+
+        return parser.handle(html)
     
     @staticmethod
     def md_to_html(input:str, block_content:bool=True):
@@ -25,46 +137,10 @@ class CommonmarkField(models.TextField):
 
         if block_content:
             return conversion
-        
-        block_elements = ["address",
-            "article",
-            "aside",
-            "blockquote",
-            "canvas",
-            "dd",
-            "div",
-            "dl",
-            "dt",
-            "fieldset",
-            "figcaption",
-            "figure",
-            "footer",
-            "form",
-            "h1",
-            "h2",
-            "h3",
-            "h4",
-            "h5",
-            "h6",
-            "header",
-            "hr",
-            "li",
-            "main",
-            "nav",
-            "noscript",
-            "ol",
-            "p",
-            "pre",
-            "section",
-            "table",
-            "tfoot",
-            "ul",
-            "video"
-        ]
 
         soup = BeautifulSoup(conversion, "html.parser")
 
-        for item in soup.find_all(block_elements):
+        for item in soup.find_all(CommonmarkField.block_elements):
             item.unwrap()
 
         return str(soup)

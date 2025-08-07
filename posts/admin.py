@@ -1,4 +1,6 @@
 from django.contrib import admin
+
+from feed.widgets import PlainTextCountTextInput, PlainTextCountTextarea
 from .models import Post, Category
 from notes.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
@@ -10,9 +12,10 @@ class PostModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
     
-    summary = CharField(widget=Textarea, help_text="Markdown supported.")
-    """Display the summary input as a Textarea."""
-
+    summary_md = CharField(widget=PlainTextCountTextarea(max=Post.summary_max), help_text="Markdown supported.", required=False)
+    title_md = CharField(widget=PlainTextCountTextInput(max=Post.title_max), help_text="Markdown supported.")
+    content_md = CharField(widget=PlainTextCountTextarea(), help_text="Markdown supported.", required=False)
+    
     class Meta:
         model = Post
         fields = [
@@ -21,11 +24,11 @@ class PostModelForm(ModelForm):
             'syndicated_to_twitter',
             'syndicate_to_mastodon',
             'syndicated_to_mastodon',
-            'title',
+            'title_md',
             'slug',
-            'summary',
+            'summary_md',
             'in_reply_to', 
-            'content',
+            'content_md',
             'author',
             'category',
             'tags',
@@ -34,12 +37,12 @@ class PostModelForm(ModelForm):
 class PostAdmin(SyndicatableAdmin):
     form = PostModelForm
 
-    prepopulated_fields = { 'slug': ('title',)}
+    prepopulated_fields = { 'slug': ('title_md',)}
     readonly_fields = ('syndicated_to_twitter', 'syndicated_to_mastodon')
     
     fieldsets = (
         (None, {
-            'fields': ('title','slug','summary','in_reply_to','content','author')
+            'fields': ('title_md','slug','summary_md','in_reply_to','content_md','author')
         }),
         ('Metadata', {
             'fields': ('category','tags')
