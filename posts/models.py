@@ -25,7 +25,7 @@ class Post(TwitterSyndicatable, MastodonSyndicatable, FeedItem):
     summary_md = models.TextField(help_text="Markdown supported.")
 
     title_max = 100
-    title_md = models.TextField(unique=True)
+    title_md = models.TextField(help_text="Markdown supported.")
 
     content_md = models.TextField(help_text="Markdown supported.")    
     category = models.ForeignKey(Category, on_delete=models.PROTECT,related_name='posts', null=True, blank=True)
