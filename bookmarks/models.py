@@ -6,14 +6,14 @@ https://indieweb.org/bookmark
 from django.db import models
 from django.urls import reverse
 from feed.models import FeedItem
-from syndications.models import TwitterSyndicatable, MastodonSyndicatable
+from syndications.models import MastodonSyndicatable
 from django.template.loader import render_to_string
 from feed.fields import CommonmarkField, CommonmarkInlineField
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 # Create your models here.
-class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
+class Bookmark(MastodonSyndicatable, FeedItem):
     """
     The Django model representing the bookmark.
     """
@@ -145,32 +145,7 @@ class Bookmark(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
         return render_to_string('bookmarks/_bookmark_postcontent.html', { 'item': self })
 
     def feed_item_link(self):
-        return self.url
-
-    def to_twitter_status(self):
-        """Return the content that should be the tweet status."""
-
-        if self.has_content() is not True:
-            raise Exception("No content to tweet.")
-
-        content = ""
-        quote_content = "“" + self.quote + "”\n\n"
-        commentary_content = self.commentary + "\n\n"
-
-        # If the Bookmark has a quote and it's length (plus 2 characters for 
-        # newlines plus the length of a link) is not longer than what's allowed
-        # put the quote in 
-        if self.has_quote() and (len(quote_content) + TwitterSyndicatable.tweet_link_length) < TwitterSyndicatable.tweet_length_limit:
-            content = quote_content
-
-        if self.has_commentary() and (len(content) + len(commentary_content) + TwitterSyndicatable.tweet_link_length) < TwitterSyndicatable.tweet_length_limit:
-            content = content + commentary_content
-
-        return content + self.url
-
-    def get_twitter_reply_to_url(self):
-        """Return the url that should be checked for the in_reply_to_id."""
-        return self.in_reply_to      
+        return self.url   
 
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""

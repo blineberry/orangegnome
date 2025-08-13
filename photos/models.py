@@ -7,7 +7,7 @@ from django.db import models
 from django.forms import ValidationError
 from feed.fields import CommonmarkField
 from feed.models import FeedItem
-from syndications.models import TwitterSyndicatable, TwitterStatusUpdate, MastodonSyndicatable, MastodonStatusUpdate
+from syndications.models import MastodonSyndicatable
 from django.urls import reverse
 from .storage import PublicAzureStorage
 from uuid import uuid4
@@ -28,11 +28,11 @@ def upload_to_callable(instance, filename):
     return '{0}/{1}'.format(d.strftime('%Y/%m/%d'),filename)
 
 # Create your models here.
-class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
+class Photo(MastodonSyndicatable, FeedItem):
     """
     A Photo model.
 
-    Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
+    Implements MastodonSyndicatable and FeedItem.
     """
 
     image = ResizedImageField(
@@ -94,26 +94,6 @@ class Photo(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
 
     def feed_item_header(self):
         return self.caption_txt()
-
-    def to_twitter_status(self):        
-        """Return the content that should be the tweet status."""
-        return self.caption_txt()
-    
-    def get_twitter_reply_to_url(self):
-        """Return the url that should be checked for the in_reply_to_id."""
-        return self.in_reply_to
-    
-    def has_twitter_media(self):
-        """Returns True if the Model has media to upload."""
-        return self.image is not None
-    
-    def get_twitter_media_image_field(self):
-        """Returns the ImageField for the media."""
-        return self.image
-
-    def get_twitter__media_alttext(self):
-        """Returns the description for the media."""
-        return self.alternative_text
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""

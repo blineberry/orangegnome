@@ -4,16 +4,16 @@
 
 from django.db import models
 from feed.models import FeedItem, convert_commonmark_to_plain_text, convert_commonmark_to_html
-from syndications.models import TwitterSyndicatable, MastodonSyndicatable
+from syndications.models import MastodonSyndicatable
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 
 # An indieweb "Note" contenttype https://indieweb.org/note
-class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
+class Note(MastodonSyndicatable, FeedItem):
     """
     A Note model.
 
-    Implements MastodonSyndicatable, TwitterSyndicatable, and FeedItem.
+    Implements MastodonSyndicatable, and FeedItem.
     """
     content_max = 560
 
@@ -48,14 +48,6 @@ class Note(MastodonSyndicatable, TwitterSyndicatable, FeedItem):
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""
         return self.content_txt()
-
-    def to_twitter_status(self):        
-        """Return the content that should be the tweet status."""
-        return self.content_md
-    
-    def get_twitter_reply_to_url(self):
-        """Return the url that should be checked for the in_reply_to_id."""
-        return self.in_reply_to
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""

@@ -20,8 +20,6 @@ class PostModelForm(ModelForm):
         model = Post
         fields = [
             'published',
-            'syndicate_to_twitter',
-            'syndicated_to_twitter',
             'syndicate_to_mastodon',
             'syndicated_to_mastodon',
             'title_md',
@@ -38,7 +36,7 @@ class PostAdmin(SyndicatableAdmin):
     form = PostModelForm
 
     prepopulated_fields = { 'slug': ('title_md',)}
-    readonly_fields = ('syndicated_to_twitter', 'syndicated_to_mastodon')
+    readonly_fields = ('syndicated_to_mastodon',)
     
     fieldsets = (
         (None, {
@@ -48,7 +46,7 @@ class PostAdmin(SyndicatableAdmin):
             'fields': ('category','tags')
         }),
         ('Syndication', {
-            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
+            'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
         }),
         ('Publishing', {
             'fields': ('published',)

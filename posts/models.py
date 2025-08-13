@@ -3,7 +3,7 @@ from django.forms import ValidationError
 from django.urls import reverse
 from feed.fields import CommonmarkField
 from feed.models import FeedItem
-from syndications.models import TwitterSyndicatable, MastodonSyndicatable
+from syndications.models import MastodonSyndicatable
 
 # Create your models here.
 class Category(models.Model):
@@ -19,7 +19,7 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse('posts:category', args=[self.id, self.slug])
 
-class Post(TwitterSyndicatable, MastodonSyndicatable, FeedItem):
+class Post(MastodonSyndicatable, FeedItem):
     # h-entry properties
     summary_max = 280
     summary_md = models.TextField(help_text="Markdown supported.")
@@ -64,14 +64,6 @@ class Post(TwitterSyndicatable, MastodonSyndicatable, FeedItem):
 
     def feed_item_header(self):
         return self.title_txt()
-
-    def to_twitter_status(self):        
-        """Return the content that should be the tweet status."""
-        return f'{self.summary_txt()} {self.get_permalink()}'
-    
-    def get_twitter_reply_to_url(self):
-        """Return the url that should be checked for the in_reply_to_id."""
-        return self.in_reply_to
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
