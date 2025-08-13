@@ -2,8 +2,6 @@
 
 {% block meta %}
 {{ block.super }}
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:creator" content="@{{ photo.author.twitter_screenname }}" />
 <meta property="og:url" content="{{ permalink }}" />
 <meta property="og:title" content="{{ photo.feed_item_header }}" />
 <meta property="og:description" content="{{ photo.caption }}" />

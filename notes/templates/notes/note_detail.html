@@ -2,8 +2,6 @@
 
 {% block meta %}
 {{ block.super }}
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:creator" content="@{{ note.author.twitter_screenname }}" />
 <meta property="og:url" content="{{ permalink }}" />
 <meta property="og:title" content="{{ note.feed_item_header }}" />
 <meta property="og:description" content="{{ note.content }}" />

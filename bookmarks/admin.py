@@ -65,8 +65,6 @@ class BookmarkModelForm(ModelForm):
             'commentary_md',
             'author',
             'tags',
-            'syndicate_to_twitter', 
-            'syndicated_to_twitter',
             'published'
         ]
 
@@ -81,7 +79,7 @@ class BookmarkAdmin(SyndicatableAdmin):
     form = BookmarkModelForm
     """Override the dynamically created form with customizations."""
 
-    readonly_fields = ('syndicated_to_twitter', 'syndicated_to_mastodon')
+    readonly_fields = ('syndicated_to_mastodon',)
     """
     These fields will be shown but uneditable. 
     
@@ -93,7 +91,7 @@ class BookmarkAdmin(SyndicatableAdmin):
             'fields': ('url', 'title_md', 'quote_md', 'commentary_md','in_reply_to','author','tags')
         }),
         ('Syndication', {
-            'fields': ('syndicate_to_twitter', 'syndicated_to_twitter', 'syndicate_to_mastodon','syndicated_to_mastodon')
+            'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
         }),
         ('Publishing', {
             'fields': ('published',)
