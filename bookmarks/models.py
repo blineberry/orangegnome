@@ -155,10 +155,10 @@ class Bookmark(MastodonSyndicatable, FeedItem):
         content = ""
         
         if self.has_quote():
-            content = "“" + self.quote_txt + "”\n\n"
+            content = "“" + self.quote_txt() + "”\n\n"
         
         if self.has_commentary():
-            content = content + self.commentary_txt + "\n\n"
+            content = content + self.commentary_txt() + "\n\n"
 
         return content + self.url
     
