@@ -1,4 +1,4 @@
 <div class="article-content">
-    <a href="{{ photo.get_absolute_url }}"><img height="{{ photo.image_height }}" width="{{ photo.image_width }}" class="u-photo" src="{{ photo.image.url }}" alt="{{ photo.alternative_text }}"></a>
+    <a href="{{ photo.get_permalink }}"><img height="{{ photo.image_height }}" width="{{ photo.image_width }}" class="u-photo" src="{{ photo.image.url }}" alt="{{ photo.alternative_text }}"></a>
     <div class="e-content">{{ photo.caption_html|safe }}</div>
 </div>
