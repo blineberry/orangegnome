@@ -161,7 +161,16 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, env('MEDIA_ROOT_PATH')),
 ]
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.contrib.staticfiles.storage.FileSystemStorage'
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+    }
+}
+#STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 # Mastodon Settings
 MASTODON_INSTANCE = env('MASTODON_INSTANCE')
