@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         ('feed', '0001_squashed_0012_feeditem_created'),
         ('pages', '0001_squashed_0005_profile_short_bio'),
         ('profiles', '0001_squashed_0004_remove_profile_twitter_screenname'),
-        ('syndications', '0001_squashed_0016_data_migration'),
+        ('syndications', '0001_squashed_0018_delete_tweet_delete_twitteruser'),
     ]
 
     operations = [

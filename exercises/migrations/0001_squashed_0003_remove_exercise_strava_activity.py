@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('syndications', '0001_squashed_0016_data_migration'),
+        ('syndications', '0001_squashed_0018_delete_tweet_delete_twitteruser'),
         ('feed', '0001_squashed_0012_feeditem_created'),
         ('profiles', '0001_squashed_0004_remove_profile_twitter_screenname'),
     ]
