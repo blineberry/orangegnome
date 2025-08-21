@@ -12,8 +12,6 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    replaces = [('syndications', '0001_initial'), ('syndications', '0002_auto_20200421_1116'), ('syndications', '0003_tweet_full_text'), ('syndications', '0004_auto_20200424_1530'), ('syndications', '0005_auto_20200428_0909'), ('syndications', '0006_auto_20200501_1532'), ('syndications', '0007_stravaactivity'), ('syndications', '0008_stravaactivity_description'), ('syndications', '0009_remove_stravaactivity_description'), ('syndications', '0010_auto_20200508_1033'), ('syndications', '0011_stravawebhook'), ('syndications', '0012_stravawebhookevent'), ('syndications', '0013_mastodonstatus'), ('syndications', '0001_mastodonstatus_content_type_mastodonstatus_object_id'), ('syndications', '0002_mastodonstatus_created_at'), ('syndications', '0003_alter_tweet_created_at'), ('syndications', '0004_reply_mastodonreply_mastodonreply_unique_mastodon_id'), ('syndications', '0005_alter_reply_published'), ('syndications', '0006_repost_mastodonboost_and_more'), ('syndications', '0007_like_mastodonfavourite_and_more'), ('syndications', '0008_like_updated_at_reply_updated_at_repost_updated_at'), ('syndications', '0009_mastodonstatusestoprocess_and_more'), ('syndications', '0010_like_created_at_reply_created_at_repost_created_at'), ('syndications', '0011_mastodonpushsubscription'), ('syndications', '0012_remove_mastodonpushsubscription_id_and_more'), ('syndications', '0013_mastodonnotification'), ('syndications', '0014_rename_mastodonnotification_mastodonpush'), ('syndications', '0015_syndication_mastodonstatus_syndication_and_more'), ('syndications', '0016_data_migration')]
-
     initial = True
 
     dependencies = [
