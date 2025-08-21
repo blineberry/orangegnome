@@ -6,8 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('posts', '0001_squashed_0034_alter_post_category'), ('posts', '0035_rename_content_post_content_md_and_more'), ('posts', '0036_alter_post_content_md_alter_post_summary_md_and_more'), ('posts', '0037_remove_post_syndicate_to_twitter_and_more')]
-
     initial = True
 
     dependencies = [
