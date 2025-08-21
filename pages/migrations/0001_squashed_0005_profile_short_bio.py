@@ -6,8 +6,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('pages', '0001_initial'), ('pages', '0002_auto_20200309_2101'), ('pages', '0003_profile_isowner'), ('pages', '0004_auto_20200309_2115'), ('pages', '0005_profile_short_bio')]
-
     initial = True
 
     dependencies = [
