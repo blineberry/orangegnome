@@ -126,7 +126,7 @@ class CommonmarkField(models.TextField):
         parser.images_to_alt = True
         parser.ul_item_mark = "-"
 
-        return parser.handle(html)
+        return parser.handle(html).strip()
     
     @staticmethod
     def md_to_html(input:str, block_content:bool=True):
@@ -136,14 +136,14 @@ class CommonmarkField(models.TextField):
         conversion = mistune.html(input) #pypandoc.convert_text(input, 'html', format='commonmark+autolink_bare_uris', extra_args=["--wrap=preserve"])
 
         if block_content:
-            return conversion
+            return conversion.strip()
 
         soup = BeautifulSoup(conversion, "html.parser")
 
         for item in soup.find_all(CommonmarkField.block_elements):
             item.unwrap()
 
-        return str(soup)
+        return str(soup).strip()
 
     def __init__(self, *args, txt_field: str = None, html_field: str = None, **kwargs):
         self.txt_field = txt_field
