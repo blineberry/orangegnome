@@ -7,8 +7,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('profiles', '0001_squashed_0002_profile_twitter_screenname'), ('profiles', '0003_profile_user'), ('profiles', '0004_remove_profile_twitter_screenname')]
-
     initial = True
 
     dependencies = [
