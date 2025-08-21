@@ -186,3 +186,5 @@ SITE_NAME = "Orange Gnome"
 SITE_URL = env('SITE_URL')
 
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
+FORMS_URLFIELD_ASSUME_HTTPS = True
