@@ -6,8 +6,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('reposts', '0001_initial'), ('reposts', '0002_alter_repost_content'), ('reposts', '0003_repost_source_name_repost_source_published'), ('reposts', '0004_remove_repost_source_published')]
-
     initial = True
 
     dependencies = [
