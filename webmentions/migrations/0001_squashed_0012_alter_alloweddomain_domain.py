@@ -6,8 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('webmentions', '0001_squashed_0011_alloweddomain_unique_domain'), ('webmentions', '0012_alter_alloweddomain_domain')]
-
     initial = True
 
     dependencies = [
