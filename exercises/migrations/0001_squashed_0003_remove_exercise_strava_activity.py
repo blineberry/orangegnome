@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('syndications', '0001_squashed_0016_data_migration'),
-        ('feed', '0007_feeditem_in_reply_to'),
+        ('feed', '0004_auto_20200417_2246_squashed_0009_alter_feeditem_published'),
         ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
     ]
 

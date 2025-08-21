@@ -11,8 +11,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('feed', '0004_auto_20200417_2246'), ('feed', '0005_auto_20200417_2353'), ('feed', '0006_auto_20200423_1653'), ('feed', '0007_feeditem_in_reply_to'), ('feed', '0008_remove_feeditem_is_published'), ('feed', '0009_alter_feeditem_published')]
-
     dependencies = [
         ('feed', '0001_squashed_0003_feeditem_tags'),
         ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
