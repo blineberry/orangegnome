@@ -6,8 +6,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('exercises', '0001_initial'), ('exercises', '0002_exercise_comments'), ('exercises', '0003_remove_exercise_strava_activity')]
-
     initial = True
 
     dependencies = [
