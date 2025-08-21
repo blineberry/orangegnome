@@ -11,8 +11,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('notes', '0001_squashed_0018_alter_note_content'),
-        ('posts', '0001_squashed_0034_alter_post_category'),
         ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
         ('syndications', '0001_squashed_0016_data_migration'),
     ]

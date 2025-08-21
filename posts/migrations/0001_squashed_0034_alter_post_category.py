@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
         ('contenttypes', '__first__'),
         ('pages', '0001_squashed_0005_profile_short_bio'),
-        ('feed', '0001_squashed_0003_feeditem_tags'),
+        ('feed', '0001_squashed_0012_feeditem_created'),
     ]
 
     operations = [
