@@ -6,8 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('bookmarks', '0001_squashed_0006_alter_bookmark_commentary_alter_bookmark_url'), ('bookmarks', '0007_remove_bookmark_commentary_remove_bookmark_quote_and_more'), ('bookmarks', '0008_migrate_data'), ('bookmarks', '0009_bookmark_commonmark_rendered_at'), ('bookmarks', '0010_alter_bookmark_url'), ('bookmarks', '0011_remove_bookmark_commentary_html_and_more'), ('bookmarks', '0012_remove_bookmark_syndicate_to_twitter_and_more')]
-
     initial = True
 
     dependencies = [
