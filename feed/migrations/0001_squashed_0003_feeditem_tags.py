@@ -5,8 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('feed', '0001_initial'), ('feed', '0002_feeditem'), ('feed', '0003_feeditem_tags')]
-
     initial = True
 
     dependencies = [
