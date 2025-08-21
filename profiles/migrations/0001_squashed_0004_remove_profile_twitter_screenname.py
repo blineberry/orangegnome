@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('photo', models.ImageField(null=True, upload_to='')),
                 ('is_owner', models.BooleanField(default=False)),
                 ('short_bio', models.CharField(max_length=160, null=True)),
-                ('user', models.OneToOneField(default=1, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
