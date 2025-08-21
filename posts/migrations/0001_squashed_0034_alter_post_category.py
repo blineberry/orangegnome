@@ -15,8 +15,6 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    replaces = [('posts', '0001_initial'), ('posts', '0002_auto_20200312_1515'), ('posts', '0003_auto_20200312_1527'), ('posts', '0004_post_is_published'), ('posts', '0005_auto_20200317_1708'), ('posts', '0006_auto_20200317_1709'), ('posts', '0007_auto_20200317_1711'), ('posts', '0008_auto_20200317_1712'), ('posts', '0009_auto_20200318_1352'), ('posts', '0010_auto_20200318_1354'), ('posts', '0011_post_syndicated_to_twitter'), ('posts', '0012_auto_20200401_1101'), ('posts', '0013_auto_20200401_1332'), ('posts', '0014_auto_20200413_2227'), ('posts', '0015_delete_twittersyndication'), ('posts', '0016_auto_20200414_0913'), ('posts', '0017_auto_20200414_0915'), ('posts', '0018_auto_20200416_2212'), ('posts', '0019_post_tags'), ('posts', '0020_migrate_tags'), ('posts', '0021_remove_post_old_tags'), ('posts', '0022_delete_tag'), ('posts', '0023_post_feeditem'), ('posts', '0024_migrate_tags'), ('posts', '0025_remove_post_tags'), ('posts', '0026_auto_20200417_2219'), ('posts', '0027_auto_20200417_2221'), ('posts', '0028_auto_20200417_2221'), ('posts', '0029_auto_20200417_2244'), ('posts', '0030_auto_20200418_0032'), ('posts', '0031_auto_20200422_0902'), ('posts', '0032_post_syndicate_to_mastodon_and_more'), ('posts', '0033_alter_post_content_alter_post_summary'), ('posts', '0034_alter_post_category')]
-
     initial = True
 
     dependencies = [
@@ -24,7 +22,7 @@ class Migration(migrations.Migration):
         ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
         ('contenttypes', '__first__'),
         ('pages', '0001_squashed_0005_profile_short_bio'),
-        ('feed', '0001_squashed_0003_feeditem_tags'),
+        ('feed', '0001_squashed_0012_feeditem_created'),
     ]
 
     operations = [

@@ -7,8 +7,8 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('syndications', '0015_syndication_mastodonstatus_syndication_and_more'),
-        ('feed', '0009_alter_feeditem_published'),
+        ('syndications', '0001_squashed_0016_data_migration'),
+        ('feed', '0004_auto_20200417_2246_squashed_0009_alter_feeditem_published'),
     ]
 
     operations = [

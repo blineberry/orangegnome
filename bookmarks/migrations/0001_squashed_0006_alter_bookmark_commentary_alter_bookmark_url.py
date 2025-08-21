@@ -6,8 +6,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('bookmarks', '0001_initial'), ('bookmarks', '0002_bookmark_syndicate_to_mastodon_and_more'), ('bookmarks', '0003_alter_bookmark_url'), ('bookmarks', '0004_alter_bookmark_title'), ('bookmarks', '0005_alter_bookmark_commentary'), ('bookmarks', '0006_alter_bookmark_commentary_alter_bookmark_url')]
-
     initial = True
 
     dependencies = [

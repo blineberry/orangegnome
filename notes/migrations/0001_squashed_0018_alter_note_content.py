@@ -12,8 +12,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('notes', '0001_initial'), ('notes', '0002_note_tags'), ('notes', '0003_auto_20200416_2215'), ('notes', '0004_note_feeditem'), ('notes', '0005_remove_note_feeditem'), ('notes', '0006_note_feeditem_ptr'), ('notes', '0007_migrate_tags'), ('notes', '0008_remove_note_tags'), ('notes', '0009_auto_20200417_2232'), ('notes', '0010_auto_20200417_2232'), ('notes', '0011_auto_20200417_2235'), ('notes', '0012_auto_20200417_2244'), ('notes', '0013_auto_20200418_0032'), ('notes', '0014_auto_20200421_1638'), ('notes', '0015_auto_20200421_1638'), ('notes', '0016_note_syndicate_to_mastodon_and_more'), ('notes', '0017_alter_note_content'), ('notes', '0018_alter_note_content')]
-
     initial = True
 
     dependencies = [

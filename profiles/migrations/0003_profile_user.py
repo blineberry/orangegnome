@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('profiles', '0002_profile_twitter_screenname'),
+        ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
     ]
 
     operations = [

@@ -6,8 +6,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('webmentions', '0001_initial'), ('webmentions', '0002_outgoingcontent_result_outgoingcontent_tries'), ('webmentions', '0003_alter_incomingwebmention_result'), ('webmentions', '0004_alter_incomingwebmention_result'), ('webmentions', '0005_incomingwebmention_approved'), ('webmentions', '0006_alter_incomingwebmention_options'), ('webmentions', '0007_remove_incomingwebmention_type'), ('webmentions', '0008_alloweddomains'), ('webmentions', '0009_rename_alloweddomains_alloweddomain'), ('webmentions', '0010_alloweddomain_domain'), ('webmentions', '0011_alloweddomain_unique_domain')]
-
     initial = True
 
     dependencies = [

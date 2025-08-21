@@ -6,13 +6,11 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [('exercises', '0001_initial'), ('exercises', '0002_exercise_comments'), ('exercises', '0003_remove_exercise_strava_activity')]
-
     initial = True
 
     dependencies = [
         ('syndications', '0001_squashed_0016_data_migration'),
-        ('feed', '0007_feeditem_in_reply_to'),
+        ('feed', '0004_auto_20200417_2246_squashed_0009_alter_feeditem_published'),
         ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
     ]
 
