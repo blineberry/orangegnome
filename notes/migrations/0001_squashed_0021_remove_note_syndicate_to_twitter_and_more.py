@@ -6,8 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('notes', '0001_squashed_0018_alter_note_content'), ('notes', '0019_rename_content_note_content_md'), ('notes', '0020_alter_note_content_md'), ('notes', '0021_remove_note_syndicate_to_twitter_and_more')]
-
     initial = True
 
     dependencies = [
