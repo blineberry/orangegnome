@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('feed', '0001_squashed_0003_feeditem_tags'),
         ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
-        ('posts', '0029_auto_20200417_2244'),
+        ('posts', '0001_squashed_0034_alter_post_category'),
         ('notes', '0001_squashed_0018_alter_note_content'),
     ]
 
