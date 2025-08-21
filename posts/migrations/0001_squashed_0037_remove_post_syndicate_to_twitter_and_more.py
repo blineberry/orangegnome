@@ -6,16 +6,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('posts', '0001_squashed_0034_alter_post_category'), ('posts', '0035_rename_content_post_content_md_and_more'), ('posts', '0036_alter_post_content_md_alter_post_summary_md_and_more'), ('posts', '0037_remove_post_syndicate_to_twitter_and_more')]
-
     initial = True
 
     dependencies = [
         ('contenttypes', '__first__'),
         ('feed', '0001_squashed_0012_feeditem_created'),
         ('pages', '0001_squashed_0005_profile_short_bio'),
-        ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
-        ('syndications', '0001_squashed_0016_data_migration'),
+        ('profiles', '0001_squashed_0004_remove_profile_twitter_screenname'),
+        ('syndications', '0001_squashed_0018_delete_tweet_delete_twitteruser'),
     ]
 
     operations = [

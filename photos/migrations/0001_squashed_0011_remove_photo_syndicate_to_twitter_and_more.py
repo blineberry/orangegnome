@@ -9,12 +9,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('photos', '0001_squashed_0006_alter_photo_image'), ('photos', '0007_alter_photo_image_height_alter_photo_image_width'), ('photos', '0008_rename_caption_photo_caption_md'), ('photos', '0009_alter_photo_caption_md'), ('photos', '0010_alter_photo_alternative_text'), ('photos', '0011_remove_photo_syndicate_to_twitter_and_more')]
-
     initial = True
 
     dependencies = [
-        ('feed', '0004_auto_20200417_2246_squashed_0009_alter_feeditem_published'),
+        ('feed', '0001_squashed_0012_feeditem_created'),
     ]
 
     operations = [

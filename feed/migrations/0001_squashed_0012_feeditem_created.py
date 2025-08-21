@@ -6,13 +6,11 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('feed', '0001_squashed_0003_feeditem_tags'), ('feed', '0004_auto_20200417_2246_squashed_0009_alter_feeditem_published'), ('feed', '0010_syndication'), ('feed', '0011_alter_feeditem_updated'), ('feed', '0012_feeditem_created')]
-
     initial = True
 
     dependencies = [
-        ('profiles', '0001_squashed_0002_profile_twitter_screenname'),
-        ('syndications', '0001_squashed_0016_data_migration'),
+        ('profiles', '0001_squashed_0004_remove_profile_twitter_screenname'),
+        ('syndications', '0001_squashed_0018_delete_tweet_delete_twitteruser'),
     ]
 
     operations = [
