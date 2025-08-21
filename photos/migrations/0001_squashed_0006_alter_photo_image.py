@@ -9,8 +9,6 @@ import photos.storage
 
 class Migration(migrations.Migration):
 
-    replaces = [('photos', '0001_initial'), ('photos', '0002_alter_photo_content'), ('photos', '0003_rename_content_photo_image_photo_image_height_and_more'), ('photos', '0004_alter_photo_caption_alter_photo_image'), ('photos', '0005_alter_photo_caption'), ('photos', '0006_alter_photo_image')]
-
     initial = True
 
     dependencies = [
