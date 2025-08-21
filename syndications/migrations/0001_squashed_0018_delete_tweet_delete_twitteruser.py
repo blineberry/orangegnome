@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('published', models.DateTimeField(blank=True, null=True)),
                 ('url', models.URLField()),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
                 ('published', models.DateTimeField(blank=True, null=True)),
                 ('url', models.URLField()),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
                 ('published', models.DateTimeField(blank=True, null=True)),
                 ('url', models.URLField()),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
