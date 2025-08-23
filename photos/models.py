@@ -13,6 +13,7 @@ from .storage import PublicAzureStorage
 from uuid import uuid4
 from datetime import date
 from django_resized import ResizedImageField
+from django_resized.forms import ResizedImageFieldFile
 from django.utils.html import mark_safe
 from django.template.loader import render_to_string
 
@@ -27,6 +28,18 @@ def upload_to_callable(instance, filename):
 
     return '{0}/{1}'.format(d.strftime('%Y/%m/%d'),filename)
 
+
+
+
+
+class OGResizedImageFieldFile(ResizedImageFieldFile):
+    def save(self, name, content, save=True):
+        super().save(name, content, save)
+        self.field.update_dimension_fields(self.instance, force=True)
+
+class OGResizedImageField(ResizedImageField):
+    attr_class = OGResizedImageFieldFile
+
 # Create your models here.
 class Photo(MastodonSyndicatable, FeedItem):
     """
@@ -35,7 +48,7 @@ class Photo(MastodonSyndicatable, FeedItem):
     Implements MastodonSyndicatable and FeedItem.
     """
 
-    image = ResizedImageField(
+    image = OGResizedImageField(
         size=[1188,1188], 
         quality=70, 
         upload_to=upload_to_callable,
