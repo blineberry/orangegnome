@@ -5,8 +5,10 @@ from django.conf import settings
 from django.utils import timezone
 from webmentions.models import Webmentionable
 from django.core.exceptions import ValidationError
-from syndications.models import Syndication as SyndicationsSyndication
+from syndications.models import MastodonStatus, Syndication as SyndicationsSyndication
 from .fields import CommonmarkField
+from django.contrib.contenttypes.fields import (GenericForeignKey,
+                                                GenericRelation)
 
 
 def convert_commonmark_to_plain_text(input:str, strip:bool=True):
@@ -48,6 +50,10 @@ class FeedItem(Webmentionable):
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
+
+    new_syndicated_to_mastodon = models.DateTimeField(null=True)
+    new_syndicate_to_mastodon = models.BooleanField(default=False)
+    new_mastodon_status = GenericRelation(MastodonStatus, related_query_name="mastodon_status")
 
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"
