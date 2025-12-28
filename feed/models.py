@@ -52,10 +52,6 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
 
-    new_syndicated_to_mastodon = models.DateTimeField(null=True)
-    new_syndicate_to_mastodon = models.BooleanField(default=False)
-    new_mastodon_status = GenericRelation(MastodonStatus, related_query_name="mastodon_status")
-
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"
 
