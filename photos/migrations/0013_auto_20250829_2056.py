@@ -14,7 +14,6 @@ def up(apps, schema_editor):
     FeedItem = apps.get_model(feed_item_app_label, feed_item_model_str)
     MastodonStatus = apps.get_model("syndications", "MastodonStatus")
     content_type = ContentType.objects.get(app_label=app_label, model=model_str.lower())
-    feed_item_content_type = ContentType.objects.get(app_label=feed_item_app_label, model=feed_item_model_str.lower())
 
     for item in model.objects.all():
         feed_item = FeedItem.objects.get(pk=item.pk)
@@ -23,10 +22,7 @@ def up(apps, schema_editor):
 
         statuses = MastodonStatus.objects.filter(content_type_id=content_type.id, object_id=item.pk)
         for status in statuses:
-            status.pk = None
-            status.content_type_id=feed_item_content_type.id
-            status.object_id = feed_item.id
-            status._state.adding = True
+            status.feed_item_id = feed_item.id
             status.save()
 
         feed_item.save()
@@ -41,6 +37,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('photos', '0012_alter_photo_image'),
         ('feed', '0013_feeditem_new_syndicate_to_mastodon_and_more'),
+        ('syndications','0019_mastodonstatus_feed_item'),
     ]
 
     operations = [
