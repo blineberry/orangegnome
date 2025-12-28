@@ -26,7 +26,7 @@ def up(apps, schema_editor):
             status.pk = None
             status.content_type_id=feed_item_content_type.id
             status.object_id = feed_item.id
-            status._state.adding = True
+            #status._state.adding = True
             status.save()
 
         feed_item.save()
