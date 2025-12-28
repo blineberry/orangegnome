@@ -7,7 +7,6 @@ from django.db import models
 from django.forms import ValidationError
 from feed.fields import CommonmarkField
 from feed.models import FeedItem
-from syndications.models import MastodonSyndicatable
 from django.urls import reverse
 from .storage import PublicAzureStorage
 from uuid import uuid4
@@ -41,7 +40,7 @@ class OGResizedImageField(ResizedImageField):
     attr_class = OGResizedImageFieldFile
 
 # Create your models here.
-class Photo(MastodonSyndicatable, FeedItem):
+class Photo(FeedItem):
     """
     A Photo model.
 

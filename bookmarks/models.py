@@ -6,14 +6,13 @@ https://indieweb.org/bookmark
 from django.db import models
 from django.urls import reverse
 from feed.models import FeedItem
-from syndications.models import MastodonSyndicatable
 from django.template.loader import render_to_string
 from feed.fields import CommonmarkField, CommonmarkInlineField
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 # Create your models here.
-class Bookmark(MastodonSyndicatable, FeedItem):
+class Bookmark(FeedItem):
     """
     The Django model representing the bookmark.
     """

@@ -373,6 +373,7 @@ class MastodonStatus(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     created_at = models.DateTimeField()
+    feed_item = models.ForeignKey('feed.FeedItem', on_delete=models.CASCADE, null=True)
     syndication = models.OneToOneField(Syndication, on_delete=models.CASCADE, null=True)
 
     instance_name = settings.MASTODON_INSTANCE

@@ -1,10 +1,9 @@
 from django.db import models
 from feed.models import FeedItem
-from syndications.models import MastodonSyndicatable
 from django.urls import reverse
 
 # Create your models here.
-class Like(MastodonSyndicatable, FeedItem):
+class Like(FeedItem):
     url = models.URLField()
 
     postheader_template = "likes/_like_postheader.html"
