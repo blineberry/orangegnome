@@ -4,12 +4,11 @@
 
 from django.db import models
 from feed.models import FeedItem, convert_commonmark_to_plain_text, convert_commonmark_to_html
-from syndications.models import MastodonSyndicatable
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 
 # An indieweb "Note" contenttype https://indieweb.org/note
-class Note(MastodonSyndicatable, FeedItem):
+class Note(FeedItem):
     """
     A Note model.
 

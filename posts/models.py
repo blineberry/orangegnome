@@ -3,7 +3,6 @@ from django.forms import ValidationError
 from django.urls import reverse
 from feed.fields import CommonmarkField
 from feed.models import FeedItem
-from syndications.models import MastodonSyndicatable
 
 # Create your models here.
 class Category(models.Model):
@@ -19,7 +18,7 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse('posts:category', args=[self.id, self.slug])
 
-class Post(MastodonSyndicatable, FeedItem):
+class Post(FeedItem):
     # h-entry properties
     summary_max = 280
     summary_md = models.TextField(help_text="Markdown supported.")

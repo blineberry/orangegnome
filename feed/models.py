@@ -4,6 +4,7 @@ from profiles.models import Profile
 from django.conf import settings
 from django.utils import timezone
 from webmentions.models import Webmentionable
+from syndications.models import MastodonSyndicatable
 from django.core.exceptions import ValidationError
 from syndications.models import MastodonStatus, Syndication as SyndicationsSyndication
 from .fields import CommonmarkField
@@ -43,7 +44,7 @@ class Tag(models.Model):
     def to_hashtag(self, strip_special_characters = True):
         return "#" + self.to_pascale_case(strip_special_characters)
 
-class FeedItem(Webmentionable):
+class FeedItem(Webmentionable, MastodonSyndicatable):
     created = models.DateTimeField(null=True, auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True)
     author = models.ForeignKey(Profile, on_delete=models.PROTECT, null=True)
