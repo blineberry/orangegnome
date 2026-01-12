@@ -51,6 +51,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
+    content_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
 
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"
