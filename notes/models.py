@@ -15,8 +15,6 @@ class Note(FeedItem):
     Implements MastodonSyndicatable, and FeedItem.
     """
     content_max = 560
-
-    content_md = models.TextField(help_text="Markdown supported.")
     """The Note content. Max length is 560 characters."""
 
     html_class = "note"
