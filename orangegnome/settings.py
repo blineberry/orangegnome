@@ -41,6 +41,11 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Common Middleware Settings
+DISALLOWED_USER_AGENTS = env.list('DISALLOWED_USER_AGENTS', default=[])
+APPEND_SLASH = env('APPEND_SLASH', default=False)
+PREPEND_WWW = env('PREPEND_WWW', default=False)
+
 
 # Application definition
 
