@@ -56,6 +56,14 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"
 
+    def content_txt(self):
+        """Returns the content converted from markdown to HTML."""
+        return convert_commonmark_to_plain_text(self.content_md)
+    
+    def content_html(self):
+        """Returns the content converted from markdown to HTML."""
+        return convert_commonmark_to_html(self.content_md)
+
     @staticmethod
     def get_site_url():
         return settings.SITE_URL
