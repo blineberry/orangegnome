@@ -45,12 +45,6 @@ class Post(FeedItem):
     def summary_html(self):
         return CommonmarkField.md_to_html(self.summary_md)
 
-    def content_txt(self):
-        return CommonmarkField.md_to_txt(self.content_md)
-
-    def content_html(self):
-        return CommonmarkField.md_to_html(self.content_md)
-
     def title_txt(self):
         return CommonmarkField.md_to_txt(self.title_md)
 

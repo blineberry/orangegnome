@@ -30,17 +30,9 @@ class Note(FeedItem):
     def feed_item_content(self):
         """Returns the content for aggregated feed item indexes."""
         return self.content_html()
-
-    def content_txt(self):
-        """Returns the content converted from markdown to HTML."""
-        return convert_commonmark_to_plain_text(self.content_md)
     
     #def content_plain_count(self):
     #    return len(self.content_txt())
-
-    def content_html(self):
-        """Returns the content converted from markdown to HTML."""
-        return convert_commonmark_to_html(self.content_md)
 
     def feed_item_header(self):
         """Returns the title for aggregated feed item indexes."""

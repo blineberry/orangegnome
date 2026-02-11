@@ -63,9 +63,7 @@ class Photo(FeedItem):
     image_width = models.PositiveIntegerField()
     """The width of the image."""
 
-    caption_max = 560
-    caption_md = models.TextField(blank=True, help_text="Markdown supported.")
-    """The caption for the photo."""
+    content_max = 560
 
     alternative_text = models.CharField(blank=True, max_length=255)
     """The alternative text description of the photo."""
@@ -74,7 +72,7 @@ class Photo(FeedItem):
     postheader_template = "photos/_postheader_template.html"
 
     def __str__(self):
-        return self.caption_md
+        return self.content_txt()
 
     # From https://stackoverflow.com/a/37965068/814492
     def image_tag(self):
@@ -86,15 +84,9 @@ class Photo(FeedItem):
 
     image_tag.short_description = 'Preview'
 
-    def caption_html(self):
-        return CommonmarkField.md_to_html(self.caption_md)
-    
-    def caption_txt(self):
-        return CommonmarkField.md_to_txt(self.caption_md)
-
-    def content_html(self):
-        """Returns an html representation of the content."""
-        return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><div class="e-content">' + self.caption_html() + '</div></div>'
+    # def content_html(self):
+    #     """Returns an html representation of the content."""
+    #     return '<div class="photo"><img class="u-photo" src="' + self.image.url + '" alt="' + self.alternative_text + '"><div class="e-content">' + self.caption_html() + '</div></div>'
 
     def get_absolute_url(self):
         """Returns the url for the photo relative to the root."""
@@ -105,11 +97,11 @@ class Photo(FeedItem):
         return render_to_string('photos/_photo_content.html', { 'photo': self })
 
     def feed_item_header(self):
-        return self.caption_txt()
+        return self.content_txt()
     
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
-        return self.caption_txt()
+        return self.content_txt()
     
     def get_mastodon_idempotency_key(self):
         """Return a string to use as the Idempotency key for Status posts."""
@@ -149,8 +141,8 @@ class Photo(FeedItem):
         if not self.alternative_text or self.alternative_text.isspace():
             raise ValidationError("Alternative text is required.")
 
-        caption_txt = self.caption_txt()
+        content_txt = self.content_txt()
 
-        if len(caption_txt) > self.caption_max:
-            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(caption_txt), self.caption_max))
+        if len(content_txt) > self.content_max:
+            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max))
         
