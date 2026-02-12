@@ -63,6 +63,12 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     summary_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
 
+    def summary_txt(self):
+        return convert_commonmark_to_plain_text(self.summary_md)
+
+    def summary_html(self):
+        return convert_commonmark_to_html(self.summary_md)
+
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"
 

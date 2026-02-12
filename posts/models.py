@@ -38,12 +38,6 @@ class Post(FeedItem):
     def get_absolute_url(self):
         return reverse('posts:detail', args=[self.id, self.slug])
 
-    def summary_txt(self):
-        return CommonmarkField.md_to_txt(self.summary_md)
-
-    def summary_html(self):
-        return CommonmarkField.md_to_html(self.summary_md)
-
     def title_txt(self):
         return CommonmarkField.md_to_txt(self.title_md)
 
