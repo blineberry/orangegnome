@@ -51,11 +51,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
+
     content_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
-
-    postheader_template = "feed/_postheader_template.html"
-    postcontent_template = "feed/_postbody_template.html"
-
     def content_txt(self):
         """Returns the content converted from markdown to HTML."""
         return convert_commonmark_to_plain_text(self.content_md)
@@ -63,6 +60,13 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def content_html(self):
         """Returns the content converted from markdown to HTML."""
         return convert_commonmark_to_html(self.content_md)
+    
+    summary_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
+
+    postheader_template = "feed/_postheader_template.html"
+    postcontent_template = "feed/_postbody_template.html"
+
+    
 
     @staticmethod
     def get_site_url():

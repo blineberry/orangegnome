@@ -21,8 +21,7 @@ class Category(models.Model):
 class Post(FeedItem):
     # h-entry properties
     summary_max = 280
-    summary_md = models.TextField(help_text="Markdown supported.")
-
+    
     title_max = 100
     title_md = models.TextField(help_text="Markdown supported.")
    
