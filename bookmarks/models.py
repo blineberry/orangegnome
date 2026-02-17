@@ -35,19 +35,13 @@ class Bookmark(FeedItem):
     def title_html(self):
         return CommonmarkInlineField.md_to_html(self.title_md)
 
+    content_max = 280    
     
-    commentary_md = models.TextField(blank=True, verbose_name="commentary", help_text="Markdown supported.")
-    """
-    Content commenting on the content of the bookmark.
-    """
-
-    commentary_max = 280    
+    def content_txt(self):
+        return CommonmarkField.md_to_txt(self.content_md)
     
-    def commentary_txt(self):
-        return CommonmarkField.md_to_txt(self.commentary_md)
-    
-    def commentary_html(self):
-        return CommonmarkField.md_to_html(self.commentary_md)
+    def content_html(self):
+        return CommonmarkField.md_to_html(self.content_md)
 
     quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported.")
     """
@@ -95,22 +89,22 @@ class Bookmark(FeedItem):
         """Returns True if Bookmark has a quote."""
         return Bookmark.is_none_or_whitespace(self.quote_md)
 
-    def has_commentary(self):
-        """Returns True if Bookmark has commentary."""
-        return Bookmark.is_none_or_whitespace(self.commentary_md)
-
     def has_content(self):
-        """Returns True if Bookmark has either quote or commentary."""
-        # True if we have commentary
-        if self.has_commentary():
+        """Returns True if Bookmark has content."""
+        return Bookmark.is_none_or_whitespace(self.content_md)
+
+    def has_quote_or_content(self):
+        """Returns True if Bookmark has either quote or content."""
+        # True if we have content
+        if self.has_content():
             return True
 
         # True if we have a quote
         return self.has_quote()
     
-    def has_quote_and_commentary(self):
-        """Returns True if Bookmark has both quote and commentary."""
-        return self.has_quote() and self.has_commentary()
+    def has_quote_and_content(self):
+        """Returns True if Bookmark has both quote and content."""
+        return self.has_quote() and self.has_content()
 
     def get_title_or_url_html(self):
         """
@@ -148,7 +142,7 @@ class Bookmark(FeedItem):
 
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
-        if self.has_content() is not True:
+        if self.has_quote_or_content() is not True:
             raise Exception("No content to post to Mastodon.")
 
         content = ""
@@ -156,8 +150,8 @@ class Bookmark(FeedItem):
         if self.has_quote():
             content = "“" + self.quote_txt() + "”\n\n"
         
-        if self.has_commentary():
-            content = content + self.commentary_txt() + "\n\n"
+        if self.has_content():
+            content = content + self.content_txt() + "\n\n"
 
         return content + self.url
     
@@ -173,29 +167,6 @@ class Bookmark(FeedItem):
         """Return the tags that should be parsed and added to the status."""
         return self.tags.all()
     
-    def render_title(self):
-        raise NotImplementedError()
-        return
-        self.title_txt = CommonmarkInlineField.md_to_txt(self.title_md)
-        self.title_html = CommonmarkInlineField.md_to_html(self.title_md)
-    
-    def render_quote(self):
-        raise NotImplementedError()
-        self.quote_txt = CommonmarkField.md_to_txt(self.quote_md)
-        self.quote_html = CommonmarkField.md_to_html(self.quote_md)
-    
-    def render_commentary(self):
-        raise NotImplementedError()
-        self.commentary_txt = CommonmarkField.md_to_txt(self.commentary_md)
-        self.commentary_html = CommonmarkField.md_to_html(self.commentary_md)
-    
-    def render_commonmark_fields(self):
-        raise NotImplementedError()
-        self.render_title()
-        self.render_quote()
-        self.render_commentary()
-        self.commonmark_rendered_at = timezone.now()
-    
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
         return result
@@ -207,12 +178,12 @@ class Bookmark(FeedItem):
     def is_publishable(self):
         title_txt = self.title_txt()
         quote_txt = self.quote_txt()
-        commentary_txt = self.commentary_txt()
+        content_txt = self.content_txt()
 
         limits = (
             ("Title", len(title_txt), Bookmark.title_max),
             ("Quote", len(quote_txt), Bookmark.quote_max),
-            ("Commentary", len(commentary_txt), Bookmark.commentary_max),
+            ("Content", len(content_txt), Bookmark.content_max),
         )
 
         for limit in limits:
@@ -227,12 +198,12 @@ class Bookmark(FeedItem):
         
         title_txt = self.title_txt()
         quote_txt = self.quote_txt()
-        commentary_txt = self.commentary_txt()
+        content_txt = self.content_txt()
 
         limits = (
             ("Title", len(title_txt), Bookmark.title_max),
             ("Quote", len(quote_txt), Bookmark.quote_max),
-            ("Commentary", len(commentary_txt), Bookmark.commentary_max),
+            ("Content", len(content_txt), Bookmark.content_max),
         )
 
         for limit in limits:
