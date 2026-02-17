@@ -26,34 +26,10 @@ class BookmarkModelForm(ModelForm):
         required=False)
     """Display the quote input as a Textarea"""
 
-    commentary_md = CharField(
-        widget=PlainTextCountTextarea(max=Bookmark.commentary_max), 
+    content_md = CharField(
+        widget=PlainTextCountTextarea(max=Bookmark.content_max), 
         required=False)
-    """Display the commentary input as a Textarea"""
-
-
-    # def validate_publishable(self, cleaned_data:dict):
-    #     published = cleaned_data.get("published")
-
-    #     if not published:
-    #         return
-        
-    #     title_txt = cleaned_data.get("title_txt", "")
-    #     quote_txt = cleaned_data.get("quote_txt", "")
-    #     commentary_txt = cleaned_data.get("commentary_txt", "")
-
-    #     limits = (
-    #         ("Title", len(title_txt), Bookmark.title_max),
-    #         ("Quote", len(quote_txt), Bookmark.quote_max),
-    #         ("Commentary", len(commentary_txt), Bookmark.commentary_max),
-    #     )
-
-    #     for limit in limits:
-    #         if limit[1] > limit[2]:
-    #             raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
-            
-    # def save(self, *args, **kwargs):
-    #     return super().save()
+    """Display the content input as a Textarea"""
 
     class Meta:
         model = Bookmark
@@ -62,7 +38,7 @@ class BookmarkModelForm(ModelForm):
             'title_md',
             'in_reply_to', 
             'quote_md',
-            'commentary_md',
+            'content_md',
             'author',
             'tags',
             'published'
@@ -88,7 +64,7 @@ class BookmarkAdmin(SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'title_md', 'quote_md', 'commentary_md','in_reply_to','author','tags')
+            'fields': ('url', 'title_md', 'quote_md', 'content_md','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
