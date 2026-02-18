@@ -68,6 +68,14 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
     def summary_html(self):
         return convert_commonmark_to_html(self.summary_md)
+    
+    quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported.")
+
+    def quote_txt(self):
+        return convert_commonmark_to_plain_text(self.quote_md)
+    
+    def quote_html(self):
+        return convert_commonmark_to_html(self.quote_md)
 
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"

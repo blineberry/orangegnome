@@ -36,25 +36,8 @@ class Bookmark(FeedItem):
         return CommonmarkInlineField.md_to_html(self.title_md)
 
     content_max = 280    
-    
-    def content_txt(self):
-        return CommonmarkField.md_to_txt(self.content_md)
-    
-    def content_html(self):
-        return CommonmarkField.md_to_html(self.content_md)
-
-    quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported.")
-    """
-    Quote from the bookmarked content.
-    """
 
     quote_max = 280
-
-    def quote_txt(self):
-        return CommonmarkField.md_to_txt(self.quote_md)
-    
-    def quote_html(self):
-        return CommonmarkField.md_to_html(self.quote_md)
 
     commonmark_rendered_at = models.DateTimeField(null=True)
 
