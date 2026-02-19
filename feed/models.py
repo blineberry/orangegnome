@@ -76,6 +76,14 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def quote_html(self):
         return convert_commonmark_to_html(self.quote_md)
+    
+    title_md = models.TextField(blank=True, verbose_name="title", help_text="Markdown supported. Inline elements only.")
+
+    def title_txt(self):
+        return convert_commonmark_to_plain_text(self.title_md)
+    
+    def title_html(self):
+        return convert_commonmark_to_html(self.title_md, False)
 
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"
