@@ -23,7 +23,6 @@ class Post(FeedItem):
     summary_max = 280
     
     title_max = 100
-    title_md = models.TextField(help_text="Markdown supported.")
    
     category = models.ForeignKey(Category, on_delete=models.PROTECT,related_name='posts', null=True, blank=True)
 
@@ -37,12 +36,6 @@ class Post(FeedItem):
 
     def get_absolute_url(self):
         return reverse('posts:detail', args=[self.id, self.slug])
-
-    def title_txt(self):
-        return CommonmarkField.md_to_txt(self.title_md)
-
-    def title_html(self):
-        return CommonmarkField.md_to_html(self.title_md, False)
 
     def feed_item_content(self):
         return self.content_html()

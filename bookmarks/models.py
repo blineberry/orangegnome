@@ -22,18 +22,7 @@ class Bookmark(FeedItem):
     The URL of the bookmark.
     """
 
-    title_md = models.TextField(blank=True, verbose_name="title", help_text="Markdown supported. Inline elements only.")
-    """
-    The title of the bookmark, probably the title of the URL page.
-    """
-
     title_max = 100
-
-    def title_txt(self):
-        return CommonmarkInlineField.md_to_txt(self.title_md)
-    
-    def title_html(self):
-        return CommonmarkInlineField.md_to_html(self.title_md)
 
     content_max = 280    
 
