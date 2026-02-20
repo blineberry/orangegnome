@@ -17,11 +17,6 @@ class Bookmark(FeedItem):
     The Django model representing the bookmark.
     """
 
-    url = models.URLField(max_length=2048,null=True,blank=True)
-    """
-    The URL of the bookmark.
-    """
-
     title_max = 100
 
     content_max = 280    

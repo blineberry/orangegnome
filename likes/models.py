@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Like(FeedItem):
-    url = models.URLField(max_length=2048,null=True,blank=True)
 
     postheader_template = "likes/_like_postheader.html"
     postcontent_template = "likes/_like_postcontent.html"
