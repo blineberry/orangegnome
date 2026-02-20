@@ -84,6 +84,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def title_html(self):
         return convert_commonmark_to_html(self.title_md, False)
+    
+    # url = models.URLField(max_length=2048,null=True,blank=True)
 
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"

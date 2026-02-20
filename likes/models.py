@@ -1,10 +1,11 @@
 from django.db import models
 from feed.models import FeedItem
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Like(FeedItem):
-    url = models.URLField()
+    url = models.URLField(max_length=2048,null=True,blank=True)
 
     postheader_template = "likes/_like_postheader.html"
     postcontent_template = "likes/_like_postcontent.html"
@@ -26,3 +27,12 @@ class Like(FeedItem):
     
     def get_mastodon_url(self):
         return self.url
+    
+
+    def clean(self):
+        super().clean()
+        self.validate_publishable()
+    
+    def validate_publishable(self):
+        if self.url is None:
+            raise ValidationError("Url is required.")

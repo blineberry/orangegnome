@@ -17,7 +17,7 @@ class Bookmark(FeedItem):
     The Django model representing the bookmark.
     """
 
-    url = models.URLField(max_length=2048)
+    url = models.URLField(max_length=2048,null=True,blank=True)
     """
     The URL of the bookmark.
     """
@@ -147,26 +147,29 @@ class Bookmark(FeedItem):
         super().clean()
         self.validate_publishable()
     
-    def is_publishable(self):
-        title_txt = self.title_txt()
-        quote_txt = self.quote_txt()
-        content_txt = self.content_txt()
+    # def is_publishable(self):
+    #     title_txt = self.title_txt()
+    #     quote_txt = self.quote_txt()
+    #     content_txt = self.content_txt()
 
-        limits = (
-            ("Title", len(title_txt), Bookmark.title_max),
-            ("Quote", len(quote_txt), Bookmark.quote_max),
-            ("Content", len(content_txt), Bookmark.content_max),
-        )
+    #     limits = (
+    #         ("Title", len(title_txt), Bookmark.title_max),
+    #         ("Quote", len(quote_txt), Bookmark.quote_max),
+    #         ("Content", len(content_txt), Bookmark.content_max),
+    #     )
 
-        for limit in limits:
-            if limit[1] > limit[2]:
-                return False
+    #     for limit in limits:
+    #         if limit[1] > limit[2]:
+    #             return False
             
-        return True
+    #     return True
     
     def validate_publishable(self):
         if not self.published:
             return
+        
+        if self.url is None:
+            raise ValidationError("Url is required.")
         
         title_txt = self.title_txt()
         quote_txt = self.quote_txt()

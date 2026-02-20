@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 
 # Create your models here.
 class Repost(FeedItem):
-    url = models.URLField(null=True,blank=True)
+    url = models.URLField(max_length=2048,null=True,blank=True)
     source_name=models.CharField(null=True,blank=True,max_length=1000)
     content = models.TextField()
     source_author_name = models.CharField(max_length=200, default="Anonymous")
