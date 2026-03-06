@@ -109,7 +109,7 @@ class Photo(FeedItem):
         if self.image() is None:
             return ""
 
-        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image().image.url))
+        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image().url))
 
     image_tag.short_description = 'Preview'
 
@@ -164,11 +164,7 @@ class Photo(FeedItem):
         if not self.published:
             return
         
-        super().validate_publishable()
-
-
-        if not self.alternative_text or self.alternative_text.isspace():
-            raise ValidationError("Alternative text is required.")
+        super().validate_publishable()        
 
         content_txt = self.content_txt()
 

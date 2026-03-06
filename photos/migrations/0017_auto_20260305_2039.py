@@ -16,8 +16,12 @@ def up(apps, schema_editor):
     for item in model.objects.all():
         feed_item = FeedItem.objects.get(pk=item.pk)
 
-        feed_item.images.create(image=item.image, description=item.alternative_text)
+        description = item.alternative_text if item.alternative_text != "" else feed_item.content_md
 
+        image = FeedImage(image=item.image, description=description)
+        image.save()
+
+        feed_item.postimage_set.create(image=image, alt=item.alternative_text)
         feed_item.save()
 
 
@@ -30,13 +34,17 @@ def down(apps, schema_editor):
 
     for item in model.objects.all():
         feed_item = FeedItem.objects.get(pk=item.pk)
-        image = feed_item.images.all()[:1][0]
+        image = feed_item.images.first()
+
+        if image is None:
+            continue
+        
         item.image = image.image
         item.alternative_text = image.description
 
         item.save()
 
-        feed_item.images.clear()
+        feed_item.images.all().delete()
         feed_item.save()
 
 class Migration(migrations.Migration):

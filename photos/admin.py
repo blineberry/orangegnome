@@ -18,7 +18,7 @@ class ImagesInlineForm(ModelForm):
 class ImagesInline(admin.StackedInline):
     model = PostImage
     form = ImagesInlineForm
-    extra = 1
+    extra = 0
     autocomplete_fields = ["image"]
     readonly_fields = ["image_tag"]
     fieldsets = (
