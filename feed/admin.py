@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tag, Syndication
+from .models import Tag, Syndication, Image
 from django import forms
 from django.utils import timezone
 from syndications.admin import SyndicatableAdmin as SAAdmin
@@ -53,4 +53,11 @@ class TagAdmin(admin.ModelAdmin):
 class SyndicatableAdmin(PublishableAdmin, SAAdmin):
     inlines = [SyndicationInline]
 
+class ImageAdmin(admin.ModelAdmin):
+    search_fields = ["description"]
+    readonly_fields = ('image_tag',)
+    fields = ["image_tag", "image", "description"]
+    list_display = ['image_tag', 'description']
+
 admin.site.register(Tag, TagAdmin)
+admin.site.register(Image,ImageAdmin)

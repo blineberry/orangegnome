@@ -10,7 +10,12 @@ from syndications.models import MastodonStatus, Syndication as SyndicationsSyndi
 from .fields import CommonmarkField
 from django.contrib.contenttypes.fields import (GenericForeignKey,
                                                 GenericRelation)
-
+from django_resized import ResizedImageField
+from django_resized.forms import ResizedImageFieldFile
+from uuid import uuid4
+from datetime import date
+from .storage import PublicAzureStorage
+from django.utils.html import mark_safe
 
 def convert_commonmark_to_plain_text(input:str, strip:bool=True):
     return CommonmarkField.md_to_txt(input, strip)
@@ -18,8 +23,55 @@ def convert_commonmark_to_plain_text(input:str, strip:bool=True):
 def convert_commonmark_to_html(input:str, block_content:bool=True):
     return CommonmarkField.md_to_html(input, block_content)
 
+# Custom upload_to callable
+# Heavily influenced from https://stackoverflow.com/a/15141228/814492
+def upload_to_callable(instance, filename):
+    ext = filename.split('.')[-1]
+
+    filename = '{}.{}'.format(uuid4().hex, ext)
+
+    d = date.today()
+
+    return '{0}/{1}'.format(d.strftime('%Y/%m/%d'),filename)
+
+class OGResizedImageFieldFile(ResizedImageFieldFile):
+    def save(self, name, content, save=True):
+        super().save(name, content, save)
+        self.field.update_dimension_fields(self.instance, force=True)
+
+class OGResizedImageField(ResizedImageField):
+    attr_class = OGResizedImageFieldFile
 
 # Create your models here.
+class Image(models.Model):
+    image = OGResizedImageField(
+        size=[1188,1188], 
+        quality=70, 
+        upload_to=upload_to_callable,
+        storage=PublicAzureStorage, 
+        height_field="image_height", 
+        width_field="image_width",
+        keep_meta=False)
+    """The Photo."""
+
+    image_height = models.PositiveIntegerField()
+    """The height of the image."""
+
+    image_width = models.PositiveIntegerField()
+    """The width of the image."""
+
+    description = models.CharField(blank=True, max_length=255)
+
+    def __str__(self):
+        return self.description
+    
+    def image_tag(self):
+        """Returns html for the Admin change view to display the uploaded image."""
+        if self.image is None:
+            return ""
+
+        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image.url))
+
 class Tag(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, db_index=True, unique=True)
@@ -51,6 +103,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
+
+    images = models.ManyToManyField(Image, through="PostImage", related_name="posts")
 
     content_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
     def content_txt(self):
@@ -215,3 +269,23 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
 class Syndication(SyndicationsSyndication):
     syndicated_post = models.ForeignKey(FeedItem, on_delete=models.CASCADE, related_name="syndications")
+
+class PostImage(models.Model):
+    image = models.ForeignKey(Image,on_delete=models.CASCADE)
+    post = models.ForeignKey(FeedItem, on_delete=models.CASCADE)
+    order = models.PositiveSmallIntegerField(blank=True, null=True)
+    alt = models.CharField(blank=True, max_length=255)
+    feature = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.image.description
+
+    def image_tag(self):
+        """Returns html for the Admin change view to display the uploaded image."""
+        if self.image is None or self.image.image is None:
+            return ""
+
+        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image.image.url))
+
+    class Meta:
+        ordering = ["order"]
