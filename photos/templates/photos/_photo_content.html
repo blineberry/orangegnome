@@ -1,4 +1,8 @@
 <div class="article-content">
-    <a href="{{ photo.get_permalink }}"><img height="{{ photo.image_height }}" width="{{ photo.image_width }}" class="u-photo" src="{{ photo.image.url }}" alt="{{ photo.alternative_text }}"></a>
+    <a href="{{ photo.get_permalink }}">
+    {% for postimage in photo.postimage_set.all|slice:"0:1" %}
+    <img height="{{ postimage.image.image_height }}" width="{{ postimage.image.image_width }}" class="u-photo" src="{{ postimage.image.image.url }}" alt="{{ postimage.alt }}"></a>
+    {% endfor %}
+    </a>
     <div class="e-content">{{ photo.content_html|safe }}</div>
 </div>
