@@ -273,7 +273,7 @@ class Syndication(SyndicationsSyndication):
 class PostImage(models.Model):
     image = models.ForeignKey(Image,on_delete=models.CASCADE)
     post = models.ForeignKey(FeedItem, on_delete=models.CASCADE)
-    order = models.PositiveSmallIntegerField(blank=True, null=True)
+    order = models.PositiveSmallIntegerField(blank=True, null=True, default=50)
     alt = models.CharField(blank=True, max_length=255)
     feature = models.BooleanField(default=False)
 

@@ -170,4 +170,3 @@ class Photo(FeedItem):
 
         if len(content_txt) > self.content_max:
             raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max))
-        
