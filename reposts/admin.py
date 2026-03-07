@@ -16,7 +16,7 @@ class RepostModelForm(ModelForm):
         model = Repost
         fields = [
             'url',
-            'content',
+            'content_md',
             'source_author_name',
             'source_author_url',
             'author',
@@ -46,7 +46,7 @@ class RepostAdmin(SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'source_name', 'content', 'source_author_name', 'source_author_url', 'author', 'tags')
+            'fields': ('url', 'source_name', 'content_md', 'source_author_name', 'source_author_url', 'author', 'tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')

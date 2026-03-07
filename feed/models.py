@@ -103,6 +103,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
+    source_name=models.CharField(null=True,blank=True,max_length=1000)
+    source_author_name = models.CharField(max_length=200, default="Anonymous")
+    source_author_url = models.URLField(null=True,blank=True)
 
     images = models.ManyToManyField(Image, through="PostImage", related_name="posts")
 
