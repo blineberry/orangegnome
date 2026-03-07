@@ -7,17 +7,12 @@ from django.template.loader import render_to_string
 
 # Create your models here.
 class Repost(FeedItem):
-    source_name=models.CharField(null=True,blank=True,max_length=1000)
-    content = models.TextField()
-    source_author_name = models.CharField(max_length=200, default="Anonymous")
-    source_author_url = models.URLField(null=True,blank=True)
-
     postheader_template = "reposts/_repost_postheader.html"
     postcontent_template = "reposts/_repost_postcontent.html"
     published_verb = "Reposted"
 
     def __str__(self):
-        t = Truncator(strip_tags(self.content))
+        t = Truncator(strip_tags(self.content_txt()))
         return t.chars(50)
 
     def get_absolute_url(self):
