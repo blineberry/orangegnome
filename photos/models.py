@@ -47,7 +47,7 @@ class Photo(FeedItem):
     Implements MastodonSyndicatable and FeedItem.
     """
 
-    image = OGResizedImageField(
+    old_image = OGResizedImageField(
         size=[1188,1188], 
         quality=70, 
         upload_to=upload_to_callable,
@@ -57,15 +57,15 @@ class Photo(FeedItem):
         keep_meta=False)
     """The Photo."""
 
-    image_height = models.PositiveIntegerField()
+    old_image_height = models.PositiveIntegerField()
     """The height of the image."""
 
-    image_width = models.PositiveIntegerField()
+    old_image_width = models.PositiveIntegerField()
     """The width of the image."""
 
     content_max = 560
 
-    alternative_text = models.CharField(blank=True, max_length=255)
+    old_alternative_text = models.CharField(blank=True, max_length=255)
     """The alternative text description of the photo."""
 
     html_class = 'photo'
@@ -74,13 +74,42 @@ class Photo(FeedItem):
     def __str__(self):
         return self.content_txt()
 
+    def image(self):
+        image = self.images.first()
+
+        if image is None:
+            return None
+        
+        return image.image
+    
+    def image_height(self):        
+        image = self.images.first()
+
+        if image is None:
+            return 0
+        
+        return image.image_height
+    
+    def image_width(self):
+        image = self.images.first()
+
+        if image is None:
+            return 0
+        
+        return image.image_width
+    
+    def alternative_text(self):
+        image = self.images.first()
+
+        return self.postimage_set.get(image = image).alt
+
     # From https://stackoverflow.com/a/37965068/814492
     def image_tag(self):
         """Returns html for the Admin change view to display the uploaded image."""
-        if self.image is None:
+        if self.image() is None:
             return ""
 
-        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image.url))
+        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image().url))
 
     image_tag.short_description = 'Preview'
 
@@ -135,14 +164,9 @@ class Photo(FeedItem):
         if not self.published:
             return
         
-        super().validate_publishable()
-
-
-        if not self.alternative_text or self.alternative_text.isspace():
-            raise ValidationError("Alternative text is required.")
+        super().validate_publishable()        
 
         content_txt = self.content_txt()
 
         if len(content_txt) > self.content_max:
             raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max))
-        

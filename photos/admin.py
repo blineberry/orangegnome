@@ -4,8 +4,29 @@ from feed.widgets import PlainTextCountTextarea
 from .models import Photo
 from feed.admin import SyndicatableAdmin
 from django.forms import ModelForm, CharField, Textarea
+from feed.models import PostImage
 
 # Customize the Admin form
+class ImagesInlineForm(ModelForm):
+    alt = CharField(widget=Textarea, required=False)
+
+    class Meta:
+        model = PostImage
+        fields = ["image", "alt", "order", "feature"]
+
+
+class ImagesInline(admin.StackedInline):
+    model = PostImage
+    form = ImagesInlineForm
+    extra = 0
+    autocomplete_fields = ["image"]
+    readonly_fields = ["image_tag"]
+    fieldsets = (
+        (None, {
+            'fields': ('image_tag', 'image', 'alt', 'order', 'feature',)
+        }),
+    )
+
 class PhotoModelForm(ModelForm):
     """
     Customizations for the Add and Change admin pages.
@@ -22,13 +43,11 @@ class PhotoModelForm(ModelForm):
     class Meta:
         model = Photo
         fields = [
-            'image',
             'content_md',
-            'alternative_text',
             'in_reply_to',
             'author',
             'tags',
-            'published'
+            'published',
         ]
 
 # Admin specs for the Photo model
@@ -42,7 +61,9 @@ class PhotoAdmin(SyndicatableAdmin):
     form = PhotoModelForm
     """Override the dynamically created form with customizations."""
 
-    readonly_fields = ('image_tag', 'syndicated_to_mastodon')
+    inlines = [ImagesInline]
+
+    readonly_fields = ('syndicated_to_mastodon',)
     """
     These fields will be shown but uneditable. 
     
@@ -51,7 +72,7 @@ class PhotoAdmin(SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('image_tag', 'image', 'content_md', 'alternative_text','in_reply_to','author','tags')
+            'fields': ('content_md','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
