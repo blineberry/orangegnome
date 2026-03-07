@@ -46,27 +46,7 @@ class Photo(FeedItem):
 
     Implements MastodonSyndicatable and FeedItem.
     """
-
-    old_image = OGResizedImageField(
-        size=[1188,1188], 
-        quality=70, 
-        upload_to=upload_to_callable,
-        storage=PublicAzureStorage, 
-        height_field="image_height", 
-        width_field="image_width",
-        keep_meta=False)
-    """The Photo."""
-
-    old_image_height = models.PositiveIntegerField()
-    """The height of the image."""
-
-    old_image_width = models.PositiveIntegerField()
-    """The width of the image."""
-
     content_max = 560
-
-    old_alternative_text = models.CharField(blank=True, max_length=255)
-    """The alternative text description of the photo."""
 
     html_class = 'photo'
     postheader_template = "photos/_postheader_template.html"
