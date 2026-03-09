@@ -23,8 +23,6 @@ class Post(FeedItem):
     summary_max = 280
     
     title_max = 100
-   
-    category = models.ForeignKey(Category, on_delete=models.PROTECT,related_name='posts', null=True, blank=True)
 
     # extra properties
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
