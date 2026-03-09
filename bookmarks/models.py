@@ -23,8 +23,6 @@ class Bookmark(FeedItem):
 
     quote_max = 280
 
-    commonmark_rendered_at = models.DateTimeField(null=True)
-
     postheader_template = "bookmarks/_bookmark_postheader.html"
     postcontent_template = "bookmarks/_bookmark_postcontent.html"
 

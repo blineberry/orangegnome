@@ -28,7 +28,6 @@ class PostModelForm(ModelForm):
             'in_reply_to', 
             'content_md',
             'author',
-            'category',
             'tags',
         ]
 
@@ -43,7 +42,7 @@ class PostAdmin(SyndicatableAdmin):
             'fields': ('title_md','slug','summary_md','in_reply_to','content_md','author')
         }),
         ('Metadata', {
-            'fields': ('category','tags')
+            'fields': ('tags',)
         }),
         ('Syndication', {
             'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
@@ -57,4 +56,3 @@ class PostAdmin(SyndicatableAdmin):
 
 # Register your models here.
 admin.site.register(Post, PostAdmin)
-admin.site.register(Category)
