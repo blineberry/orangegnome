@@ -144,6 +144,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     url = models.URLField(max_length=2048,null=True,blank=True)
 
+    slug = models.SlugField(max_length=100, null=True)
+
     postheader_template = "feed/_postheader_template.html"
     postcontent_template = "feed/_postbody_template.html"
 

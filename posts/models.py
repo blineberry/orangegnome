@@ -24,8 +24,6 @@ class Post(FeedItem):
     
     title_max = 100
 
-    # extra properties
-    slug = models.SlugField(max_length=100, unique=True, db_index=True)
     
     postcontent_template = "posts/_post_summary.html"
 
