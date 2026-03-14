@@ -38,7 +38,7 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
     extra_context = {
         'page_title': 'Brent Lineberry',
     }
-    template_name = 'feed/feed.html'
+    template_name = 'feed/post_archive.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -185,6 +185,10 @@ class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
         if self.post_type == Post.PostType.NOTE: 
             page_title = 'Notes | Brent Lineberry'
             feed_title = 'Notes'
+
+        if self.post_type == Post.PostType.PHOTO: 
+            page_title = 'Photos | Brent Lineberry'
+            feed_title = 'Photos'
 
         context['page_title'] = page_title
         context['feed_title'] = feed_title

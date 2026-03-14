@@ -16,6 +16,12 @@
     <meta property="og:title" content="{{ object.feed_item_header }}" />
     <meta property="og:description" content="{{ object.content }}" />
     <meta property="og:type" content="article" />
+    {% elif object.post_type == 'NOTE' %}
+    <meta property="og:url" content="{{ permalink }}" />
+    <meta property="og:title" content="{{ object.feed_item_header }}" />
+    <meta property="og:description" content="{{ object.caption }}" />
+    <meta name="og:image" content="{{ object.image.url }}" />
+    <meta property="og:type" content="article" />
     {% endif %}
 {% endblock %}
 
@@ -31,6 +37,12 @@
         <h1><a class="article-link alt u-bookmark-of {% if object.title_md %}h-cite{% endif %}" href="{{ object.url }}">{{ object.get_title_or_url_html|safe }}</a></h1>
     </header>
     {% elif object.post_type == 'NOTE' %}
+    <header class="article-header">
+        {% if object.in_reply_to %}
+        <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% endif %}
+    </header>
+    {% elif object.post_type == 'PHOTO' %}
     <header class="article-header">
         {% if object.in_reply_to %}
         <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
@@ -56,6 +68,8 @@
         <div class="article-content e-content">
             {{ object.feed_item_content|safe }}
         </div>
+    {% elif object.post_type == 'PHOTO' %}
+        {% include "feed/_postcontent.html" with post=object %}
     {% else %}
     <div class="article-content e-content">
         {{ object.feed_item_content|safe }}

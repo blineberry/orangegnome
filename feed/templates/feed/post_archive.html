@@ -9,10 +9,9 @@
     
     <ul class="feed-list">
         {% for post in object_list %}
-        {% with item=post.get_child  %}
             <li class="feed-item">
             {% block post %}
-                <article class="article h-entry {{ post.get_html_class }}">
+                <article class="article h-entry {{ post.html_class }}">
                 {% block postheader %}
                     {% include 'feed/_postheader.html' with post=post %}
                 {% endblock %}                
@@ -25,26 +24,26 @@
                             <div><small><a href="{{ post.get_edit_link }}">Edit</a></small></div>
                         {% endif %}
                         <div class="meta">
-                            <div class="postmeta-published">{{ item.published_verb|default:"Published" }} by 
-                                <span class="p-author h-card postmeta-published-author"><a class="u-url" href="{{ item.get_site_url }}"><img class="u-photo" src="{{ item.author.photo.url }}" alt="{{ item.author.name }}" />{{ item.author.name }}</a></span> on 
-                                <a class="u-url" href="{{ item.get_absolute_url }}"><time class="dt-published" datetime="{{ item.published|date:'c' }}">{{ item.published }}</time></a>                                
-                                {% if item.category %}
-                                    in <a href="{{ item.category.get_absolute_url }}" class="p-category" rel="category tag">{{ item.category.name }}</a>
+                            <div class="postmeta-published">{{ post.published_verb|default:"Published" }} by 
+                                <span class="p-author h-card postmeta-published-author"><a class="u-url" href="{{ post.get_site_url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" />{{ post.author.name }}</a></span> on 
+                                <a class="u-url" href="{{ post.get_absolute_url }}"><time class="dt-published" datetime="{{ post.published|date:'c' }}">{{ post.published }}</time></a>                                
+                                {% if post.category %}
+                                    in <a href="{{ post.category.get_absolute_url }}" class="p-category" rel="category tag">{{ post.category.name }}</a>
                                 {% endif %}
                             </div>
-                            {% if item.tags.all %}
+                            {% if post.tags.all %}
                             <div class="postmeta-tags">Tags:
                                 <ul>
-                                {% for tag in item.tags.all|dictsort:"name" %}
+                                {% for tag in post.tags.all|dictsort:"name" %}
                                     <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
                                 {% endfor %}
                                 </ul>
                             </div>
                             {% endif %}                            
-                            {% if item.syndications.all %}
+                            {% if post.syndications.all %}
                             <div class="postmeta-syndication">Also on: 
                                 <ul class="commalist">
-                                {% for s in item.syndications.all|dictsort:"name" %}
+                                {% for s in post.syndications.all|dictsort:"name" %}
                                     <li><a class="u-syndication" href="{{ s.url }}">{{ s.name }}</a></li>
                                 {% endfor %}
                                 </ul>
@@ -56,7 +55,6 @@
                 </article>
             {% endblock %}
             </li>
-        {% endwith %}
         {% endfor %}
     </ul>
     <nav class="feed-nav">

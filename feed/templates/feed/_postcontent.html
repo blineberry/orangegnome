@@ -13,6 +13,15 @@
     {% endif %}
 {% elif post.post_type == 'LIKE' %}
     <p class="p-summary">Liked <a class="u-like-of" href="{{post.url}}">{{post.url}}</a>.</p>
+{% elif post.post_type == 'PHOTO' %}
+    <div class="article-content">
+        <a href="{{ post.get_permalink }}">
+        {% for postimage in post.postimage_set.all|slice:"0:1" %}
+        <img height="{{ postimage.image.image_height }}" width="{{ postimage.image.image_width }}" class="u-photo" src="{{ postimage.image.image.url }}" alt="{{ postimage.alt }}"></a>
+        {% endfor %}
+        </a>
+        <div class="e-content">{{ post.content_html|safe }}</div>
+    </div>
 {% else %}
     {% include post.postcontent_template with item=post %}
 {% endif %}

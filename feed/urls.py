@@ -28,4 +28,6 @@ urlpatterns = [
     path('likes/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='likedetail_old'),
     path('notes/', views.PostIndex.as_view(post_type=Post.PostType.NOTE), {"wm_app_name": 'feed', "wm_model_name": "FeedItem"}, name="notes"),
     path('notes/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='notedetail_old'),
+    path('photos/', views.PostIndex.as_view(post_type=Post.PostType.PHOTO), {"wm_app_name": 'feed', "wm_model_name": "FeedItem"}, name="photos"),
+    path('photos/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='photodetail_old'),
 ]

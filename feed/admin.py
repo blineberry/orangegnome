@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tag, Syndication, Image, PostImage, FeedItem as Post, Bookmark, Like, Note
+from .models import Tag, Syndication, Image, PostImage, FeedItem as Post, Bookmark, Like, Note, Photo
 from django import forms
 from django.utils import timezone
 from syndications.admin import SyndicatableAdmin as SAAdmin
@@ -54,9 +54,24 @@ class TagAdmin(admin.ModelAdmin):
 class SyndicatableAdmin(PublishableAdmin, SAAdmin):
     inlines = [SyndicationInline]
 
+class PostImagesInlineForm(forms.ModelForm):
+    alt = forms.CharField(widget=forms.Textarea, required=False)
+
+    class Meta:
+        model = PostImage
+        fields = ["image", "alt", "order", "feature"]
+
 class PostImageInline(admin.StackedInline):
     model = PostImage
+    form = PostImagesInlineForm
     extra = 0
+    autocomplete_fields = ["image"]
+    readonly_fields = ["image_tag"]
+    fieldsets = (
+        (None, {
+            'fields': ('image_tag', 'image', 'alt', 'order', 'feature',)
+        }),
+    )
 
 class ImageForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea, required=False)
@@ -226,6 +241,7 @@ class NoteModelForm(forms.ModelForm):
 
     Inherits from forms.ModelForm.
     """
+    post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.NOTE)
 
     content_md = forms.CharField(widget=PlainTextCountTextarea(max=Note.content_max), help_text="Markdown supported.")
     """Display the content input as a Textarea"""
@@ -237,7 +253,8 @@ class NoteModelForm(forms.ModelForm):
             'in_reply_to',
             'author',
             'tags',
-            'published'
+            'published',
+            'post_type'
         ]
 
 # Admin specs for the Note model
@@ -260,7 +277,7 @@ class NoteAdmin(SyndicatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('content_md','in_reply_to','author','tags')
+            'fields': ('post_type', 'content_md','in_reply_to','author','tags')
         }),
         ('Syndication', {
             'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
@@ -282,6 +299,79 @@ class NoteAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """    
 
+class PhotoModelForm(forms.ModelForm):
+    """
+    Customizations for the Add and Change admin pages.
+
+    Inherits from forms.ModelForm.
+    """
+    post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.PHOTO)
+
+    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Photo.content_max), required=False, help_text="Markdown supported.")
+    """Display the caption input as a Textarea"""
+
+    alternative_text = forms.CharField(widget=forms.Textarea, required=False)
+    """Display the caption input as a Textarea"""
+
+    class Meta:
+        model = Photo
+        fields = [
+            'content_md',
+            'in_reply_to',
+            'author',
+            'tags',
+            'published',
+            'post_type',
+        ]
+
+# Admin specs for the Photo model
+class PhotoAdmin(SyndicatableAdmin):
+    """
+    Specifications for the Note Admin page.
+
+    Inherits from PublishableAdmin, SyndicatableAdmin, and WebmentionAdmin
+    """
+
+    form = PhotoModelForm
+    """Override the dynamically created form with customizations."""
+
+    inlines = [PostImageInline]
+
+    readonly_fields = ('syndicated_to_mastodon',)
+    """
+    These fields will be shown but uneditable. 
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
+    """
+
+    fieldsets = (
+        (None, {
+            'fields': ('post_type', 'content_md','in_reply_to','author','tags')
+        }),
+        ('Syndication', {
+            'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
+        }),
+        ('Publishing', {
+            'fields': ('published',)
+        })
+    )
+    """
+    Group related fields together. 
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
+    """
+
+    filter_horizontal = ('tags',)
+    """
+    Use the built-in interface for the tags many-to-many relationship.
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
+    """
+
+    list_display = ['image_tag', 'content_md']
+
+# Register your models here.
+admin.site.register(Photo, PhotoAdmin)
 
 # Register your models here.
 admin.site.register(Note, NoteAdmin)

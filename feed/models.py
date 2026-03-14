@@ -174,7 +174,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if post_type == FeedItem.PostType.BOOKMARK:
             return 280
         
-        if post_type == FeedItem.PostType.NOTE:
+        if (post_type == FeedItem.PostType.NOTE or
+            post_type == FeedItem.PostType.PHOTO):
             return 560
         
         return
@@ -189,6 +190,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         if post_type == FeedItem.PostType.NOTE:
             return 'note'
+        
+        if post_type == FeedItem.PostType.PHOTO:
+            return 'photo'
         
         return
     
@@ -215,6 +219,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         if post_type == FeedItem.PostType.NOTE:
             return 'notes/_postheader_template.html'
+        
+        if post_type == FeedItem.PostType.PHOTO:
+            return 'photos/_postheader_template.html'
         
         return 'feed/_postheader_template.html'
     
@@ -267,10 +274,12 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return self.get_site_url() + self.get_absolute_url()
 
     def __str__(self):
-        if self.post_type == FeedItem.PostType.BOOKMARK or self.post_type == FeedItem.PostType.LIKE:
+        if (self.post_type == FeedItem.PostType.BOOKMARK or 
+            self.post_type == FeedItem.PostType.LIKE):
             return self.url
         
-        if self.post_type == FeedItem.PostType.NOTE:
+        if (self.post_type == FeedItem.PostType.NOTE or
+            self.post_type == FeedItem.PostType.NOTE):
             return self.content_txt()
         
         return 'FeedItem'
@@ -342,7 +351,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if self.post_type == FeedItem.PostType.BOOKMARK:
             return self.get_title_or_url_txt()
         
-        if self.post_type == FeedItem.PostType.NOTE:
+        if (self.post_type == FeedItem.PostType.NOTE or
+            self.post_type == FeedItem.PostType.PHOTO):
             return self.content_txt()
         
         return None
@@ -354,6 +364,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         if self.post_type == FeedItem.PostType.NOTE:
             return self.content_html()
+        
+        if self.post_type == FeedItem.PostType.PHOTO:
+            return render_to_string('photos/_photo_content.html', { 'photo': self })
+        
         return None
     
     def feed_item_link(self):
@@ -421,11 +435,12 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             if self.url is None:
                 raise ValidationError("Url is required.")
             
-        if self.post_type == FeedItem.PostType.NOTE:
+        if (self.post_type == FeedItem.PostType.NOTE or
+            self.post_type == FeedItem.PostType.PHOTO):
             content_txt = self.content_txt()
 
-        if len(content_txt) > self.content_max:
-            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max))
+            if len(content_txt) > self.content_max():
+                raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max()))
         
     def commonmark_to_html(self, commonmark:str, block_content:bool=True):
         return convert_commonmark_to_html(commonmark, block_content)
@@ -509,7 +524,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
             return content + self.url
         
-        if self.post_type == FeedItem.PostType.NOTE:
+        if (self.post_type == FeedItem.PostType.NOTE or
+            self.post_type == FeedItem.PostType.PHOTO):
             return self.content_txt()
         
         raise Exception("No content to post to Mastodon.")
@@ -537,6 +553,57 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             return self.url
         
         return None
+    
+    def has_mastodon_media(self):
+        """Returns True if the Model has media to upload."""
+        return self.image is not None
+    
+    def get_mastodon_media_image_field(self):
+        """Returns the ImageField for the media."""
+        return self.image
+    
+    def get_mastodon_media_description(self):
+        """Returns the description for the media."""
+        return self.alternative_text
+    
+    def image(self):
+        image = self.images.first()
+
+        if image is None:
+            return None
+        
+        return image.image
+    
+    def image_height(self):        
+        image = self.images.first()
+
+        if image is None:
+            return 0
+        
+        return image.image_height
+    
+    def image_width(self):
+        image = self.images.first()
+
+        if image is None:
+            return 0
+        
+        return image.image_width
+    
+    def alternative_text(self):
+        image = self.images.first()
+
+        return self.postimage_set.get(image = image).alt
+
+    # From https://stackoverflow.com/a/37965068/814492
+    def image_tag(self):
+        """Returns html for the Admin change view to display the uploaded image."""
+        if self.image() is None:
+            return ""
+
+        return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image().url))
+
+    image_tag.short_description = 'Preview'
         
 class Syndication(SyndicationsSyndication):
     syndicated_post = models.ForeignKey(FeedItem, on_delete=models.CASCADE, related_name="syndications")
@@ -584,6 +651,12 @@ class Like(FeedItem):
 
 class Note(FeedItem):
     objects = PostTypeManager(FeedItem.PostType.NOTE)
+
+    class Meta:
+        proxy = True
+
+class Photo(FeedItem):
+    objects = PostTypeManager(FeedItem.PostType.PHOTO)
 
     class Meta:
         proxy = True

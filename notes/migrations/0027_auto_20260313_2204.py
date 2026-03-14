@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('notes', '0026_remove_note_old_content_md'),
+        ('feed', '0033_feeditem_post_type' ),
     ]
 
     operations = [
