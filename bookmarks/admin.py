@@ -16,19 +16,19 @@ class BookmarkModelForm(ModelForm):
     Inherits from forms.ModelForm.
     """
 
-    title_md = CharField(
-        widget=PlainTextCountTextInput(max=Bookmark.title_max),
-        required=False)
-    #title = CharField(widget=TextInput)
+    # title_md = CharField(
+    #     widget=PlainTextCountTextInput(max=Bookmark.title_max),
+    #     required=False)
+    # #title = CharField(widget=TextInput)
 
-    quote_md = CharField(
-        widget=PlainTextCountTextarea(max=Bookmark.quote_max), 
-        required=False)
-    """Display the quote input as a Textarea"""
+    # quote_md = CharField(
+    #     widget=PlainTextCountTextarea(max=Bookmark.quote_max), 
+    #     required=False)
+    # """Display the quote input as a Textarea"""
 
-    content_md = CharField(
-        widget=PlainTextCountTextarea(max=Bookmark.content_max), 
-        required=False)
+    # content_md = CharField(
+    #     widget=PlainTextCountTextarea(max=Bookmark.content_max), 
+    #     required=False)
     """Display the content input as a Textarea"""
 
     class Meta:
@@ -91,4 +91,4 @@ class BookmarkAdmin(SyndicatableAdmin):
        
 
 # Register your models here.
-admin.site.register(Bookmark, BookmarkAdmin)
+#admin.site.register(Bookmark, BookmarkAdmin)

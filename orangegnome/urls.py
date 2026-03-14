@@ -21,12 +21,12 @@ from django.views.generic.base import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('posts/', include('posts.urls', namespace='posts')),
-    path('notes/', include('notes.urls', namespace='notes')),
+    path('articles/', include('posts.urls', namespace='posts')),
+    #path('notes/', include('notes.urls', namespace='notes')),
     path('exercises/', include('exercises.urls', namespace='exercises')),
     path('photos/', include('photos.urls', namespace='photos')),
-    path('bookmarks/', include('bookmarks.urls', namespace='bookmarks')),
-    path('likes/', include('likes.urls', namespace='likes')),
+    #path('bookmarks/', include('bookmarks.urls', namespace='bookmarks')),
+    #path('likes/', include('likes.urls', namespace='likes')),
     path('reposts/', include('reposts.urls', namespace='reposts')),
     path('syndications/', include('syndications.urls', namespace='syndications')),
     path('webmentions/', include('webmentions.urls', namespace='webmentions')),
