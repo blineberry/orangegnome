@@ -15,8 +15,9 @@ from django_resized.forms import ResizedImageFieldFile
 from uuid import uuid4
 from datetime import date
 from .storage import PublicAzureStorage
-from django.utils.html import mark_safe
+from django.utils.html import mark_safe, strip_tags
 from django.template.loader import render_to_string
+from django.utils.text import Truncator
 
 def convert_commonmark_to_plain_text(input:str, strip:bool=True):
     return CommonmarkField.md_to_txt(input, strip)
@@ -209,6 +210,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if post_type == FeedItem.PostType.NOTE:
             return 'Noted'
         
+        if post_type == FeedItem.PostType.REPOST:
+            return 'Reposted'
+        
         return 'Posted'
 
     @staticmethod
@@ -224,6 +228,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         if post_type == FeedItem.PostType.PHOTO:
             return 'photos/_postheader_template.html'
+
+        if post_type == FeedItem.PostType.REPOST:
+            return 'reposts/_repost_postheader.html'
         
         return 'feed/_postheader_template.html'
     
@@ -237,6 +244,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         if post_type == FeedItem.PostType.ARTICLE:
             return 'posts/_post_summary.html'
+        
+        if post_type == FeedItem.PostType.REPOST:
+            return 'reposts/_repost_postcontent.html'
 
         return 'feed/_postbody_template.html'
 
@@ -295,6 +305,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         if self.post_type == FeedItem.PostType.ARTICLE:
             return self.title_txt()
+        
+        if self.post_type == FeedItem.PostType.REPOST:
+            t = Truncator(strip_tags(self.content_txt()))
+            return t.chars(50)
         
         return 'FeedItem'
 
@@ -372,6 +386,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if self.post_type == FeedItem.PostType.ARTICLE:
             return self.title_txt()
         
+        if self.post_type == FeedItem.PostType.REPOST:
+            return f'Reposted {self.source_author_name}'
+        
         return None
     
     def feed_item_content(self):
@@ -386,12 +403,21 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if self.post_type == FeedItem.PostType.PHOTO:
             return render_to_string('photos/_photo_content.html', { 'photo': self })
         
+        if self.post_type == FeedItem.PostType.REPOST:
+            return render_to_string('reposts/_repost_content.html', { 'item': self })
+        
         return None
     
     def feed_item_link(self):
         if self.post_type == FeedItem.PostType.BOOKMARK:
             return self.url
         return self.get_child().get_permalink()
+    
+    def to_text(self):
+        if self.post_type == FeedItem.PostType.REPOST:
+            return "Reposted " + self.source_author_name
+        
+        return ""
     
     def get_edit_link(self):
         model_name = self._meta.model_name
@@ -589,8 +615,15 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         return False
     
+    def is_mastodon_boost(self):
+        if self.post_type == FeedItem.PostType.REPOST:
+            return True
+        
+        return False
+    
     def get_mastodon_url(self):
-        if self.post_type == FeedItem.PostType.LIKE:
+        if (self.post_type == FeedItem.PostType.LIKE or
+            self.post_type == FeedItem.PostType.REPOST):
             return self.url
         
         return None
@@ -704,6 +737,12 @@ class Photo(FeedItem):
 
 class Article(FeedItem):
     objects = PostTypeManager(FeedItem.PostType.ARTICLE)
+
+    class Meta:
+        proxy = True
+
+class Repost(FeedItem):
+    objects = PostTypeManager(FeedItem.PostType.REPOST)
 
     class Meta:
         proxy = True

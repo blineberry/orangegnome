@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tag, Syndication, Image, PostImage, FeedItem as Post, Bookmark, Like, Note, Photo, Article
+from .models import Tag, Syndication, Image, PostImage, FeedItem as Post, Bookmark, Like, Note, Photo, Article, Repost
 from django import forms
 from django.utils import timezone
 from syndications.admin import SyndicatableAdmin as SAAdmin
@@ -421,7 +421,76 @@ class ArticleAdmin(SyndicatableAdmin):
 
     filter_horizontal = ('tags',)
 
+class RepostModelForm(forms.ModelForm):
+    """
+    Customizations for the Add and Change admin pages.
+
+    Inherits from forms.ModelForm.
+    """
+    post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.REPOST)
+
+    class Meta:
+        model = Repost
+        fields = [
+            'url',
+            'content_md',
+            'source_author_name',
+            'source_author_url',
+            'author',
+            'tags',
+            'syndicate_to_mastodon', 
+            'syndicated_to_mastodon',
+            'published',
+            'post_type'
+        ]
+
+# Admin specs for the Repost model
+class RepostAdmin(SyndicatableAdmin):
+    """
+    Specifications for the Repost Admin page.
+
+    Inherits from PublishableAdmin, SyndicatableAdmin
+    """
+
+    form = RepostModelForm
+    """Override the dynamically created form with customizations."""
+
+    readonly_fields = ('syndicated_to_mastodon',)
+    """
+    These fields will be shown but uneditable. 
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
+    """
+
+    fieldsets = (
+        (None, {
+            'fields': ('post_type', 'url', 'source_name', 'content_md', 'source_author_name', 'source_author_url', 'author', 'tags')
+        }),
+        ('Syndication', {
+            'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
+        }),
+        ('Publishing', {
+            'fields': ('published',)
+        })
+    )
+    """
+    Group related fields together. 
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
+    """
+
+    filter_horizontal = ('tags',)
+    """
+    Use the built-in interface for the tags many-to-many relationship.
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
+    """
+
+    list_display = ['url', 'source_author_name']
+    """The fields to display on the admin list view."""
+
 # Register your models here.
+admin.site.register(Repost, RepostAdmin)
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo, PhotoAdmin)
 admin.site.register(Note, NoteAdmin)

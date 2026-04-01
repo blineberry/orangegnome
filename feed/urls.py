@@ -31,5 +31,7 @@ urlpatterns = [
     path('photos/', views.PostIndex.as_view(post_type=Post.PostType.PHOTO), {"wm_app_name": 'feed', "wm_model_name": "FeedItem"}, name="photos"),
     path('photos/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='photodetail_old'),
     path('articles/', views.PostIndex.as_view(post_type=Post.PostType.ARTICLE), {"wm_app_name": 'feed', "wm_model_name": "FeedItem"}, name="articles"),
-    path('articles/<int:pk>/<slug:slug>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='photodetail_old'),
+    path('articles/<int:pk>/<slug:slug>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='articleodetail_old'),
+    path('reposts/', views.PostIndex.as_view(post_type=Post.PostType.REPOST), {"wm_app_name": 'feed', "wm_model_name": "FeedItem"}, name="reposts"),
+    path('reposts/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='repostdetail_old'),
 ]

@@ -27,6 +27,9 @@
     <meta property="og:title" content="{{ object.title_txt }}" />
     <meta property="og:description" content="{{ object.summary }}" />
     <meta property="og:type" content="article" />
+    {% elif object.post_type == 'REPOST' %}
+    <meta property="og:url" content="{{ permalink }}" />
+    <meta property="og:title" content="{{ object.to_text }}" />
     {% endif %}
 {% endblock %}
 
@@ -53,6 +56,8 @@
         <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
         {% endif %}
     </header>
+    {% elif object.post_type == 'REPOST' %}
+    <header class="article-header">Reposted:</header>
     {% else %}
     <header class="article-header">
         {% if object.feed_item_header %}
@@ -78,6 +83,35 @@
     {% elif object.post_type == 'ARTICLE' %}
         <div class="article-content e-content">
             {{ object.feed_item_content|safe }}
+        </div>
+    {% elif object.post_type == 'REPOST' %}
+        <div class="h-cite u-repost-of"> 
+            <div class="h-cite u-repost-of">    
+                <blockquote class="e-content">
+                    {{object.content_html|safe}}
+                    <footer>—
+                        {% if item.url %}
+                            <span class="p-author h-card">
+                                {% if object.source_author_url %}
+                                    <a class="p-name u-url" href="{{ object.source_author_url }}">{{ object.source_author_name }}</a>,
+                                {% else %}
+                                    <span class="p-name">{{ object.source_author_name }}</span>,
+                                {% endif %}
+                            </span>
+                            <cite><a class="u-url" href="{{ object.url }}">{{ object.source_name|default:object.url }}</a></cite>
+                        {% elif object.source_name %}
+                            <span class="p-author h-card">
+                                {% if object.source_author_url %}
+                                    <a class="p-name u-url" href="{{ object.source_author_url }}">{{ object.source_author_name }}</a>,
+                                {% else %}
+                                    <span class="p-name">{{ object.source_author_name }}</span>,
+                                {% endif %}
+                            </span>
+                            {{ object.source_name }}
+                        {% endif %}
+                    </footer>
+                </blockquote>
+            </div>
         </div>
     {% else %}
     <div class="article-content e-content">

@@ -190,6 +190,14 @@ class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
             page_title = 'Photos | Brent Lineberry'
             feed_title = 'Photos'
 
+        if self.post_type == Post.PostType.ARTICLE: 
+            page_title = 'Articles | Brent Lineberry'
+            feed_title = 'Articles'
+
+        if self.post_type == Post.PostType.REPOST: 
+            page_title = 'Reposts | Brent Lineberry'
+            feed_title = 'Reposts'
+
         context['page_title'] = page_title
         context['feed_title'] = feed_title
         return context
@@ -238,5 +246,23 @@ class PostDetailView(WebmentionableMixin, PermalinkResponseMixin, detail.DetailV
 
         if post.post_type == Post.PostType.BOOKMARK:
             context["page_title"] = f'{post.title_txt()} | Bookmarked by Brent Lineberry'
+
+        if post.post_type == Post.PostType.LIKE:
+            context["page_title"] = f'{post.url} | Liked by Brent Lineberry'
+        
+        if post.post_type == Post.PostType.NOTE:
+            context["page_title"] = f'{post.content_txt()} | Brent Lineberry'
+        
+        if post.post_type == Post.PostType.PHOTO:
+            context["page_title"] = f'{post.content_txt()} | Brent Lineberry'
+
+        if post.post_type == Post.PostType.ARTICLE:
+            context["page_title"] = f'{post.title_txt()} | Brent Lineberry'
+
+        if post.post_type == Post.PostType.REPOST:
+            context["page_title"] = f'{post.source_author_name} reposted by Brent Lineberry'
+
+        
+
 
         return context
