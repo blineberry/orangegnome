@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tag, Syndication, Image, PostImage, FeedItem as Post, Bookmark, Like, Note, Photo
+from .models import Tag, Syndication, Image, PostImage, FeedItem as Post, Bookmark, Like, Note, Photo, Article
 from django import forms
 from django.utils import timezone
 from syndications.admin import SyndicatableAdmin as SAAdmin
@@ -243,7 +243,7 @@ class NoteModelForm(forms.ModelForm):
     """
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.NOTE)
 
-    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Note.content_max), help_text="Markdown supported.")
+    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Post.get_content_max(Post.PostType.NOTE)), help_text="Markdown supported.")
     """Display the content input as a Textarea"""
 
     class Meta:
@@ -307,7 +307,7 @@ class PhotoModelForm(forms.ModelForm):
     """
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.PHOTO)
 
-    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Photo.content_max), required=False, help_text="Markdown supported.")
+    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Post.get_content_max(Post.PostType.PHOTO)), required=False, help_text="Markdown supported.")
     """Display the caption input as a Textarea"""
 
     alternative_text = forms.CharField(widget=forms.Textarea, required=False)
@@ -370,10 +370,60 @@ class PhotoAdmin(SyndicatableAdmin):
 
     list_display = ['image_tag', 'content_md']
 
-# Register your models here.
-admin.site.register(Photo, PhotoAdmin)
+class ArticleModelForm(forms.ModelForm):
+    """
+    Customizations for the Add and Change admin pages.
+
+    Inherits from forms.ModelForm.
+    """
+    post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.ARTICLE)
+    
+    summary_md = forms.CharField(widget=PlainTextCountTextarea(max=Post.get_summary_max(Post.PostType.ARTICLE)), help_text="Markdown supported.", required=False)
+    title_md = forms.CharField(widget=PlainTextCountTextInput(max=Post.get_title_max(Post.PostType.ARTICLE)), help_text="Markdown supported.")
+    content_md = forms.CharField(widget=PlainTextCountTextarea(), help_text="Markdown supported.", required=False)
+    
+    class Meta:
+        model = Post
+        fields = [
+            'published',
+            'syndicate_to_mastodon',
+            'syndicated_to_mastodon',
+            'title_md',
+            'slug',
+            'summary_md',
+            'in_reply_to', 
+            'content_md',
+            'author',
+            'tags',
+            'post_type',
+        ]
+
+class ArticleAdmin(SyndicatableAdmin):
+    form = ArticleModelForm
+
+    prepopulated_fields = { 'slug': ('title_md',)}
+    readonly_fields = ('syndicated_to_mastodon',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('post_type', 'title_md','slug','summary_md','in_reply_to','content_md','author')
+        }),
+        ('Metadata', {
+            'fields': ('tags',)
+        }),
+        ('Syndication', {
+            'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
+        }),
+        ('Publishing', {
+            'fields': ('published',)
+        })
+    )
+
+    filter_horizontal = ('tags',)
 
 # Register your models here.
+admin.site.register(Article, ArticleAdmin)
+admin.site.register(Photo, PhotoAdmin)
 admin.site.register(Note, NoteAdmin)
 admin.site.register(Like, LikeAdmin)
 admin.site.register(Bookmark, BookmarkAdmin)

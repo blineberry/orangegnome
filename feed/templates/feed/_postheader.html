@@ -6,4 +6,11 @@
 
         <h1><a class="article-link alt u-bookmark-of {% if post.title_md %}h-cite{% endif %}" href="{{ post.url }}">{{ post.get_title_or_url_html|safe }}</a></h1>
     </header>
+{% elif post.post_type == 'ARTICLE' %}
+    <header class="article-header">
+        <h1 class="p-name"><a class="article-link alt" href="{{ post.get_absolute_url }}">{{ post.feed_item_header }}</a></h1>
+        {% if post.in_reply_to %}
+        <div>In reply to <a class="u-in-reply-to" href="{{post.in_reply_to}}">{{post.in_reply_to}}</a></div>
+        {% endif %}
+    </header>
 {% endif %}

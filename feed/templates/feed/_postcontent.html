@@ -22,6 +22,11 @@
         </a>
         <div class="e-content">{{ post.content_html|safe }}</div>
     </div>
+{% elif post.post_type == 'ARTICLE' %}
+    <div class="article-content e-description">
+        {{ post.summary_html | safe }}
+    </div>
+    <a class="article-readmore" href="{{ post.get_absolute_url }}">Read full article</a>
 {% else %}
     {% include post.postcontent_template with item=post %}
 {% endif %}

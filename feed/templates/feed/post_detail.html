@@ -22,6 +22,11 @@
     <meta property="og:description" content="{{ object.caption }}" />
     <meta name="og:image" content="{{ object.image.url }}" />
     <meta property="og:type" content="article" />
+    {% elif object.post_type == 'ARTICLE' %}
+    <meta property="og:url" content="{{ permalink }}" />
+    <meta property="og:title" content="{{ object.title_txt }}" />
+    <meta property="og:description" content="{{ object.summary }}" />
+    <meta property="og:type" content="article" />
     {% endif %}
 {% endblock %}
 
@@ -70,6 +75,10 @@
         </div>
     {% elif object.post_type == 'PHOTO' %}
         {% include "feed/_postcontent.html" with post=object %}
+    {% elif object.post_type == 'ARTICLE' %}
+        <div class="article-content e-content">
+            {{ object.feed_item_content|safe }}
+        </div>
     {% else %}
     <div class="article-content e-content">
         {{ object.feed_item_content|safe }}

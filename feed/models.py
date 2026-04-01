@@ -158,16 +158,13 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
     @staticmethod
     def get_title_max(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 100
-        
-        return
+        # Bookmark and Article
+        return 100
     
     @staticmethod
     def get_quote_max(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 280
-        return  
+        # Bookmark
+        return 280  
     
     @staticmethod
     def get_content_max(post_type):
@@ -179,6 +176,11 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             return 560
         
         return
+
+    @staticmethod
+    def get_summary_max(post_type):
+        # Article
+        return 280
     
     @staticmethod
     def get_html_class(post_type):
@@ -233,6 +235,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if post_type == FeedItem.PostType.LIKE:
             return 'likes/_like_postcontent.html'
         
+        if post_type == FeedItem.PostType.ARTICLE:
+            return 'posts/_post_summary.html'
+
         return 'feed/_postbody_template.html'
 
     def title_max(self):
@@ -243,6 +248,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
     def content_max(self):
         return FeedItem.get_content_max(self.post_type)
+    
+    def summary_max(self):
+        return FeedItem.get_summary_max(self.post_type)
     
     def html_class(self):
         return FeedItem.get_html_class(self.post_type)
@@ -268,6 +276,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def get_absolute_url(self):
         """Returns the url for the post relative to the root."""
+        if self.post_type == FeedItem.PostType.ARTICLE:
+            return reverse('feed:detail', args=[self.id, self.slug])
+            
         return reverse('feed:detail', args=[self.id])
 
     def get_permalink(self):
@@ -281,6 +292,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if (self.post_type == FeedItem.PostType.NOTE or
             self.post_type == FeedItem.PostType.NOTE):
             return self.content_txt()
+        
+        if self.post_type == FeedItem.PostType.ARTICLE:
+            return self.title_txt()
         
         return 'FeedItem'
 
@@ -355,6 +369,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             self.post_type == FeedItem.PostType.PHOTO):
             return self.content_txt()
         
+        if self.post_type == FeedItem.PostType.ARTICLE:
+            return self.title_txt()
+        
         return None
     
     def feed_item_content(self):
@@ -362,7 +379,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if self.post_type == FeedItem.PostType.BOOKMARK:
             return render_to_string('feed/bookmark_content.html', { 'bookmark': self })
         
-        if self.post_type == FeedItem.PostType.NOTE:
+        if (self.post_type == FeedItem.PostType.NOTE or
+            self.post_type == FeedItem.PostType.ARTICLE):
             return self.content_html()
         
         if self.post_type == FeedItem.PostType.PHOTO:
@@ -422,9 +440,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             content_txt = self.content_txt()
 
             limits = (
-                ("Title", len(title_txt), self.get_title_max()),
-                ("Quote", len(quote_txt), self.get_quote_max()),
-                ("Content", len(content_txt), self.get_content_max()),
+                ("Title", len(title_txt), self.title_max()),
+                ("Quote", len(quote_txt), self.quote_max()),
+                ("Content", len(content_txt), self.content_max()),
             )
 
             for limit in limits:
@@ -441,6 +459,26 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
             if len(content_txt) > self.content_max():
                 raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max()))
+            
+        if self.post_type == FeedItem.PostType.ARTICLE:
+            if not self.summary_md or self.summary_md.isspace():
+                raise ValidationError("Summary is required to publish.")
+            
+            if not self.content_md or self.content_md.isspace():
+                raise ValidationError("Content is required to publish.")
+            
+            title_txt = self.title_txt()
+            summary_txt = self.summary_txt()
+
+            limits = (
+                ("Title", len(title_txt), self.title_max()),
+                ("Summary", len(summary_txt), self.summary_max()),
+            )
+
+            for limit in limits:
+                if limit[1] > limit[2]:
+                    raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
+
         
     def commonmark_to_html(self, commonmark:str, block_content:bool=True):
         return convert_commonmark_to_html(commonmark, block_content)
@@ -527,6 +565,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if (self.post_type == FeedItem.PostType.NOTE or
             self.post_type == FeedItem.PostType.PHOTO):
             return self.content_txt()
+        
+        if self.post_type == FeedItem.PostType.ARTICLE:
+            return f'{self.summary_txt()}\n\n{self.get_permalink()}'
         
         raise Exception("No content to post to Mastodon.")
     
@@ -657,6 +698,12 @@ class Note(FeedItem):
 
 class Photo(FeedItem):
     objects = PostTypeManager(FeedItem.PostType.PHOTO)
+
+    class Meta:
+        proxy = True
+
+class Article(FeedItem):
+    objects = PostTypeManager(FeedItem.PostType.ARTICLE)
 
     class Meta:
         proxy = True
