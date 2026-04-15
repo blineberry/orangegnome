@@ -97,4 +97,4 @@ class PhotoAdmin(SyndicatableAdmin):
     list_display = ['image_tag', 'content_md']
 
 # Register your models here.
-admin.site.register(Photo, PhotoAdmin)
+#admin.site.register(Photo, PhotoAdmin)

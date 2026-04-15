@@ -67,4 +67,4 @@ class NoteAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """    
 
-admin.site.register(Note, NoteAdmin)
+#admin.site.register(Note, NoteAdmin)

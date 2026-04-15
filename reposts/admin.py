@@ -72,4 +72,4 @@ class RepostAdmin(SyndicatableAdmin):
     """The fields to display on the admin list view."""
 
 # Register your models here.
-admin.site.register(Repost, RepostAdmin)
+#admin.site.register(Repost, RepostAdmin)

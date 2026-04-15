@@ -1,0 +1,61 @@
+{% if post.post_type == 'BOOKMARK' %}
+    {% if post.has_quote_or_content %}
+    <div class="article-content e-content">
+        {% if post.quote_html %}
+        <blockquote>
+            {{ post.quote_html|safe }}
+        </blockquote>
+        {% endif %}
+        {% if post.content_html %}
+        <div>{{ post.content_html|safe }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+{% elif post.post_type == 'LIKE' %}
+    <p class="p-summary">Liked <a class="u-like-of" href="{{post.url}}">{{post.url}}</a>.</p>
+{% elif post.post_type == 'PHOTO' %}
+    <div class="article-content">
+        <a href="{{ post.get_permalink }}">
+        {% for postimage in post.postimage_set.all|slice:"0:1" %}
+        <img height="{{ postimage.image.image_height }}" width="{{ postimage.image.image_width }}" class="u-photo" src="{{ postimage.image.image.url }}" alt="{{ postimage.alt }}"></a>
+        {% endfor %}
+        </a>
+        <div class="e-content">{{ post.content_html|safe }}</div>
+    </div>
+{% elif post.post_type == 'ARTICLE' %}
+    <div class="article-content e-description">
+        {{ post.summary_html | safe }}
+    </div>
+    <a class="article-readmore" href="{{ post.get_absolute_url }}">Read full article</a>
+{% elif post.post_type == 'REPOST' %}
+    <div class="h-cite u-repost-of"> 
+        <div class="h-cite u-repost-of">    
+            <blockquote class="e-content">
+                {{post.content_html|safe}}
+                <footer>—
+                    {% if post.url %}
+                        <span class="p-author h-card">
+                            {% if post.source_author_url %}
+                                <a class="p-name u-url" href="{{ post.source_author_url }}">{{ post.source_author_name }}</a>,
+                            {% else %}
+                                <span class="p-name">{{ post.source_author_name }}</span>,
+                            {% endif %}
+                        </span>
+                        <cite><a class="u-url" href="{{ post.url }}">{{ post.source_name|default:post.url }}</a></cite>
+                    {% elif post.source_name %}
+                        <span class="p-author h-card">
+                            {% if post.source_author_url %}
+                                <a class="p-name u-url" href="{{ post.source_author_url }}">{{ post.source_author_name }}</a>,
+                            {% else %}
+                                <span class="p-name">{{ post.source_author_name }}</span>,
+                            {% endif %}
+                        </span>
+                        {{ post.source_name }}
+                    {% endif %}
+                </footer>
+            </blockquote>
+        </div> 
+    </div>
+{% else %}
+    {% include post.postcontent_template with item=post %}
+{% endif %}

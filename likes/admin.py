@@ -69,4 +69,4 @@ class LikeAdmin(SyndicatableAdmin):
     """The fields to display on the admin list view."""
 
 # Register your models here.
-admin.site.register(Like, LikeAdmin)
+#admin.site.register(Like, LikeAdmin)

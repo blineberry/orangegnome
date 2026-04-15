@@ -55,4 +55,4 @@ class PostAdmin(SyndicatableAdmin):
     filter_horizontal = ('tags',)
 
 # Register your models here.
-admin.site.register(Post, PostAdmin)
+#admin.site.register(Post, PostAdmin)

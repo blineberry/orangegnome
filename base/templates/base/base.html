@@ -45,10 +45,10 @@
         <nav class="sitenav">
             <ul class="sitenav-list">
                 <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:index' %}">Home</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'posts:index' %}">Posts</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'notes:index' %}">Notes</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'photos:index' %}">Photos</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'bookmarks:index' %}">Links</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:articles' %}">Articles</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:notes' %}">Notes</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:photos' %}">Photos</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:bookmarks' %}">Links</a></li>
             </ul>
         </nav>
     </header>
@@ -59,12 +59,12 @@
     <footer class="sitefooter">
         <nav class="sitefooter-content sitefooter-nav">
             <ul>
-                <li class="sitefooter-listitem"><a href="{% url 'posts:index' %}">Posts</a></li>
-                <li class="sitefooter-listitem"><a href="{% url 'notes:index' %}">Notes</a></li>
-                <li class="sitefooter-listitem"><a href="{% url 'photos:index' %}">Photos</a></li>
-                <li class="sitefooter-listitem"><a href="{% url 'bookmarks:index' %}">Links</a></li>
-                <li class="sitefooter-listitem"><a href="{% url 'reposts:index' %}">Reposts</a></li>
-                <li class="sitefooter-listitem"><a href="{% url 'likes:index' %}">Likes</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'feed:articles' %}">Articles</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'feed:notes' %}">Notes</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'feed:photos' %}">Photos</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'feed:bookmarks' %}">Links</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'feed:reposts' %}">Reposts</a></li>
+                <li class="sitefooter-listitem"><a href="{% url 'feed:likes' %}">Likes</a></li>
                 <li class="sitefooter-listitem"><a href="{% url 'feed:tagindex' %}">Tags</a></li>
             </ul>
         </nav>
