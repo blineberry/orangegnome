@@ -630,7 +630,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def has_mastodon_media(self):
         """Returns True if the Model has media to upload."""
-        return self.image is not None
+        return self.image() is not None
     
     def get_mastodon_media_image_field(self):
         """Returns the ImageField for the media."""
