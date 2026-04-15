@@ -634,7 +634,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def get_mastodon_media_image_field(self):
         """Returns the ImageField for the media."""
-        return self.image
+        return self.image()
     
     def get_mastodon_media_description(self):
         """Returns the description for the media."""
