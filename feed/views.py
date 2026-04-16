@@ -53,7 +53,7 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
 
 class FeedItemDateArchiveView(FeedItemArchiveView):
     make_object_list = True
-    template_name = 'feed/feed.html'
+    template_name = 'feed/post_archive.html'
 
 class YearView(PermalinkResponseMixin, dates.YearArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):    
     canonical_viewname = 'feed:year'
@@ -87,7 +87,7 @@ class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveV
     
 class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
     paginate_by = 5
-    template_name = 'feed/feed.html'
+    template_name = 'feed/post_archive.html'
     canonical_viewname = 'feed:tag'
 
     def get_canonical_view_args(self, context):
