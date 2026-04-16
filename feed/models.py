@@ -100,11 +100,11 @@ class Tag(models.Model):
 
 class FeedItem(Webmentionable, MastodonSyndicatable):
     class PostType(models.TextChoices):
+        ARTICLE = 'ARTICLE'
         BOOKMARK = 'BOOKMARK'
         LIKE = 'LIKE'
         NOTE = 'NOTE'
         PHOTO = 'PHOTO'
-        ARTICLE = 'ARTICLE'
         REPOST = 'REPOST'
 
     post_type = models.CharField(choices=PostType, null=True, blank=True, max_length=8)
@@ -422,6 +422,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def get_edit_link(self):
         model_name = self._meta.model_name
 
+        if self.post_type == FeedItem.PostType.ARTICLE:
+            model_name = 'article'
+
         if self.post_type == FeedItem.PostType.BOOKMARK:
             model_name = 'bookmark'
         
@@ -430,6 +433,12 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
         if self.post_type == FeedItem.PostType.NOTE:
             model_name = 'note'
+        
+        if self.post_type == FeedItem.PostType.PHOTO:
+            model_name = 'photo'
+            
+        if self.post_type == FeedItem.PostType.REPOST:
+            model_name = 'repost'        
         
         return reverse(f"admin:{self._meta.app_label}_{model_name}_change", args=(self.pk,))
 
