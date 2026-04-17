@@ -185,19 +185,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     @staticmethod
     def get_html_class(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 'bookmark'
+        if post_type is None:
+            return ''
         
-        if post_type == FeedItem.PostType.LIKE:
-            return 'like'
-        
-        if post_type == FeedItem.PostType.NOTE:
-            return 'note'
-        
-        if post_type == FeedItem.PostType.PHOTO:
-            return 'photo'
-        
-        return
+        return post_type.lower()
     
     @staticmethod
     def get_published_verb(post_type):
@@ -312,26 +303,26 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         return 'FeedItem'
 
-    def is_post(self):
-        return hasattr(self, 'post')
+    def is_article(self):
+        return self.post_type == self.PostType.ARTICLE
 
     def is_note(self):
-        return hasattr(self, 'note')
+        return self.post_type == self.PostType.NOTE
 
     def is_photo(self):
-        return hasattr(self, 'photo')
+        return self.post_type == self.PostType.PHOTO
 
     def is_exercise(self):
-        return hasattr(self, 'exercise')
+        return False
 
     def is_bookmark(self):
-        return hasattr(self, 'bookmark')
+        return self.post_type == self.PostType.BOOKMARK
 
     def is_like(self):
-        return hasattr(self, 'like')
+        return self.post_type == self.PostType.LIKE
 
     def is_repost(self):
-        return hasattr(self, 'repost')
+        return self.post_type == self.PostType.REPOST
 
     def get_child(self):
         if self.is_post():
@@ -409,9 +400,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return None
     
     def feed_item_link(self):
-        if self.post_type == FeedItem.PostType.BOOKMARK:
-            return self.url
-        return self.get_child().get_permalink()
+        return self.get_permalink()
     
     def to_text(self):
         if self.post_type == FeedItem.PostType.REPOST:
@@ -420,25 +409,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return ""
     
     def get_edit_link(self):
-        model_name = self._meta.model_name
-
-        if self.post_type == FeedItem.PostType.ARTICLE:
-            model_name = 'article'
-
-        if self.post_type == FeedItem.PostType.BOOKMARK:
-            model_name = 'bookmark'
-        
-        if self.post_type == FeedItem.PostType.LIKE:
-            model_name = 'like'
-
-        if self.post_type == FeedItem.PostType.NOTE:
-            model_name = 'note'
-        
-        if self.post_type == FeedItem.PostType.PHOTO:
-            model_name = 'photo'
-            
-        if self.post_type == FeedItem.PostType.REPOST:
-            model_name = 'repost'        
+        model_name = self.post_type.lower()
         
         return reverse(f"admin:{self._meta.app_label}_{model_name}_change", args=(self.pk,))
 
