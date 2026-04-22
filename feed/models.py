@@ -114,13 +114,13 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
-    source_name=models.CharField(null=True,blank=True,max_length=1000)
-    source_author_name = models.CharField(max_length=200, default="Anonymous")
-    source_author_url = models.URLField(null=True,blank=True)
+    source_name=models.CharField(null=True,blank=True,max_length=1000, help_text="Used for Reposts.")
+    source_author_name = models.CharField(max_length=200, default="Anonymous", null=True, blank=True, help_text="Used for Reposts.")
+    source_author_url = models.URLField(null=True,blank=True, help_text="Used for Reposts.")
 
     images = models.ManyToManyField(Image, through="PostImage", related_name="posts")
 
-    content_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
+    content_md = models.TextField(help_text="Markdown supported. Used for Notes, Articles, Bookmarks, Photos, and Reposts.", blank=True, null=True)
     def content_txt(self):
         """Returns the content converted from markdown to HTML."""
         return convert_commonmark_to_plain_text(self.content_md)
@@ -129,7 +129,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         """Returns the content converted from markdown to HTML."""
         return convert_commonmark_to_html(self.content_md)
     
-    summary_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
+    summary_md = models.TextField(help_text="Markdown supported. Used for Articles.", blank=True, null=True)
 
     def summary_txt(self):
         return convert_commonmark_to_plain_text(self.summary_md)
@@ -137,7 +137,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def summary_html(self):
         return convert_commonmark_to_html(self.summary_md)
     
-    quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported.")
+    quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported. Used for Bookmarks.")
 
     def quote_txt(self):
         return convert_commonmark_to_plain_text(self.quote_md)
@@ -145,7 +145,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def quote_html(self):
         return convert_commonmark_to_html(self.quote_md)
     
-    title_md = models.TextField(blank=True, verbose_name="title", help_text="Markdown supported. Inline elements only.")
+    title_md = models.TextField(blank=True, verbose_name="title", help_text="Markdown supported. Inline elements only. Used for Articles and Bookmarks.")
 
     def title_txt(self):
         return convert_commonmark_to_plain_text(self.title_md)
@@ -153,9 +153,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def title_html(self):
         return convert_commonmark_to_html(self.title_md, False)
     
-    url = models.URLField(max_length=2048,null=True,blank=True)
+    url = models.URLField(max_length=2048,null=True,blank=True, help_text="Used for Bookmarks, Likes, and Reposts.")
 
-    slug = models.SlugField(max_length=100, null=True)
+    slug = models.SlugField(max_length=100, null=True, blank=True, help_text="Used for Articles.")
 
     @staticmethod
     def get_title_max(post_type):
@@ -185,19 +185,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     @staticmethod
     def get_html_class(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 'bookmark'
+        if post_type is None:
+            return ''
         
-        if post_type == FeedItem.PostType.LIKE:
-            return 'like'
-        
-        if post_type == FeedItem.PostType.NOTE:
-            return 'note'
-        
-        if post_type == FeedItem.PostType.PHOTO:
-            return 'photo'
-        
-        return
+        return post_type.lower()
     
     @staticmethod
     def get_published_verb(post_type):
@@ -300,7 +291,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             return self.url
         
         if (self.post_type == FeedItem.PostType.NOTE or
-            self.post_type == FeedItem.PostType.NOTE):
+            self.post_type == FeedItem.PostType.PHOTO):
             return self.content_txt()
         
         if self.post_type == FeedItem.PostType.ARTICLE:
@@ -312,26 +303,26 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         
         return 'FeedItem'
 
-    def is_post(self):
-        return hasattr(self, 'post')
+    def is_article(self):
+        return self.post_type == self.PostType.ARTICLE
 
     def is_note(self):
-        return hasattr(self, 'note')
+        return self.post_type == self.PostType.NOTE
 
     def is_photo(self):
-        return hasattr(self, 'photo')
+        return self.post_type == self.PostType.PHOTO
 
     def is_exercise(self):
-        return hasattr(self, 'exercise')
+        return False
 
     def is_bookmark(self):
-        return hasattr(self, 'bookmark')
+        return self.post_type == self.PostType.BOOKMARK
 
     def is_like(self):
-        return hasattr(self, 'like')
+        return self.post_type == self.PostType.LIKE
 
     def is_repost(self):
-        return hasattr(self, 'repost')
+        return self.post_type == self.PostType.REPOST
 
     def get_child(self):
         if self.is_post():
@@ -409,9 +400,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return None
     
     def feed_item_link(self):
-        if self.post_type == FeedItem.PostType.BOOKMARK:
-            return self.url
-        return self.get_child().get_permalink()
+        return self.get_permalink()
     
     def to_text(self):
         if self.post_type == FeedItem.PostType.REPOST:
@@ -420,25 +409,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return ""
     
     def get_edit_link(self):
-        model_name = self._meta.model_name
+        model_name = 'feeditem'
 
-        if self.post_type == FeedItem.PostType.ARTICLE:
-            model_name = 'article'
-
-        if self.post_type == FeedItem.PostType.BOOKMARK:
-            model_name = 'bookmark'
-        
-        if self.post_type == FeedItem.PostType.LIKE:
-            model_name = 'like'
-
-        if self.post_type == FeedItem.PostType.NOTE:
-            model_name = 'note'
-        
-        if self.post_type == FeedItem.PostType.PHOTO:
-            model_name = 'photo'
-            
-        if self.post_type == FeedItem.PostType.REPOST:
-            model_name = 'repost'        
+        if self.post_type is not None:
+            model_name = self.post_type.lower()
         
         return reverse(f"admin:{self._meta.app_label}_{model_name}_change", args=(self.pk,))
 
