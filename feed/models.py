@@ -114,13 +114,13 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     published = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag, related_name='feed_items',blank=True)
     in_reply_to = models.CharField(max_length=2000, blank=True, null=True)
-    source_name=models.CharField(null=True,blank=True,max_length=1000)
-    source_author_name = models.CharField(max_length=200, default="Anonymous")
-    source_author_url = models.URLField(null=True,blank=True)
+    source_name=models.CharField(null=True,blank=True,max_length=1000, help_text="Used for Reposts.")
+    source_author_name = models.CharField(max_length=200, default="Anonymous", null=True, blank=True, help_text="Used for Reposts.")
+    source_author_url = models.URLField(null=True,blank=True, help_text="Used for Reposts.")
 
     images = models.ManyToManyField(Image, through="PostImage", related_name="posts")
 
-    content_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
+    content_md = models.TextField(help_text="Markdown supported. Used for Notes, Articles, Bookmarks, Photos, and Reposts.", blank=True, null=True)
     def content_txt(self):
         """Returns the content converted from markdown to HTML."""
         return convert_commonmark_to_plain_text(self.content_md)
@@ -129,7 +129,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         """Returns the content converted from markdown to HTML."""
         return convert_commonmark_to_html(self.content_md)
     
-    summary_md = models.TextField(help_text="Markdown supported.", blank=True, null=True)
+    summary_md = models.TextField(help_text="Markdown supported. Used for Articles.", blank=True, null=True)
 
     def summary_txt(self):
         return convert_commonmark_to_plain_text(self.summary_md)
@@ -137,7 +137,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def summary_html(self):
         return convert_commonmark_to_html(self.summary_md)
     
-    quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported.")
+    quote_md = models.TextField(blank=True, verbose_name="quote", help_text="CommonMark supported. Used for Bookmarks.")
 
     def quote_txt(self):
         return convert_commonmark_to_plain_text(self.quote_md)
@@ -145,7 +145,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def quote_html(self):
         return convert_commonmark_to_html(self.quote_md)
     
-    title_md = models.TextField(blank=True, verbose_name="title", help_text="Markdown supported. Inline elements only.")
+    title_md = models.TextField(blank=True, verbose_name="title", help_text="Markdown supported. Inline elements only. Used for Articles and Bookmarks.")
 
     def title_txt(self):
         return convert_commonmark_to_plain_text(self.title_md)
@@ -153,9 +153,9 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def title_html(self):
         return convert_commonmark_to_html(self.title_md, False)
     
-    url = models.URLField(max_length=2048,null=True,blank=True)
+    url = models.URLField(max_length=2048,null=True,blank=True, help_text="Used for Bookmarks, Likes, and Reposts.")
 
-    slug = models.SlugField(max_length=100, null=True)
+    slug = models.SlugField(max_length=100, null=True, blank=True, help_text="Used for Articles.")
 
     @staticmethod
     def get_title_max(post_type):
@@ -291,7 +291,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             return self.url
         
         if (self.post_type == FeedItem.PostType.NOTE or
-            self.post_type == FeedItem.PostType.NOTE):
+            self.post_type == FeedItem.PostType.PHOTO):
             return self.content_txt()
         
         if self.post_type == FeedItem.PostType.ARTICLE:
@@ -409,7 +409,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return ""
     
     def get_edit_link(self):
-        model_name = self.post_type.lower()
+        model_name = 'feeditem'
+
+        if self.post_type is not None:
+            model_name = self.post_type.lower()
         
         return reverse(f"admin:{self._meta.app_label}_{model_name}_change", args=(self.pk,))
 

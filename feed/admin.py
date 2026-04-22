@@ -85,7 +85,33 @@ class ImageAdmin(admin.ModelAdmin):
     inlines = [PostImageInline,]
 
 class PostAdmin(admin.ModelAdmin):
-    pass
+    readonly_fields = ('syndicated_to_mastodon',)
+
+    inlines = [PostImageInline,SyndicationInline,]
+
+    fieldsets = (
+        (None, {
+            'fields': ('post_type', 'in_reply_to', 'content_md', 'title_md', 'slug', 'summary_md', 'url', 'quote_md', 'source_name', 'source_author_name', 'source_author_url', 'author','tags')
+        }),
+        ('Syndication', {
+            'fields': ('syndicate_to_mastodon','syndicated_to_mastodon')
+        }),
+        ('Publishing', {
+            'fields': ('published',)
+        })
+    )
+    """
+    Group related fields together. 
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
+    """
+
+    filter_horizontal = ('tags',)
+    """
+    Use the built-in interface for the tags many-to-many relationship.
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
+    """
 
 class BookmarkModelForm(forms.ModelForm):
     """
@@ -97,7 +123,6 @@ class BookmarkModelForm(forms.ModelForm):
     title_md = forms.CharField(
         widget=PlainTextCountTextInput(max=Post.get_title_max(Post.PostType.BOOKMARK)),
         required=False)
-    #title = CharField(widget=TextInput)
 
     quote_md = forms.CharField(
         widget=PlainTextCountTextarea(max=Post.get_quote_max(Post.PostType.BOOKMARK)), 
@@ -308,10 +333,10 @@ class PhotoModelForm(forms.ModelForm):
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.PHOTO)
 
     content_md = forms.CharField(widget=PlainTextCountTextarea(max=Post.get_content_max(Post.PostType.PHOTO)), required=False, help_text="Markdown supported.")
-    """Display the caption input as a Textarea"""
+    # """Display the caption input as a Textarea"""
 
-    alternative_text = forms.CharField(widget=forms.Textarea, required=False)
-    """Display the caption input as a Textarea"""
+    # alternative_text = forms.CharField(widget=forms.Textarea, required=False)
+    # """Display the caption input as a Textarea"""
 
     class Meta:
         model = Photo
