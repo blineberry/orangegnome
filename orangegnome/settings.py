@@ -52,7 +52,6 @@ PREPEND_WWW = env('PREPEND_WWW', default=False)
 INSTALLED_APPS = [
     'bookmarks.apps.BookmarksConfig',
     'photos.apps.PhotosConfig',
-    'exercises.apps.ExercisesConfig',
     'notes.apps.NotesConfig',
     'syndications.apps.SyndicationsConfig',
     'base.apps.BaseConfig',
