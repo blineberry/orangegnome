@@ -5,10 +5,8 @@ from .feed import LatestEntriesFeed
 from django.utils import timezone
 import json
 from django.http import HttpResponse, JsonResponse
-from datetime import datetime
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-import uuid
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models.query import QuerySet
 from typing import Any
@@ -123,19 +121,6 @@ class TagIndex(ListView, PageTitleResponseMixin):
 
 @method_decorator([staff_member_required, csrf_exempt], name='dispatch')
 class CommonmarkConversion(View):
-    def get(self, request, *args, **kwargs):
-        id = request.GET.get("id")
-
-        if id is None:
-            return HttpResponse("id parameter is required", status=400)
-        
-        conversion = request.session.pop(id, None)
-
-        if conversion is None:
-            return HttpResponse("id not found", status=404)
-        
-        return JsonResponse(conversion)
-
     def post(self, request, *args, **kwargs):
         body = json.loads(request.body)
 
@@ -144,19 +129,14 @@ class CommonmarkConversion(View):
 
         if input is None:
             return HttpResponse("input property is required", status=400)
-        
-        id = str(uuid.uuid4())
 
-        request.session[id] = {
+        conversion = {
             "input": input,
             "html": convert_commonmark_to_html(input, block_content),
             "plain": convert_commonmark_to_plain_text(input)
         }
 
-        return JsonResponse({
-            "success": True,
-            "id": id
-        })
+        return JsonResponse(conversion)
     
 class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
     post_type = None
