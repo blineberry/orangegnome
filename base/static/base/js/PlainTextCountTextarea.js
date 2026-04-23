@@ -106,17 +106,7 @@ class PlainTextCountTextarea extends HTMLElement {
 
             content = response.json()
             return content
-        }).then(content => {
-            return fetch(`${this.conversionEndpoint}?id=${content['id']}`, {
-                signal: abortController.signal
-            });
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error(`GET Response status: ${response.status}`);
-            }
-
-            return response.json()
-        }).then(content => {
+        }).then(content => {            
             console.log(content);
 
             this.updateContent(content);
