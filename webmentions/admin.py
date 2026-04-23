@@ -23,6 +23,8 @@ class OutgoingWebmentionAdmin(admin.ModelAdmin):
 
     list_display = ["__str__", "success", "tries"]
 
+    list_filter = ["success",]
+
     @admin.action(description="Notify selected webmentions' receivers")
     def try_notify_receivers(self, request, queryset):
         for obj in queryset:
@@ -33,6 +35,8 @@ class IncomingWebmentionAdmin(admin.ModelAdmin):
     actions = ["process", "approve", "allow_domain"]
 
     list_display = ["__str__", "is_content_fetched", "verified", "is_parsed", "is_attached", "approved", "tries"]
+
+    list_filter = ["approved",]
 
     @admin.action(description="Fetch the source content")
     def fetch_source(self, request, queryset):
