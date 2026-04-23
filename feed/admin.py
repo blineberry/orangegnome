@@ -113,6 +113,9 @@ class PostAdmin(admin.ModelAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """
 
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
+
 class BookmarkModelForm(forms.ModelForm):
     """
     Customizations for the Add and Change admin pages.
@@ -194,6 +197,9 @@ class BookmarkAdmin(SyndicatableAdmin):
 
     list_display = ['url', 'title_txt']
     """The fields to display on the admin list view."""
+
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
        
 class LikeModelForm(forms.ModelForm):
     """
@@ -260,6 +266,9 @@ class LikeAdmin(SyndicatableAdmin):
     list_display = ['url',]
     """The fields to display on the admin list view."""
 
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
+
 class NoteModelForm(forms.ModelForm):
     """
     Customizations for the Add and Change admin pages.
@@ -323,6 +332,9 @@ class NoteAdmin(SyndicatableAdmin):
     
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """    
+
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
 
 class PhotoModelForm(forms.ModelForm):
     """
@@ -395,6 +407,9 @@ class PhotoAdmin(SyndicatableAdmin):
 
     list_display = ['image_tag', 'content_md']
 
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
+
 class ArticleModelForm(forms.ModelForm):
     """
     Customizations for the Add and Change admin pages.
@@ -445,6 +460,9 @@ class ArticleAdmin(SyndicatableAdmin):
     )
 
     filter_horizontal = ('tags',)
+
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
 
 class RepostModelForm(forms.ModelForm):
     """
@@ -513,6 +531,9 @@ class RepostAdmin(SyndicatableAdmin):
 
     list_display = ['url', 'source_author_name']
     """The fields to display on the admin list view."""
+
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
 
 # Register your models here.
 admin.site.register(Repost, RepostAdmin)
