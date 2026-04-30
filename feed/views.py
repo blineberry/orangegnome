@@ -211,7 +211,7 @@ class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
         
         return qs.filter(post_type=self.post_type).order_by('-published')
     
-class PostDetailView(WebmentionableMixin, PermalinkResponseMixin, detail.DetailView):
+class PostDetailView(ForceSlugMixin, WebmentionableMixin, PermalinkResponseMixin, detail.DetailView):
     pk = 0
     slug = None
     canonical_viewname = 'feed:detail'        
