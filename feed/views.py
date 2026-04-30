@@ -224,6 +224,9 @@ class PostDetailView(WebmentionableMixin, PermalinkResponseMixin, detail.DetailV
 
         post = self.get_object()
 
+        context['post'] = post
+        context['permalink'] = post.get_permalink()
+
         if post.post_type == Post.PostType.BOOKMARK:
             context["page_title"] = f'{post.title_txt()} | Bookmarked by Brent Lineberry'
 

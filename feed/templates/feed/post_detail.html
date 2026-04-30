@@ -4,172 +4,154 @@
     {{ block.super }}
     <link href="{% url 'webmentions:webmention_handler' %}" rel="webmention" />
 
-    {% if object.post_type == 'BOOKMARK' %}
-    <meta property="og:url" content="{{ permalink }}" />
-    <meta property="og:title" content="{{ object.published }}" />
+    {% if object.post_type == 'ARTICLE' %}
+    <meta property="og:title" content="{{ post.title_txt }}" />
+    <meta property="og:description" content="{{ post.summary_txt }}" />
+    <meta property="og:type" content="article" />
+    {% elif object.post_type == 'BOOKMARK' %}
+    <meta property="og:title" content="{{ post.get_title_or_url_txt }} bookmarked by {{ post.author.name }}" />
     <meta property="og:description" content="{{ object.content_txt }}" />
     {% elif object.post_type == 'LIKE' %}
-    <meta property="og:url" content="{{ permalink }}" />
-    <meta property="og:title" content="{{ object.to_text }}" />
+    <meta property="og:title" content="{{ post.url }} liked by {{ post.author.name }}" />
     {% elif object.post_type == 'NOTE' %}
-    <meta property="og:url" content="{{ permalink }}" />
-    <meta property="og:title" content="{{ object.feed_item_header }}" />
-    <meta property="og:description" content="{{ object.content }}" />
-    <meta property="og:type" content="article" />
-    {% elif object.post_type == 'NOTE' %}
-    <meta property="og:url" content="{{ permalink }}" />
-    <meta property="og:title" content="{{ object.feed_item_header }}" />
-    <meta property="og:description" content="{{ object.caption }}" />
-    <meta name="og:image" content="{{ object.image.url }}" />
-    <meta property="og:type" content="article" />
-    {% elif object.post_type == 'ARTICLE' %}
-    <meta property="og:url" content="{{ permalink }}" />
-    <meta property="og:title" content="{{ object.title_txt }}" />
-    <meta property="og:description" content="{{ object.summary }}" />
-    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{ post.context_txt }}" />
+    {% elif object.post_type == 'PHOTO' %}
+    <meta property="og:title" content="{{ post.content_txt }}" />
+    <meta name="og:image" content="{{ post.image.url }}" />
+    <meta name="og:image:alt" content="{{ post.image.alt }}">  
     {% elif object.post_type == 'REPOST' %}
-    <meta property="og:url" content="{{ permalink }}" />
-    <meta property="og:title" content="{{ object.to_text }}" />
+    <meta property="og:title" content="{{ post.source_author_name }} reposted by {{ post.author.name }}" />
     {% endif %}
 {% endblock %}
 
 {% block body %}
-<article class="article h-entry {{ object.html_class }}">
+<article class="article h-entry {{ post.post_type|lower }}">
 {% block postheader %}
-    {% if object.post_type == 'ARTICLE' %}
     <header class="article-header">
-        {% if object.feed_item_header %}
-            <h1 class="e-name"><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.title_html | safe }}</a></h1>
-        {% endif %}
-        {% if object.in_reply_to %}
-            <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% if post.is_article %}
+        <h1 class="p-name"><a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
         {% endif %}
 
-        <div class="article-summary e-summary">{{ object.summary_html | safe }}</div>
-    </header>
-    {% elif object.post_type == 'BOOKMARK' %}
-    <header class="article-header">
-        {% if object.in_reply_to %}
-            <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% if post.in_reply_to %}
+        <div>In reply to <a class="u-in-reply-to alt" href="{{ post.in_reply_to }}">{{ post.in_reply_to }}</a></div>
         {% endif %}
 
-        <h1><a class="article-link alt u-bookmark-of {% if object.title_md %}h-cite{% endif %}" href="{{ object.url }}">{{ object.get_title_or_url_html|safe }}</a></h1>
-    </header>
-    {% elif object.post_type == 'NOTE' %}
-    <header class="article-header">
-        {% if object.in_reply_to %}
-        <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
+        {% if post.is_bookmark %}
+        <div>{{ post.author.name }} bookmarked <a class="article-link alt u-bookmark-of {% if post.title_txt %}h-cite{% endif %}" href="{{ post.url }}">{{ post.get_title_or_url_txt }}</a></div>
+        {% endif %}
+
+        {% if post.is_like %}
+        <div>{{ post.author.name }} liked <a class="article-link alt u-like-of" href="{{ post.url }}">{{ post.url }}</a></div>
+        {% endif %}
+
+        {% if post.is_repost %}
+        <div>{{ post.author.name }} reposted <a class="article-link alt u-repost-of" href="{{ post.source_url }}">{{ post.source_author }}</a></div>
+        {% endif %}
+
+        {% if post.is_article %}
+        <div class="article-summary p-summary">{{ post.summary_html | safe }}</div>
         {% endif %}
     </header>
-    {% elif object.post_type == 'PHOTO' %}
-    <header class="article-header">
-        {% if object.in_reply_to %}
-        <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
-        {% endif %}
-    </header>
-    {% elif object.post_type == 'REPOST' %}
-    <header class="article-header">Reposted:</header>
-    {% else %}
-    <header class="article-header">
-        {% if object.feed_item_header %}
-            <h1 class="p-name"><a class="article-link alt" href="{{ object.get_absolute_url }}">{{ object.feed_item_header }}</a></h1>
-        {% endif %}
-        {% if object.in_reply_to %}
-            <div>In reply to <a class="u-in-reply-to" href="{{object.in_reply_to}}">{{object.in_reply_to}}</a></div>
-        {% endif %}
-    </header>
-    {% endif %}
 {% endblock %}
 {% block postcontent %}
-    {% if object.post_type == 'BOOKMARK' %}
-        {% include 'feed/_postcontent.html' with post=object %}
-    {% elif object.post_type == 'LIKE' %}
-        {% include 'feed/_postcontent.html' with post=object %}
-    {% elif object.post_type == 'NOTE' %}
-        <div class="article-content e-content">
-            {{ object.feed_item_content|safe }}
-        </div>
-    {% elif object.post_type == 'PHOTO' %}
-        {% include "feed/_postcontent.html" with post=object %}
-    {% elif object.post_type == 'ARTICLE' %}
-        <div class="article-content e-content">
-            {{ object.feed_item_content|safe }}
-        </div>
-    {% elif object.post_type == 'REPOST' %}
+    {% if post.is_article %}
+    <div class="article-content e-content">
+        {{ post.feed_item_content|safe }}
+    </div>
+    {% elif post.is_bookmark %}
+    {% if post.has_quote_or_content %}
+    <div class="article-content e-content">
+        {% if post.quote_html %}
+        <blockquote>
+            {{ post.quote_html|safe }}
+        </blockquote>
+        {% endif %}
+        {% if post.content_html %}
+        <div>{{ post.content_html|safe }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% elif post.is_note %}
+    <div class="article-content e-content">
+        {{ post.feed_item_content|safe }}
+    </div>
+    {% elif post.is_photo %}
+    <div class="article-content">
+        <a href="{{ post.get_permalink }}">
+        {% for postimage in post.postimage_set.all|slice:"0:1" %}
+        <img height="{{ postimage.image.image_height }}" width="{{ postimage.image.image_width }}" class="u-photo" src="{{ postimage.image.image.url }}" alt="{{ postimage.alt }}"></a>
+        {% endfor %}
+        </a>
+        <div class="e-content">{{ post.content_html|safe }}</div>
+    </div>
+    {% elif post.is_repost %}
         <div class="h-cite u-repost-of"> 
             <div class="h-cite u-repost-of">    
                 <blockquote class="e-content">
-                    {{object.content_html|safe}}
+                    {{post.content_html|safe}}
                     <footer>—
-                        {% if item.url %}
+                        {% if post.url %}
                             <span class="p-author h-card">
-                                {% if object.source_author_url %}
-                                    <a class="p-name u-url" href="{{ object.source_author_url }}">{{ object.source_author_name }}</a>,
+                                {% if post.source_author_url %}
+                                    <a class="p-name u-url" href="{{ post.source_author_url }}">{{ post.source_author_name }}</a>,
                                 {% else %}
-                                    <span class="p-name">{{ object.source_author_name }}</span>,
+                                    <span class="p-name">{{ post.source_author_name }}</span>,
                                 {% endif %}
                             </span>
-                            <cite><a class="u-url" href="{{ object.url }}">{{ object.source_name|default:object.url }}</a></cite>
-                        {% elif object.source_name %}
+                            <cite><a class="u-url" href="{{ post.url }}">{{ post.source_name|default:post.url }}</a></cite>
+                        {% elif post.source_name %}
                             <span class="p-author h-card">
                                 {% if object.source_author_url %}
-                                    <a class="p-name u-url" href="{{ object.source_author_url }}">{{ object.source_author_name }}</a>,
+                                    <a class="p-name u-url" href="{{ post.source_author_url }}">{{ post.source_author_name }}</a>,
                                 {% else %}
-                                    <span class="p-name">{{ object.source_author_name }}</span>,
+                                    <span class="p-name">{{ post.source_author_name }}</span>,
                                 {% endif %}
                             </span>
-                            {{ object.source_name }}
+                            {{ post.source_name }}
                         {% endif %}
                     </footer>
                 </blockquote>
             </div>
         </div>
-    {% else %}
-    <div class="article-content e-content">
-        {{ object.feed_item_content|safe }}
-    </div>
     {% endif %}
 {% endblock %}
 {% block postfooter %}
     <footer class="article-footer">
         {% if user.is_staff %}
-            <div><small><a href="{{ object.get_edit_link }}">Edit</a></small></div>
+            <div><small><a href="{{ post.get_edit_link }}">Edit</a></small></div>
         {% endif %}
         <div class="meta">
-            {% if object.is_published %}
+            {% if post.is_published %}
             <div class="postmeta-published">Published by 
-                <span class="h-card p-author postmeta-published-author"><a class="u-url" href="{{ object.get_site_url }}"><img class="u-photo" src="{{ object.author.photo.url }}" alt="{{ object.author.name }}" />{{ object.author.name }}</a></span> on 
-                <time class="dt-published" datetime="{{ object.published|date:'c' }}">
-                    <a href="{% url 'feed:month' object.published|date:'Y' object.published|date:'m' %}">{{ object.published|date:'F' }}</a>
-                    <a href="{% url 'feed:day' object.published|date:'Y' object.published|date:'m' object.published|date:'d' %}">{{ object.published|date:'j' }}</a>, 
-                    <a href="{% url 'feed:year' object.published|date:'Y' %}">{{ object.published|date:'Y' }}</a>
+                <span class="h-card p-author postmeta-published-author"><a class="u-url" href="{{ object.get_site_url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" />{{ post.author.name }}</a></span> on 
+                <time class="dt-published" datetime="{{ post.published|date:'c' }}">
+                    <a href="{% url 'feed:month' post.published|date:'Y' post.published|date:'m' %}">{{ post.published|date:'F' }}</a>
+                    <a href="{% url 'feed:day' post.published|date:'Y' post.published|date:'m' post.published|date:'d' %}">{{ post.published|date:'j' }}</a>, 
+                    <a href="{% url 'feed:year' post.published|date:'Y' %}">{{ post.published|date:'Y' }}</a>
                 </time>
-                {% if object.category %}
-                    in <a href="{{ object.category.get_absolute_url }}" class="p-category" rel="category tag">{{ object.category.name }}</a>
-                {% endif %}
             </div>
             {% else %}
             <div class="postmeta-published">Not yet published.</div>
             {% endif %}
-            {% if object.tags.all %}
+            {% if post.tags.all %}
             <div class="postmeta-tags">Tags:
                 <ul>
-                {% for tag in object.tags.all|dictsort:"name" %}
+                {% for tag in post.tags.all|dictsort:"name" %}
                     <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
                 {% endfor %}
                 </ul>
             </div>
             {% endif %}
-            {% if object.syndications.all %}
+            {% if post.syndications.all %}
             <div class="postmeta-syndication">Also on: 
                 <ul class="commalist">
-                {% for s in object.syndications.all|dictsort:"name" %}
+                {% for s in post.syndications.all|dictsort:"name" %}
                     <li><a class="u-syndication" href="{{ s.url }}">{{ s.name }}</a></li>
                 {% endfor %}
                 </ul>
             </div>    
             {% endif %}
-            <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ object.get_permalink }}">{{ request.get_host }}{{ object.get_absolute_url }}</a></div>
+            <div class="postmeta-permalink">Permalink: <a class="u-url" href="{{ post.get_permalink }}">{{ request.get_host }}{{ post.get_absolute_url }}</a></div>
         </div>
     </footer>
 {% endblock %}
