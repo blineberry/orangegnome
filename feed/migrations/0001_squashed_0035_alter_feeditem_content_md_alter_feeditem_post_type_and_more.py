@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('profiles', '0001_squashed_0004_remove_profile_twitter_screenname'),
-        ('syndications', '0001_squashed_0018_delete_tweet_delete_twitteruser'),
+        ('syndications', '0001_squashed_0019_mastodonstatus_feed_item'),
     ]
 
     operations = [
