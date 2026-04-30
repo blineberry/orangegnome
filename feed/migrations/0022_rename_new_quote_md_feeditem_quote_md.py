@@ -7,7 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('feed', '0021_feeditem_new_quote_md'),
-        ('bookmarks', '0018_rename_quote_md_bookmark_old_quote_md'),
     ]
 
     operations = [
