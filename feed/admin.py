@@ -405,7 +405,7 @@ class PhotoAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
     """
 
-    list_display = ['image_tag', 'content_md']
+    list_display = ['admin_image_tag', 'content_md']
 
     list_filter = ["published",]
     """Fields for filtering in the admin list view."""

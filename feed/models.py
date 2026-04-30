@@ -6,10 +6,8 @@ from django.utils import timezone
 from webmentions.models import Webmentionable
 from syndications.models import MastodonSyndicatable
 from django.core.exceptions import ValidationError
-from syndications.models import MastodonStatus, Syndication as SyndicationsSyndication
+from syndications.models import Syndication as SyndicationsSyndication
 from .fields import CommonmarkField
-from django.contrib.contenttypes.fields import (GenericForeignKey,
-                                                GenericRelation)
 from django_resized import ResizedImageField
 from django_resized.forms import ResizedImageFieldFile
 from uuid import uuid4
@@ -189,57 +187,6 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             return ''
         
         return post_type.lower()
-    
-    @staticmethod
-    def get_published_verb(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 'Bookmarked'
-        
-        if post_type == FeedItem.PostType.LIKE:
-            return 'Liked'
-        
-        if post_type == FeedItem.PostType.NOTE:
-            return 'Noted'
-        
-        if post_type == FeedItem.PostType.REPOST:
-            return 'Reposted'
-        
-        return 'Posted'
-
-    @staticmethod
-    def get_postheader_template(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 'bookmarks/_bookmark_postheader.html'
-        
-        if post_type == FeedItem.PostType.LIKE:
-            return 'likes/_like_postheader.html'
-        
-        if post_type == FeedItem.PostType.NOTE:
-            return 'notes/_postheader_template.html'
-        
-        if post_type == FeedItem.PostType.PHOTO:
-            return 'photos/_postheader_template.html'
-
-        if post_type == FeedItem.PostType.REPOST:
-            return 'reposts/_repost_postheader.html'
-        
-        return 'feed/_postheader_template.html'
-    
-    @staticmethod
-    def get_postcontent_template(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 'bookmarks/_bookmark_postcontent.html'
-        
-        if post_type == FeedItem.PostType.LIKE:
-            return 'likes/_like_postcontent.html'
-        
-        if post_type == FeedItem.PostType.ARTICLE:
-            return 'posts/_post_summary.html'
-        
-        if post_type == FeedItem.PostType.REPOST:
-            return 'reposts/_repost_postcontent.html'
-
-        return 'feed/_postbody_template.html'
 
     def title_max(self):
         return FeedItem.get_title_max(self.post_type)
@@ -255,12 +202,6 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def html_class(self):
         return FeedItem.get_html_class(self.post_type)
-    
-    def postheader_template(self):
-        return FeedItem.get_postheader_template(self.post_type)
-    
-    def postcontent_template(self):
-        return FeedItem.get_postcontent_template(self.post_type)
 
     @staticmethod
     def get_site_url():
@@ -306,6 +247,12 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def is_article(self):
         return self.post_type == self.PostType.ARTICLE
 
+    def is_bookmark(self):
+        return self.post_type == self.PostType.BOOKMARK
+
+    def is_like(self):
+        return self.post_type == self.PostType.LIKE
+
     def is_note(self):
         return self.post_type == self.PostType.NOTE
 
@@ -315,53 +262,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     def is_exercise(self):
         return False
 
-    def is_bookmark(self):
-        return self.post_type == self.PostType.BOOKMARK
-
-    def is_like(self):
-        return self.post_type == self.PostType.LIKE
-
     def is_repost(self):
         return self.post_type == self.PostType.REPOST
-
-    def get_child(self):
-        if self.is_post():
-            return self.post
-        
-        if self.is_note():
-            return self.note
-
-        if self.is_photo():
-            return self.photo
-
-        if self.is_exercise():
-            return self.exercise
-        
-        if self.is_bookmark():
-            return self.bookmark
-        
-        if self.is_like():
-            return self.like
-        
-        if self.is_repost():
-            return self.repost
-
-        raise NotImplementedError
-    
-    def get_type_name(self):
-        return self._meta.verbose_name
-        
-    def get_type_name_plural(self):
-        return self._meta.verbose_name_plural
-    
-    def get_type_verb(self):
-        return self._meta.object_verb
-
-    def meta_template(self):
-        return f'{ self._meta.app_label }/_meta.html'
-
-    def feed_item_template(self):
-        return None
 
     def feed_item_header(self):
         """
@@ -380,33 +282,13 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if self.post_type == FeedItem.PostType.REPOST:
             return f'Reposted {self.source_author_name}'
         
-        return None
+        return ''
     
     def feed_item_content(self):
-        """Returns the content for aggregated feed item indexes."""
-        if self.post_type == FeedItem.PostType.BOOKMARK:
-            return render_to_string('feed/bookmark_content.html', { 'bookmark': self })
-        
-        if (self.post_type == FeedItem.PostType.NOTE or
-            self.post_type == FeedItem.PostType.ARTICLE):
-            return self.content_html()
-        
-        if self.post_type == FeedItem.PostType.PHOTO:
-            return render_to_string('photos/_photo_content.html', { 'photo': self })
-        
-        if self.post_type == FeedItem.PostType.REPOST:
-            return render_to_string('reposts/_repost_content.html', { 'item': self })
-        
-        return None
+        return render_to_string('feed/_post_content.html', { 'post': self, 'is_first': True })
     
     def feed_item_link(self):
         return self.get_permalink()
-    
-    def to_text(self):
-        if self.post_type == FeedItem.PostType.REPOST:
-            return "Reposted " + self.source_author_name
-        
-        return ""
     
     def get_edit_link(self):
         model_name = 'feeditem'
@@ -486,15 +368,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
             for limit in limits:
                 if limit[1] > limit[2]:
-                    raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
-
-        
-    def commonmark_to_html(self, commonmark:str, block_content:bool=True):
-        return convert_commonmark_to_html(commonmark, block_content)
-    
-    def commonmark_to_plain(self, commonmark:str, strip:bool=True):
-        return convert_commonmark_to_plain_text(commonmark, strip)
-    
+                    raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)    
 
     @staticmethod
     def is_none_or_whitespace(str):
@@ -593,16 +467,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return self.tags.all()
     
     def is_mastodon_favorite(self):
-        if self.post_type == FeedItem.PostType.LIKE:
-            return True
-        
-        return False
+        return self.is_like()
     
     def is_mastodon_boost(self):
-        if self.post_type == FeedItem.PostType.REPOST:
-            return True
-        
-        return False
+        return self.is_repost()
     
     def get_mastodon_url(self):
         if (self.post_type == FeedItem.PostType.LIKE or
@@ -621,7 +489,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def get_mastodon_media_description(self):
         """Returns the description for the media."""
-        return self.alternative_text
+        return self.alternative_text()
     
     def image(self):
         image = self.images.first()
@@ -653,14 +521,14 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return self.postimage_set.get(image = image).alt
 
     # From https://stackoverflow.com/a/37965068/814492
-    def image_tag(self):
+    def admin_image_tag(self):
         """Returns html for the Admin change view to display the uploaded image."""
         if self.image() is None:
             return ""
 
         return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image().url))
 
-    image_tag.short_description = 'Preview'
+    admin_image_tag.short_description = 'Preview'
         
 class Syndication(SyndicationsSyndication):
     syndicated_post = models.ForeignKey(FeedItem, on_delete=models.CASCADE, related_name="syndications")
