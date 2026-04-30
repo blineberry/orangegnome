@@ -1,0 +1,9 @@
+
+{% if post.is_article %}
+<div class="e-content">
+    <p>📄 <a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
+    {{ post.summary_html | safe }}
+</div>
+{% else %}
+{% include 'feed/_post_content.html' with post=post is_first=is_first %}
+{% endif %}

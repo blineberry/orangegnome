@@ -33,7 +33,12 @@
 </head>
 <body>
     {% if user.is_staff %}
-        <div><small><a href="{% url 'admin:index' %}">Admin</a></small></div>
+        <nav class="adminnav">
+            <a href="{% url 'admin:index' %}">Admin</a>
+            {% if edit_link %}
+            | <a href="{{ edit_link }}">Edit</a>
+            {% endif %}
+        </nav>
     {% endif %}
     <header class="siteheader">
         <div class="h-card profile {% block hcard_class %}{% endblock %}">

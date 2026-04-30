@@ -47,7 +47,7 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
         return context    
 
     def get_queryset(self):
-        return super().get_queryset().filter(published__lte=timezone.now()).exclude(like__isnull=False).order_by('-published')
+        return super().get_queryset().filter(published__lte=timezone.now()).exclude(post_type=Post.PostType.LIKE).order_by('-published')
 
 class FeedItemDateArchiveView(FeedItemArchiveView):
     make_object_list = True
@@ -145,7 +145,7 @@ class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
         'feed_title': 'Posts',
     }
     template_name = 'feed/post_archive.html'
-    paginate_by = 5
+    paginate_by = 10
     date_field = 'published'
     model = Post
 
@@ -153,6 +153,10 @@ class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
         context = super().get_context_data(**kwargs)
         page_title = 'Posts | Brent Lineberry'
         feed_title = 'Posts'
+
+        if self.post_type == Post.PostType.ARTICLE: 
+            page_title = 'Articles | Brent Lineberry'
+            feed_title = 'Articles'
 
         if self.post_type == Post.PostType.BOOKMARK: 
             page_title = 'Links | Brent Lineberry'
@@ -170,10 +174,6 @@ class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
             page_title = 'Photos | Brent Lineberry'
             feed_title = 'Photos'
 
-        if self.post_type == Post.PostType.ARTICLE: 
-            page_title = 'Articles | Brent Lineberry'
-            feed_title = 'Articles'
-
         if self.post_type == Post.PostType.REPOST: 
             page_title = 'Reposts | Brent Lineberry'
             feed_title = 'Reposts'
@@ -183,8 +183,23 @@ class PostIndex(PermalinkResponseMixin, dates.ArchiveIndexView):
         return context
 
     def get_canonical_viewname(self, context):
-        if self.post_type == Post.PostType.BOOKMARK:
+        if self.post_type == Post.PostType.ARTICLE: 
+            return 'feed:articles'
+
+        if self.post_type == Post.PostType.BOOKMARK: 
             return 'feed:bookmarks'
+        
+        if self.post_type == Post.PostType.LIKE: 
+            return 'feed:likes'
+
+        if self.post_type == Post.PostType.NOTE: 
+            return 'feed:notes'
+
+        if self.post_type == Post.PostType.PHOTO: 
+            return 'feed:photos'
+
+        if self.post_type == Post.PostType.REPOST: 
+            return 'feed:reposts'          
         
         return 'feed:posts'
 
@@ -226,6 +241,7 @@ class PostDetailView(WebmentionableMixin, PermalinkResponseMixin, detail.DetailV
 
         context['post'] = post
         context['permalink'] = post.get_permalink()
+        context['edit_link'] = post.get_edit_link()
 
         if post.post_type == Post.PostType.BOOKMARK:
             context["page_title"] = f'{post.title_txt()} | Bookmarked by Brent Lineberry'
@@ -244,8 +260,5 @@ class PostDetailView(WebmentionableMixin, PermalinkResponseMixin, detail.DetailV
 
         if post.post_type == Post.PostType.REPOST:
             context["page_title"] = f'{post.source_author_name} reposted by Brent Lineberry'
-
-        
-
 
         return context

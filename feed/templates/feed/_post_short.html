@@ -1,0 +1,17 @@
+<article class="article h-entry {{ post.post_type|lower }}">
+    {% block postheader %}
+    <header class="article-header">
+        {% include 'feed/_post_header_meta.html' with post=post %}
+    </header>
+    {% endblock %}
+    {% block postcontent %}
+    <div class="article-content">
+        {% include 'feed/_post_content_short.html' with post=post is_first=is_first %}
+    </div>
+    {% endblock %}
+    {% block postfooter %}
+    <footer class="article-footer"></p>
+        {% include 'feed/_post_footer_meta.html' with post=post %}
+    </footer>
+    {% endblock %}
+</article>

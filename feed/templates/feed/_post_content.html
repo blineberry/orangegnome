@@ -1,0 +1,65 @@
+{% if post.is_bookmark %}
+{% if post.has_quote_or_content %}
+<p>🔖 <a class="alt u-bookmark-of {% if post.title_txt %}h-cite{% endif %}" href="{{ post.url }}">{{ post.get_title_or_url_txt }}</a></p>
+<div class="e-content">
+    {% if post.quote_html %}
+    <blockquote>
+        {{ post.quote_html|safe }}
+    </blockquote>
+    {% endif %}
+    {% if post.content_html %}
+    <div>{{ post.content_html|safe }}</div>
+    {% endif %}
+</div>
+{% endif %}
+{% elif post.is_like %}
+<p>👍 <a class="u-like-of alt" href="{{ post.url }}">{{ post.url }}</a></p>
+{% elif post.is_photo %}
+<a href="{{ post.get_permalink }}">
+    {% for postimage in post.postimage_set.all|slice:"0:1" %}
+    <img 
+        height="{{ postimage.image.image_height }}" 
+        width="{{ postimage.image.image_width }}" 
+        class="u-photo" 
+        src="{{ postimage.image.image.url }}" 
+        alt="{{ postimage.alt }}"
+        {% if not is_first %}defer{% endif %}>
+    {% endfor %}
+</a>
+<div class="e-content">{{ post.content_html|safe }}</div>
+{% elif post.is_repost %}
+<div class="h-cite u-repost-of"> 
+    <div class="h-cite u-repost-of">    
+        <blockquote class="e-content">
+            {{post.content_html|safe}}
+            <footer>—
+                {% if post.url %}
+                    <span class="p-author h-card">
+                        {% if post.source_author_url %}
+                            <a class="p-name u-url" href="{{ post.source_author_url }}">{{ post.source_author_name }}</a>,
+                        {% else %}
+                            <span class="p-name">{{ post.source_author_name }}</span>,
+                        {% endif %}
+                    </span>
+                    <cite><a class="u-url" href="{{ post.url }}">{{ post.source_name|default:post.url }}</a></cite>
+                {% elif post.source_name %}
+                    <span class="p-author h-card">
+                        {% if object.source_author_url %}
+                            <a class="p-name u-url" href="{{ post.source_author_url }}">{{ post.source_author_name }}</a>,
+                        {% else %}
+                            <span class="p-name">{{ post.source_author_name }}</span>,
+                        {% endif %}
+                    </span>
+                    {{ post.source_name }}
+                {% endif %}
+            </footer>
+        </blockquote>
+    </div>
+</div>
+{% else %}
+{% if post.content_html %}
+<div class="e-content">
+    {{ post.content_html|safe }}
+</div>
+{% endif %}
+{% endif %}

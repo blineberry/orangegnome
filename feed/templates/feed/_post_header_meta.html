@@ -1,0 +1,15 @@
+{% if post.in_reply_to %}
+<div class="meta">In reply to <a class="u-in-reply-to alt" href="{{ post.in_reply_to }}">{{ post.in_reply_to }}</a></div>
+{% endif %}
+
+{% if post.is_bookmark %}
+<div class="meta">{{ post.author.name }} bookmarked <a class="article-link alt" href="{{ post.url }}">{{ post.get_title_or_url_txt }}</a></div>
+{% endif %}
+
+{% if post.is_like %}
+<div class="meta">{{ post.author.name }} liked <a class="article-link alt" href="{{ post.url }}">{{ post.url }}</a></div>
+{% endif %}
+
+{% if post.is_repost %}
+<div class="meta">{{ post.author.name }} reposted <a class="article-link alt u-repost-of" href="{{ post.source_url }}">{{ post.source_author }}</a></div>
+{% endif %}

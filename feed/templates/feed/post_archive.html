@@ -11,48 +11,7 @@
         {% for post in object_list %}
             <li class="feed-item">
             {% block post %}
-                <article class="article h-entry {{ post.html_class }}">
-                {% block postheader %}
-                    {% include 'feed/_postheader.html' with post=post %}
-                {% endblock %}                
-                {% block postcontent %}                    
-                    {% include 'feed/_postcontent.html' with post=post %}                    
-                {% endblock %}
-                {% block postfooter %}
-                    <footer class="article-footer">
-                        {% if user.is_staff %}
-                            <div><small><a href="{{ post.get_edit_link }}">Edit</a></small></div>
-                        {% endif %}
-                        <div class="meta">
-                            <div class="postmeta-published">{{ post.published_verb|default:"Published" }} by 
-                                <span class="p-author h-card postmeta-published-author"><a class="u-url" href="{{ post.get_site_url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" />{{ post.author.name }}</a></span> on 
-                                <a class="u-url" href="{{ post.get_absolute_url }}"><time class="dt-published" datetime="{{ post.published|date:'c' }}">{{ post.published }}</time></a>                                
-                                {% if post.category %}
-                                    in <a href="{{ post.category.get_absolute_url }}" class="p-category" rel="category tag">{{ post.category.name }}</a>
-                                {% endif %}
-                            </div>
-                            {% if post.tags.all %}
-                            <div class="postmeta-tags">Tags:
-                                <ul>
-                                {% for tag in post.tags.all|dictsort:"name" %}
-                                    <li><a class="p-category" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
-                                {% endfor %}
-                                </ul>
-                            </div>
-                            {% endif %}                            
-                            {% if post.syndications.all %}
-                            <div class="postmeta-syndication">Also on: 
-                                <ul class="commalist">
-                                {% for s in post.syndications.all|dictsort:"name" %}
-                                    <li><a class="u-syndication" href="{{ s.url }}">{{ s.name }}</a></li>
-                                {% endfor %}
-                                </ul>
-                            </div>    
-                            {% endif %}
-                        </div>                        
-                    </footer>
-                {% endblock %}
-                </article>
+                {% include 'feed/_post_short.html' with post=post is_first=forloop.first %}
             {% endblock %}
             </li>
         {% endfor %}

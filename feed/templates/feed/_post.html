@@ -1,0 +1,26 @@
+<article class="article h-entry {{ post.post_type|lower }}">
+    {% block postheader %}
+    <header class="article-header">
+        {% include 'feed/_post_header_meta.html' with post=post %}
+        {% if post.is_article %}        
+            <h1 class="p-name"><a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
+            <div class="article-summary p-summary">{{ post.summary_html | safe }}</div>
+        {% endif %}
+    </header>
+    {% endblock %}
+    {% block postcontent %}
+    <div class="article-content">
+        {% include 'feed/_post_content.html' with post=post is_first=is_first %}
+    </div>
+{% endblock %}
+{% block postfooter %}
+    <footer class="article-footer">
+        {% include 'feed/_post_footer_meta.html' with post=post %}
+    </footer>
+    {% endblock %}
+    {% block webmentions %}
+        {% if webmentions %}
+        {% include 'feed/_webmentions.html' with webmentions=webmentions %} 
+        {% endif %}       
+    {% endblock webmentions %}
+</article>

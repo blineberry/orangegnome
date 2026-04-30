@@ -110,7 +110,8 @@
 --light-midground: #E6E6E6;
 --light-background: #CCC;
 
---light-text: #444;
+--light-text-lighten: #757575; /* WCAG AA against #FEFEFE */
+--light-text: #444; /* WCAG AAA against #FEFEFE */
 --dark-text: #F5F5F5;
 
 --font-root: 18px;
@@ -184,7 +185,7 @@ a:link, a:visited, a:hover, a:active {
 }
 
 a.alt {
-    &:link, &:visited, &:hover, &:active {
+    &:link, &:visited {
         color: inherit;
         font-weight: bold;
         border-bottom: 1px solid transparent;
@@ -192,7 +193,8 @@ a.alt {
     }
 
     &:hover, &:active {
-        border-bottom-color: var(--light-text);
+        color: var(--primary);
+        border-bottom-color: var(--primary);
         text-decoration: none;
     }
 }
@@ -381,7 +383,7 @@ pre code {
 }
 
 .feed-item {
-    margin-top: var(--space-3);
+    margin-top: var(--space-6);
 
     &:first-child {
         margin-top: 0;
@@ -439,7 +441,7 @@ pre code {
   ===== 
 */
 
-.article .meta {
+.article .meta, .adminnav {
     font-size: var(--font-small);
     font-family: 'Open Sans', sans-serif;
 }
@@ -453,7 +455,7 @@ pre code {
 }
 
 .article-header + .article-content {
-    margin-top: var(--space-3);
+    margin-top: var(--space-1);
 }
 
 .article-summary {
@@ -461,7 +463,11 @@ pre code {
 }
 
 .article-content + .article-footer {
-    margin-top: var(--space-3);
+    margin-top: var(--space-1);
+}
+
+.article-header, .article-footer {
+    color: var(--light-text-lighten)
 }
 
 .article-content code {
