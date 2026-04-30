@@ -23,7 +23,7 @@ class PublishedSingleObjectMixin(detail.SingleObjectMixin):
 class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
     model = Post
     date_field = 'published'
-    paginate_by = 5
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,7 +84,7 @@ class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveV
         return '{d:%B} {d.day}, {d.year} Archives | Brent Lineberry'.format(d = context['day'])
     
 class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
-    paginate_by = 5
+    paginate_by = 10
     template_name = 'feed/post_archive.html'
     canonical_viewname = 'feed:tag'
 
