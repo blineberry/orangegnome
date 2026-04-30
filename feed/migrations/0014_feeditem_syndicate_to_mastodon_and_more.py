@@ -7,7 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('feed', '0013_feeditem_new_syndicate_to_mastodon_and_more'),
-        ('notes', '0023_remove_note_syndicate_to_mastodon_and_more'),
         ('photos', '0014_remove_photo_syndicate_to_mastodon_and_more'),
         ('posts', '0039_remove_post_syndicate_to_mastodon_and_more'),
         ('reposts', '0006_remove_repost_syndicate_to_mastodon_and_more'),
