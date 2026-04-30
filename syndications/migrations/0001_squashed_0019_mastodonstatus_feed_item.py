@@ -6,8 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('syndications', '0001_squashed_0018_delete_tweet_delete_twitteruser'), ('syndications', '0019_mastodonstatus_feed_item')]
-
     initial = True
 
     dependencies = [
