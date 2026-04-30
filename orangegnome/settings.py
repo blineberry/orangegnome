@@ -50,18 +50,12 @@ PREPEND_WWW = env('PREPEND_WWW', default=False)
 # Application definition
 
 INSTALLED_APPS = [
-    'bookmarks.apps.BookmarksConfig',
-    'photos.apps.PhotosConfig',
-    'notes.apps.NotesConfig',
     'syndications.apps.SyndicationsConfig',
     'base.apps.BaseConfig',
     'feed.apps.FeedConfig',
     'pages.apps.PagesConfig',
     'profiles.apps.ProfilesConfig',
-    'posts.apps.PostsConfig',
     'webmentions.apps.WebmentionsConfig',
-    'likes.apps.LikesConfig',
-    'reposts.apps.RepostsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
