@@ -23,7 +23,7 @@
         class="u-photo" 
         src="{{ postimage.image.image.url }}" 
         alt="{{ postimage.alt }}"
-        {% if not is_first %}defer{% endif %}>
+        {% if not is_first %}loading="lazy"{% endif %}>
     {% endfor %}
 </a>
 <div class="e-content">{{ post.content_html|safe }}</div>

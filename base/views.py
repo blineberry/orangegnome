@@ -81,7 +81,13 @@ class ForceSlugMixin(TemplateResponseMixin):
         the request is redirected to the correct URL. Prevents mischevious URL
         linking.
         """
-        if context['object'].slug == self.kwargs['slug']:
+        post_slug = context['object'].slug
+        url_slug = self.kwargs.get('slug')
+
+        if not post_slug or post_slug == '':
+            return super().render_to_response(context, **response_kwargs)
+
+        if post_slug == url_slug:
             return super().render_to_response(context, **response_kwargs)
     
         return redirect(context['object'], permanent=True)
