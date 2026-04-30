@@ -4,22 +4,22 @@
     {{ block.super }}
     <link href="{% url 'webmentions:webmention_handler' %}" rel="webmention" />
 
-    {% if object.post_type == 'ARTICLE' %}
+    {% if post.is_article %}
     <meta property="og:title" content="{{ post.title_txt }}" />
     <meta property="og:description" content="{{ post.summary_txt }}" />
     <meta property="og:type" content="article" />
-    {% elif object.post_type == 'BOOKMARK' %}
+    {% elif post.is_bookmark %}
     <meta property="og:title" content="{{ post.get_title_or_url_txt }} bookmarked by {{ post.author.name }}" />
     <meta property="og:description" content="{{ object.content_txt }}" />
-    {% elif object.post_type == 'LIKE' %}
+    {% elif post.is_like %}
     <meta property="og:title" content="{{ post.url }} liked by {{ post.author.name }}" />
-    {% elif object.post_type == 'NOTE' %}
+    {% elif post.is_note %}
     <meta property="og:title" content="{{ post.context_txt }}" />
-    {% elif object.post_type == 'PHOTO' %}
+    {% elif post.is_photo %}
     <meta property="og:title" content="{{ post.content_txt }}" />
     <meta name="og:image" content="{{ post.image.url }}" />
     <meta name="og:image:alt" content="{{ post.image.alt }}">  
-    {% elif object.post_type == 'REPOST' %}
+    {% elif post.is_repost %}
     <meta property="og:title" content="{{ post.source_author_name }} reposted by {{ post.author.name }}" />
     {% endif %}
 {% endblock %}
@@ -33,19 +33,19 @@
         {% endif %}
 
         {% if post.in_reply_to %}
-        <div>In reply to <a class="u-in-reply-to alt" href="{{ post.in_reply_to }}">{{ post.in_reply_to }}</a></div>
+        <div class="meta">In reply to <a class="u-in-reply-to alt" href="{{ post.in_reply_to }}">{{ post.in_reply_to }}</a></div>
         {% endif %}
 
         {% if post.is_bookmark %}
-        <div>{{ post.author.name }} bookmarked <a class="article-link alt u-bookmark-of {% if post.title_txt %}h-cite{% endif %}" href="{{ post.url }}">{{ post.get_title_or_url_txt }}</a></div>
+        <div class="meta">{{ post.author.name }} bookmarked <a class="article-link alt" href="{{ post.url }}">{{ post.get_title_or_url_txt }}</a></div>
         {% endif %}
 
         {% if post.is_like %}
-        <div>{{ post.author.name }} liked <a class="article-link alt u-like-of" href="{{ post.url }}">{{ post.url }}</a></div>
+        <div class="meta">{{ post.author.name }} liked <a class="article-link alt" href="{{ post.url }}">{{ post.url }}</a></div>
         {% endif %}
 
         {% if post.is_repost %}
-        <div>{{ post.author.name }} reposted <a class="article-link alt u-repost-of" href="{{ post.source_url }}">{{ post.source_author }}</a></div>
+        <div class="meta">{{ post.author.name }} reposted <a class="article-link alt u-repost-of" href="{{ post.source_url }}">{{ post.source_author }}</a></div>
         {% endif %}
 
         {% if post.is_article %}
@@ -60,6 +60,7 @@
     </div>
     {% elif post.is_bookmark %}
     {% if post.has_quote_or_content %}
+    <p>🔖 <a class="u-bookmark-of {% if post.title_txt %}h-cite{% endif %}" href="post.url">{{ post.get_title_or_url_txt }}</a></p>
     <div class="article-content e-content">
         {% if post.quote_html %}
         <blockquote>
@@ -71,6 +72,8 @@
         {% endif %}
     </div>
     {% endif %}
+    {% elif post.is_like %}
+    <p>⭐️ <a class="u-like-of" href="{{ post.url }}">{{ post.url }}</a></p>
     {% elif post.is_note %}
     <div class="article-content e-content">
         {{ post.feed_item_content|safe }}
@@ -118,7 +121,7 @@
 {% block postfooter %}
     <footer class="article-footer">
         {% if user.is_staff %}
-            <div><small><a href="{{ post.get_edit_link }}">Edit</a></small></div>
+            <div class="meta"><a href="{{ post.get_edit_link }}">Edit</a></div>
         {% endif %}
         <div class="meta">
             {% if post.is_published %}
