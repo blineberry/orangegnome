@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 
 class LatestEntriesFeed(Feed):
-    title = "Brent Lineberry"
+    title = settings.SITE_NAME
     link = settings.SITE_URL
     description = "Latest entries from Brent Lineberry."
     author_name = "Brent Lineberry"
