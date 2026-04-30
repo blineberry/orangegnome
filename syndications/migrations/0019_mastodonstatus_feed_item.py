@@ -7,7 +7,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feed', '0013_feeditem_new_syndicate_to_mastodon_and_more'),
         ('syndications', '0001_squashed_0018_delete_tweet_delete_twitteruser'),
     ]
 
