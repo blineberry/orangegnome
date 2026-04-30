@@ -5,8 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    replaces = [('likes', '0001_squashed_0002_like_syndicate_to_mastodon_and_more'), ('likes', '0003_auto_20250829_2024'), ('likes', '0004_remove_like_syndicate_to_mastodon_and_more'), ('likes', '0005_alter_like_url'), ('likes', '0006_auto_20260219_2054'), ('likes', '0007_rename_url_like_old_url'), ('likes', '0008_remove_like_old_url'), ('likes', '0009_auto_20260310_2127'), ('likes', '0010_delete_like')]
-
+    
     initial = True
 
     dependencies = [
