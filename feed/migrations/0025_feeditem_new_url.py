@@ -7,7 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('feed', '0024_rename_new_title_md_feeditem_title_md'),
-        ('reposts', '0007_alter_repost_url'),
     ]
 
     operations = [
