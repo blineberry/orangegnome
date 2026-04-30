@@ -14,7 +14,7 @@ class LatestEntriesFeed(Feed):
         return f'Copyright (c) {timezone.now().year} Brent Lineberry'
 
     def items(self):
-        return FeedItem.objects.filter(published__lte=timezone.now()).exclude(like__isnull=False).exclude(in_reply_to__isnull=False).exclude(in_reply_to='').order_by('-published')[:10]
+        return FeedItem.objects.filter(published__lte=timezone.now()).exclude(post_type=FeedItem.PostType.LIKE).exclude(in_reply_to__isnull=False).exclude(in_reply_to='').order_by('-published')[:10]
     
     def item_title(self, item):
         return item.feed_item_header()

@@ -1,0 +1,31 @@
+{% if user.is_staff %}
+<div class="meta"><a class="alt" href="{{ post.get_edit_link }}">Edit</a></div>
+{% endif %}
+<div class="meta">
+    {% if post.is_published %}
+    <div class="postmeta-published">Published by 
+        <span class="h-card p-author postmeta-published-author"><a class="u-url alt" href="{{ object.get_site_url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" />{{ post.author.name }}</a></span> on 
+        <a class="u-url alt" href="{{ post.get_absolute_url }}"><time class="dt-published" datetime="{{ post.published|date:'c' }}">{{ post.published|date:'M j, Y' }}</time></a>
+    </div>
+    {% else %}
+    <div class="postmeta-published">Not yet published.</div>
+    {% endif %}
+    {% if post.tags.all %}
+    <div class="postmeta-tags">Tags:
+        <ul>
+        {% for tag in post.tags.all|dictsort:"name" %}
+            <li><a class="p-category alt" href="{{ tag.get_absolute_url }}" rel="tag">{{ tag.name }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% if post.syndications.all %}
+    <div class="postmeta-syndication">Also on: 
+        <ul class="commalist">
+        {% for s in post.syndications.all|dictsort:"name" %}
+            <li><a class="u-syndication alt" href="{{ s.url }}">{{ s.name }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>    
+    {% endif %}            
+</div>
