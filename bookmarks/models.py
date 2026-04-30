@@ -12,7 +12,3 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 # Create your models here.
-class Bookmark(FeedItem):
-    """
-    The Django model representing the bookmark.
-    """
