@@ -8,8 +8,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [('feed', '0001_squashed_0012_feeditem_created'), ('feed', '0013_feeditem_new_syndicate_to_mastodon_and_more'), ('feed', '0014_feeditem_syndicate_to_mastodon_and_more'), ('feed', '0015_auto_20251228_1200'), ('feed', '0016_remove_feeditem_new_syndicate_to_mastodon_and_more'), ('feed', '0017_feeditem_new_content_md'), ('feed', '0018_rename_new_content_md_feeditem_content_md'), ('feed', '0019_feeditem_new_summary_md'), ('feed', '0020_rename_new_summary_md_feeditem_summary_md'), ('feed', '0021_feeditem_new_quote_md'), ('feed', '0022_rename_new_quote_md_feeditem_quote_md'), ('feed', '0023_feeditem_new_title_md'), ('feed', '0024_rename_new_title_md_feeditem_title_md'), ('feed', '0025_feeditem_new_url'), ('feed', '0026_rename_new_url_feeditem_url'), ('feed', '0027_image_postimage_feeditem_images'), ('feed', '0028_alter_postimage_order'), ('feed', '0029_feeditem_new_source_author_name_and_more'), ('feed', '0030_rename_new_source_author_name_feeditem_source_author_name_and_more'), ('feed', '0031_feeditem_new_slug'), ('feed', '0032_rename_new_slug_feeditem_slug'), ('feed', '0033_feeditem_post_type'), ('feed', '0034_article_bookmark_like_note_photo_repost'), ('feed', '0035_alter_feeditem_content_md_alter_feeditem_post_type_and_more')]
-
     initial = True
 
     dependencies = [
