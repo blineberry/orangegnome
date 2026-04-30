@@ -5,7 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    replaces = [('photos', '0001_squashed_0011_remove_photo_syndicate_to_twitter_and_more'), ('photos', '0012_alter_photo_image'), ('photos', '0013_auto_20250829_2056'), ('photos', '0014_remove_photo_syndicate_to_mastodon_and_more'), ('photos', '0015_auto_20260210_2135'), ('photos', '0016_remove_photo_caption_md'), ('photos', '0017_auto_20260305_2039'), ('photos', '0018_rename_alternative_text_photo_old_alternative_text_and_more'), ('photos', '0019_remove_photo_old_alternative_text_and_more'), ('photos', '0020_auto_20260314_1649'), ('photos', '0021_delete_photo')]
 
     initial = True
 

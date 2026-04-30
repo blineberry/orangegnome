@@ -5,7 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    replaces = [('notes', '0001_squashed_0021_remove_note_syndicate_to_twitter_and_more'), ('notes', '0022_auto_20250829_2044'), ('notes', '0023_remove_note_syndicate_to_mastodon_and_more'), ('notes', '0024_auto_20260111_1629'), ('notes', '0025_rename_content_md_note_old_content_md'), ('notes', '0026_remove_note_old_content_md'), ('notes', '0027_auto_20260313_2204'), ('notes', '0028_delete_note')]
 
     initial = True
 

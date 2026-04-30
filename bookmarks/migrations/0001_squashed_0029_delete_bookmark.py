@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    replaces = [('bookmarks', '0001_squashed_0012_remove_bookmark_syndicate_to_twitter_and_more'), ('bookmarks', '0013_auto_20250829_1948'), ('bookmarks', '0014_remove_bookmark_syndicate_to_mastodon_and_more'), ('bookmarks', '0015_auto_20260216_2039'), ('bookmarks', '0016_remove_bookmark_commentary_md'), ('bookmarks', '0017_auto_20260217_2012'), ('bookmarks', '0018_rename_quote_md_bookmark_old_quote_md'), ('bookmarks', '0019_remove_bookmark_old_quote_md'), ('bookmarks', '0020_auto_20260218_2022'), ('bookmarks', '0021_rename_title_md_bookmark_old_title_md'), ('bookmarks', '0022_remove_bookmark_old_title_md'), ('bookmarks', '0023_alter_bookmark_url'), ('bookmarks', '0024_auto_20260219_2050'), ('bookmarks', '0025_rename_url_bookmark_old_url'), ('bookmarks', '0026_remove_bookmark_old_url'), ('bookmarks', '0027_remove_bookmark_commonmark_rendered_at'), ('bookmarks', '0028_auto_20260309_1311'), ('bookmarks', '0029_delete_bookmark')]
+    
 
     initial = True
 
