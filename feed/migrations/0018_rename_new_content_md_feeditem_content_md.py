@@ -7,7 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('feed', '0017_feeditem_new_content_md'),
-        ('posts', '0041_rename_content_md_post_old_content_md'),
     ]
 
     operations = [
