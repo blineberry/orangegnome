@@ -22,6 +22,17 @@
     {% elif post.is_repost %}
     <meta property="og:title" content="{{ post.source_author_name }} reposted by {{ post.author.name }}" />
     {% endif %}
+
+    {% for meta in post.author.meta_tags.all %}
+    <meta 
+        {% if meta.name %}
+        name="{{ meta.name }}"
+        {% endif %}
+        {% if meta.content %}
+        content="{{ meta.content }}"
+        {% endif %} >
+    {% endfor %}
+
 {% endblock %}
 
 {% block body %}

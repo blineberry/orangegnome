@@ -28,3 +28,8 @@ class LinkedProfile(models.Model):
     name = models.CharField(max_length=80)
     url = models.CharField(max_length=2000)
     person = models.ForeignKey(Profile, on_delete=models.CASCADE)
+
+class MetaTag(models.Model):
+    name = models.CharField(max_length=280)
+    content = models.CharField(max_length=280)
+    person = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="meta_tags")

@@ -1,5 +1,19 @@
 {% extends 'base/extended_hcard.html' %}
 
+{% block meta %}
+    {{ block.super }}
+
+    {% for meta in profiles.site_owner.meta_tags.all %}
+    <meta 
+        {% if meta.name %}
+        name="{{ meta.name }}"
+        {% endif %}
+        {% if meta.content %}
+        content="{{ meta.content }}"
+        {% endif %} >
+    {% endfor %}
+{% endblock %}
+
 {% block body %}
 
 <section class="feed {{feedclass}} h-feed">
