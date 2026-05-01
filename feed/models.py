@@ -7,9 +7,7 @@ from webmentions.models import Webmentionable
 from syndications.models import MastodonSyndicatable
 from django.core.exceptions import ValidationError
 from syndications.models import Syndication as SyndicationsSyndication
-from .fields import CommonmarkField
-from django_resized import ResizedImageField
-from django_resized.forms import ResizedImageFieldFile
+from .fields import CommonmarkField, OGResizedImageField
 from uuid import uuid4
 from datetime import date
 from .storage import PublicAzureStorage
@@ -33,14 +31,6 @@ def upload_to_callable(instance, filename):
     d = date.today()
 
     return '{0}/{1}'.format(d.strftime('%Y/%m/%d'),filename)
-
-class OGResizedImageFieldFile(ResizedImageFieldFile):
-    def save(self, name, content, save=True):
-        super().save(name, content, save)
-        self.field.update_dimension_fields(self.instance, force=True)
-
-class OGResizedImageField(ResizedImageField):
-    attr_class = OGResizedImageFieldFile
 
 # Create your models here.
 class Image(models.Model):
