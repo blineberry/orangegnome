@@ -1,48 +1,15 @@
-import re
 from django.db import models
-import pypandoc
-from bs4 import BeautifulSoup, Comment, NavigableString
-import os
-from django.conf import settings
-from mf2py.dom_helpers import get_textContent
+from bs4 import BeautifulSoup
 import mistune
-from mistune.renderers.markdown import MarkdownRenderer
-from typing import cast
 import html2text
+from django_resized import ResizedImageField
+from django_resized.forms import ResizedImageFieldFile
+from pillow_heif import register_heif_opener, from_pillow
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
 
-class PlainTextRenderer(MarkdownRenderer):
-    def link(self, token, state):
-        text = self.render_children(token, state)
-        out = text
-
-        attrs = token["attrs"]
-        url = attrs["url"]
-
-        if text == url:
-            return text
-        elif "mailto:" + text == url:
-            return text
-        
-        return out + " (" + url + ")"
-    
-    def image(self, token, state):
-
-        alt = self.render_children(token, state)
-
-        if alt is not None:
-            return " " + alt + " "
-        
-        attrs = token["attrs"]
-        print(str(attrs))
-        src = attrs.get("url")
-
-        if src is not None:
-            return " " + src + " "
-
-        return ""
-
-_whitespace_to_space_regex = re.compile(r"[\n\t\r]+")
-_reduce_spaces_regex = re.compile(r" {2,}")
+register_heif_opener(thumbnails=False)
 
 class CommonmarkField(models.TextField):   
     block_elements = ["address",
@@ -190,17 +157,32 @@ class CommonmarkField(models.TextField):
 
         return value
         
-class CommonmarkInlineField(CommonmarkField):
-    @staticmethod
-    def md_to_html(input:str, block_content:bool=False):
-        return CommonmarkField.md_to_html(input,block_content)
 
-    def _render_html(self, value, model_instance):
-        if not self.html_field:
-            return value
+class OGResizedImageFieldFile(ResizedImageFieldFile):
+    def save(self, name, content, save=True):
+        content.file.seek(0)
+        img = Image.open(content.file)
+        img_format = img.format.lower()
+
+        if img_format in ('heif','mpo',):
+            new_content = BytesIO()
+            img_format = 'JPEG'
+            img.save(new_content, format=img_format)
+            content = ContentFile(new_content.getvalue())        
+            name = self.get_name(name, img_format)
         
-        html = CommonmarkField.md_to_html(value, block_content=False)
+        super().save(name, content, save)
 
-        setattr(model_instance, self.html_field, html)
+        self.field.update_dimension_fields(self.instance, force=True)
 
-        return value
+class OGResizedImageField(ResizedImageField):
+    attr_class = OGResizedImageFieldFile
+
+    def __init__(self, verbose_name=None, name=None, **kwargs):
+        print(kwargs)
+        super().__init__(verbose_name, name, **kwargs)
+
+    def check(self, **kwargs):
+        print("self")
+        print(self)
+        return super().check(**kwargs)
