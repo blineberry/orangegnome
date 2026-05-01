@@ -179,10 +179,7 @@ class OGResizedImageField(ResizedImageField):
     attr_class = OGResizedImageFieldFile
 
     def __init__(self, verbose_name=None, name=None, **kwargs):
-        print(kwargs)
         super().__init__(verbose_name, name, **kwargs)
 
     def check(self, **kwargs):
-        print("self")
-        print(self)
         return super().check(**kwargs)
