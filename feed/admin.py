@@ -4,6 +4,7 @@ from django import forms
 from django.utils import timezone
 from syndications.admin import SyndicatableAdmin as SAAdmin
 from feed.widgets import PlainTextCountTextarea, PlainTextCountTextInput
+from django.core.validators import URLValidator
 
 # Register your models here.
 class SyndicationInline(admin.TabularInline):
@@ -123,19 +124,26 @@ class BookmarkModelForm(forms.ModelForm):
     Inherits from forms.ModelForm.
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['url'].required = True
+
     title_md = forms.CharField(
-        widget=PlainTextCountTextInput(max=Post.get_title_max(Post.PostType.BOOKMARK)),
+        widget=PlainTextCountTextInput(max=Bookmark.title_max),
         required=False)
 
     quote_md = forms.CharField(
-        widget=PlainTextCountTextarea(max=Post.get_quote_max(Post.PostType.BOOKMARK)), 
+        widget=PlainTextCountTextarea(max=Bookmark.quote_max), 
         required=False)
     """Display the quote input as a Textarea"""
 
     content_md = forms.CharField(
-        widget=PlainTextCountTextarea(max=Post.get_content_max(Post.PostType.BOOKMARK)), 
+        widget=PlainTextCountTextarea(max=Bookmark.content_max), 
         required=False)
     """Display the content input as a Textarea"""
+
+    #url = forms.URLField(widget=forms.URLInput, max_length=2048,required=True, validators=[URLValidator])
 
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.BOOKMARK)
 
@@ -207,6 +215,10 @@ class LikeModelForm(forms.ModelForm):
 
     Inherits from forms.ModelForm.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['url'].required = True
 
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.LIKE)
 
@@ -277,7 +289,7 @@ class NoteModelForm(forms.ModelForm):
     """
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.NOTE)
 
-    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Post.get_content_max(Post.PostType.NOTE)), help_text="Markdown supported.")
+    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Note.content_max), help_text="Markdown supported.")
     """Display the content input as a Textarea"""
 
     class Meta:
@@ -344,7 +356,7 @@ class PhotoModelForm(forms.ModelForm):
     """
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.PHOTO)
 
-    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Post.get_content_max(Post.PostType.PHOTO)), required=False, help_text="Markdown supported.")
+    content_md = forms.CharField(widget=PlainTextCountTextarea(max=Photo.content_max), required=True, help_text="Markdown supported.")
     # """Display the caption input as a Textarea"""
 
     # alternative_text = forms.CharField(widget=forms.Textarea, required=False)
@@ -418,8 +430,8 @@ class ArticleModelForm(forms.ModelForm):
     """
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.ARTICLE)
     
-    summary_md = forms.CharField(widget=PlainTextCountTextarea(max=Post.get_summary_max(Post.PostType.ARTICLE)), help_text="Markdown supported.", required=False)
-    title_md = forms.CharField(widget=PlainTextCountTextInput(max=Post.get_title_max(Post.PostType.ARTICLE)), help_text="Markdown supported.")
+    summary_md = forms.CharField(widget=PlainTextCountTextarea(max=Article.summary_max), help_text="Markdown supported.", required=False)
+    title_md = forms.CharField(widget=PlainTextCountTextInput(max=Article.title_max), help_text="Markdown supported.")
     content_md = forms.CharField(widget=PlainTextCountTextarea(), help_text="Markdown supported.", required=False)
     
     class Meta:

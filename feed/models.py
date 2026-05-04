@@ -144,32 +144,6 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     url = models.URLField(max_length=2048,null=True,blank=True, help_text="Used for Bookmarks, Likes, and Reposts.")
 
     slug = models.SlugField(max_length=100, null=True, blank=True, help_text="Used for Articles.")
-
-    @staticmethod
-    def get_title_max(post_type):
-        # Bookmark and Article
-        return 100
-    
-    @staticmethod
-    def get_quote_max(post_type):
-        # Bookmark
-        return 280  
-    
-    @staticmethod
-    def get_content_max(post_type):
-        if post_type == FeedItem.PostType.BOOKMARK:
-            return 280
-        
-        if (post_type == FeedItem.PostType.NOTE or
-            post_type == FeedItem.PostType.PHOTO):
-            return 560
-        
-        return
-
-    @staticmethod
-    def get_summary_max(post_type):
-        # Article
-        return 280
     
     @staticmethod
     def get_html_class(post_type):
@@ -177,18 +151,6 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             return ''
         
         return post_type.lower()
-
-    def title_max(self):
-        return FeedItem.get_title_max(self.post_type)
-
-    def quote_max(self):
-        return FeedItem.get_quote_max(self.post_type)     
-        
-    def content_max(self):
-        return FeedItem.get_content_max(self.post_type)
-    
-    def summary_max(self):
-        return FeedItem.get_summary_max(self.post_type)
     
     def html_class(self):
         return FeedItem.get_html_class(self.post_type)
@@ -312,54 +274,6 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         if not self.author:
             raise ValidationError("Published posts must have an author.")
         
-        if self.post_type == FeedItem.PostType.BOOKMARK:
-            if self.url is None:
-                raise ValidationError("Url is required.")
-            
-            title_txt = self.title_txt()
-            quote_txt = self.quote_txt()
-            content_txt = self.content_txt()
-
-            limits = (
-                ("Title", len(title_txt), self.title_max()),
-                ("Quote", len(quote_txt), self.quote_max()),
-                ("Content", len(content_txt), self.content_max()),
-            )
-
-            for limit in limits:
-                if limit[1] > limit[2]:
-                    raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
-        
-        if self.post_type == FeedItem.PostType.LIKE:
-            if self.url is None:
-                raise ValidationError("Url is required.")
-            
-        if (self.post_type == FeedItem.PostType.NOTE or
-            self.post_type == FeedItem.PostType.PHOTO):
-            content_txt = self.content_txt()
-
-            if len(content_txt) > self.content_max():
-                raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max()))
-            
-        if self.post_type == FeedItem.PostType.ARTICLE:
-            if not self.summary_md or self.summary_md.isspace():
-                raise ValidationError("Summary is required to publish.")
-            
-            if not self.content_md or self.content_md.isspace():
-                raise ValidationError("Content is required to publish.")
-            
-            title_txt = self.title_txt()
-            summary_txt = self.summary_txt()
-
-            limits = (
-                ("Title", len(title_txt), self.title_max()),
-                ("Summary", len(summary_txt), self.summary_max()),
-            )
-
-            for limit in limits:
-                if limit[1] > limit[2]:
-                    raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)    
-
     @staticmethod
     def is_none_or_whitespace(str):
         """
@@ -550,35 +464,126 @@ class PostTypeManager(models.Manager):
     
     def get_queryset(self):
         qs = super().get_queryset()
-        return qs.filter(post_type=self.post_type)        
+        return qs.filter(post_type=self.post_type)      
+
+class Article(FeedItem):
+    objects = PostTypeManager(FeedItem.PostType.ARTICLE)
+
+    title_max = 100
+    summary_max = 280
+
+    def validate_publishable(self):
+        if not self.published:
+            return
+        
+        super().validate_publishable()
+
+        if not self.summary_md or self.summary_md.isspace():
+            raise ValidationError("Summary is required to publish.")
+        
+        if not self.content_md or self.content_md.isspace():
+            raise ValidationError("Content is required to publish.")
+        
+        if not self.slug or self.slug.isspace():
+            raise ValidationError("Slug is required to publish.")
+        
+        title_txt = self.title_txt()
+        summary_txt = self.summary_txt()
+
+        limits = (
+            ("Title", len(title_txt), self.title_max),
+            ("Summary", len(summary_txt), self.summary_max),
+        )
+
+        for limit in limits:
+            if limit[1] > limit[2]:
+                raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)    
+
+    class Meta:
+        proxy = True  
 
 class Bookmark(FeedItem):
     objects = PostTypeManager(FeedItem.PostType.BOOKMARK)
 
+    title_max = 100    
+    quote_max = 280
+    content_max = 280
+
+    def validate_publishable(self):
+        if not self.published:
+            return
+        
+        super().validate_publishable()
+        
+        if self.url is None:
+            raise ValidationError("Url is required.")
+        
+        title_txt = self.title_txt()
+        quote_txt = self.quote_txt()
+        content_txt = self.content_txt()
+
+        limits = (
+            ("Title", len(title_txt), self.title_max),
+            ("Quote", len(quote_txt), self.quote_max),
+            ("Content", len(content_txt), self.content_max),
+        )
+
+        for limit in limits:
+            if limit[1] > limit[2]:
+                raise ValidationError("%s plain text count of %s must be less than the limit of %s to publish." % limit)
+    
     class Meta:
         proxy = True
 
 class Like(FeedItem):
     objects = PostTypeManager(FeedItem.PostType.LIKE)
 
+    def validate_publishable(self):
+        if not self.published:
+            return
+        
+        super().validate_publishable()
+        
+        if self.url is None:
+            raise ValidationError("Url is required.")
+        
     class Meta:
         proxy = True
 
 class Note(FeedItem):
     objects = PostTypeManager(FeedItem.PostType.NOTE)
 
+    content_max= 560
+    
+    def validate_publishable(self):
+        if not self.published:
+            return
+        
+        super().validate_publishable()
+        
+        content_txt = self.content_txt()
+
+        if len(content_txt) > self.content_max:
+            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max()))
+            
     class Meta:
         proxy = True
 
 class Photo(FeedItem):
     objects = PostTypeManager(FeedItem.PostType.PHOTO)
+    content_max = 560
+    
+    def validate_publishable(self):
+        if not self.published:
+            return
+        
+        super().validate_publishable()
+        
+        content_txt = self.content_txt()
 
-    class Meta:
-        proxy = True
-
-class Article(FeedItem):
-    objects = PostTypeManager(FeedItem.PostType.ARTICLE)
-
+        if len(content_txt) > self.content_max:
+            raise ValidationError("Plain text count of %s must be less than the limit of %s to publish." % (len(content_txt), self.content_max))
+            
     class Meta:
         proxy = True
 
