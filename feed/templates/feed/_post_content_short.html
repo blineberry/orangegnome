@@ -4,6 +4,74 @@
     <p>📄 <a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
     {{ post.summary_html | safe }}
 </div>
+{% elif post.is_photo %}
+{% with image_count=post.postimage_set.count %}
+{% if image_count < 4 %}
+{% if image_count == 1 %}
+{% for postimage in post.postimage_set.all %}
+<div 
+    class="{{ post.html_class }}-short" 
+    style="aspect-ratio: {{ postimage.image.image_width }} / {{ postimage.image.image_height }};"
+>
+    <a href="{{ post.get_permalink }}">
+        <img 
+            id="postimage-{{ postimage.id }}"
+            height="{{ postimage.image.image_height }}" 
+            width="{{ postimage.image.image_width }}" 
+            class="u-photo" 
+            src="{{ postimage.image.image.url }}" 
+            alt="{{ postimage.alt }}"
+                {% if not is_first %}loading="lazy"{% endif %}>
+    </a>
+</div>
+{% endfor %}
+{% else %}
+    <div class="photo-grid photo-count-{{ image_count }}">
+        <a 
+            class="photo-grid-link" href="{{ post.get_permalink }}">
+            <ul>
+                {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"feature" %}
+                <li 
+                    class="{% if postimage.image.image_height > postimage.image.image_width %}photo-grid-item-portrait{% elif postimage.image.image_height < postimage.image.image_width %}photo-grid-item-landscape{% endif %}">
+                    <img 
+                        src="{{ postimage.image.image.url }}" 
+                        alt="{{ postimage.alt }}"
+                        class="u-photo"
+                        {% if not is_first %}loading="lazy"{% endif %}>
+                </li>
+                {% endfor %}
+            </ul>
+        </a>
+    </div>
+{% endif %}
+<div class="e-content">
+    {{ post.content_html|safe }}
+</div>
+{% else %}
+<div class="e-content">    
+    <div class="photo-grid photo-count-3 photo-grid-preview">
+        <a 
+            class="photo-grid-link" href="{{ post.get_permalink }}">
+            <ul>
+                {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"feature"|slice:":2" %}
+                <li 
+                    class="{% if postimage.image.image_height > postimage.image.image_width %}photo-grid-item-portrait{% elif postimage.image.image_height < postimage.image.image_width %}photo-grid-item-landscape{% endif %}">
+                    <img 
+                        src="{{ postimage.image.image.url }}" 
+                        alt="{{ postimage.alt }}"
+                        class="u-photo"
+                        {% if not is_first %}loading="lazy"{% endif %}>
+                </li>
+                {% endfor %}
+                <li class="photo-grid-additional"><span>+{{ image_count|add:"-2" }}</span></li>
+            </ul>
+            <span class="photo-grid-preview-action">View all images</span>
+        </a>
+    </div>
+    {{ post.content_html|safe }}
+</div>
+{% endif %}
+{% endwith %}
 {% else %}
 {% include 'feed/_post_content.html' with post=post is_first=is_first %}
 {% endif %}
