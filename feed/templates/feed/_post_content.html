@@ -15,17 +15,37 @@
 {% elif post.is_like %}
 <p>👍 <a class="u-like-of alt" href="{{ post.url }}">{{ post.url }}</a></p>
 {% elif post.is_photo %}
-<a href="{{ post.get_permalink }}">
-    {% for postimage in post.postimage_set.all|slice:"0:1" %}
-    <img 
+    {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"feature" %}
+    {% if forloop.first and forloop.last %}
+    <div class="photo-photo">
+    {% else %}
+    <ul class="photo-photos">
+        <li>
+    {% endif %}
+        {% if not forloop.first and not forloop.last %}
+        <li>
+        {% endif %}
+    <a href="{% if forloop.first %}{{ post.get_permalink }}{% else %}{{ post.get_permalink }}#postimage-{{ postimage.id }}{% endif %}">
+        <img 
+        id="postimage-{{ postimage.id }}"
         height="{{ postimage.image.image_height }}" 
         width="{{ postimage.image.image_width }}" 
         class="u-photo" 
         src="{{ postimage.image.image.url }}" 
         alt="{{ postimage.alt }}"
-        {% if not is_first %}loading="lazy"{% endif %}>
+            {% if not is_first or not forloop.first %}loading="lazy"{% endif %}>
+    </a>
+    {% if not forloop.first and not forloop.last %}
+        <li>
+        {% endif %}
+    {% if forloop.first and forloop.last %}
+    </div>
+    {% else %}
+        </li>
+    </ul>
+    {% endif %}
+    
     {% endfor %}
-</a>
 <div class="e-content">{{ post.content_html|safe }}</div>
 {% elif post.is_repost %}
 <div class="h-cite u-repost-of"> 

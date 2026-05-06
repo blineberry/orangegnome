@@ -395,6 +395,32 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         """Returns the description for the media."""
         return self.alternative_text()
     
+    def image_max_width(self):
+        images = self.images.all()
+
+        if images is None or len(images) <= 0:
+            return None
+        
+        max = 0
+        for image in images:
+            if image.image.width > max:
+                max = image.image.width
+
+        return max
+
+    def image_max_height(self):
+        images = self.images.all()
+
+        if images is None or len(images) <= 0:
+            return None
+        
+        max = 0
+        for image in images:
+            if image.image.height > max:
+                max = image.image.height
+
+        return max
+
     def image(self):
         image = self.images.first()
 

@@ -17,11 +17,14 @@
     <meta property="og:title" content="{{ post.context_txt }}" />
     {% elif post.is_photo %}
     <meta property="og:title" content="{{ post.content_txt }}" />
-    <meta name="og:image" content="{{ post.image.url }}" />
-    <meta name="og:image:alt" content="{{ post.image.alt }}">  
     {% elif post.is_repost %}
     <meta property="og:title" content="{{ post.source_author_name }} reposted by {{ post.author.name }}" />
     {% endif %}
+
+    {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"feature"|slice:":1" %}
+    <meta name="og:image" content="{{ postimage.image.image.url }}" />
+    <meta name="og:image:alt" content="{{ postimage.alt }}">  
+    {% endfor %}
 
     {% for meta in post.author.meta_tags.all %}
     <meta 
