@@ -506,9 +506,13 @@ pre code {
             }
         }
 
-        > div :first-child {
-            margin-top: 0;
-        }        
+        > div {
+            flex: 1;
+            
+            :first-child {
+                margin-top: 0;
+            }    
+        }    
     }
 }
 
