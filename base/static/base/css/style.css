@@ -487,6 +487,30 @@ pre code {
     font-size: var(--font-3);
 }
 
+.article .article-short {
+    &:has(> a .u-featured) {
+        display: flex;
+
+        > a {
+            grid-area: image;
+            display: block;
+            width: 33%;
+            max-width: calc(var(--space-6) * 3);  
+            margin-right: var(--space-2);          
+
+            img {            
+                object-fit: cover; 
+                width: 100%;
+                aspect-ratio: 1;        
+                border-radius: var(--space-1);
+            }
+        }
+
+        > div :first-child {
+            margin-top: 0;
+        }        
+    }
+}
 
 
 

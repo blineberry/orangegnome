@@ -60,7 +60,7 @@ class PostImagesInlineForm(forms.ModelForm):
 
     class Meta:
         model = PostImage
-        fields = ["image", "alt", "order", "feature"]
+        fields = ["image", "alt", "order", "featured"]
 
 class PostImageInline(admin.StackedInline):
     model = PostImage
@@ -70,7 +70,7 @@ class PostImageInline(admin.StackedInline):
     readonly_fields = ["image_tag"]
     fieldsets = (
         (None, {
-            'fields': ('image_tag', 'image', 'alt', 'order', 'feature',)
+            'fields': ('image_tag', 'image', 'alt', 'order', 'featured',)
         }),
     )
 

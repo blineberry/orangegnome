@@ -420,6 +420,10 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
                 max = image.image.height
 
         return max
+    
+    def image_featured(self):
+        featured = self.postimage_set.order_by("-featured","order").first()
+        return featured
 
     def image(self):
         image = self.images.first()
@@ -468,7 +472,7 @@ class PostImage(models.Model):
     post = models.ForeignKey(FeedItem, on_delete=models.CASCADE)
     order = models.PositiveSmallIntegerField(blank=True, null=True, default=50)
     alt = models.CharField(blank=True, max_length=255)
-    feature = models.BooleanField(default=False)
+    featured = models.BooleanField(default=False)
 
     def __str__(self):
         return self.image.description
@@ -481,7 +485,7 @@ class PostImage(models.Model):
         return mark_safe('<img src="%s" style="max-width: 200px; max-height: 200px; width: auto; height: auto;" />' % (self.image.image.url))
 
     class Meta:
-        ordering = ["order"]
+        ordering = ["-featured", "order"]
 
 class PostTypeManager(models.Manager):
     def __init__(self, post_type):
