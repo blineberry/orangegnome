@@ -60,34 +60,6 @@
          url('../fonts/eb-garamond-v13-latin-700italic.svg#EBGaramond') format('svg'); /* Legacy iOS */
   }
   
-  /* open-sans-regular - latin */
-@font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    src: url('../fonts/open-sans-v17-latin-regular.eot'); /* IE9 Compat Modes */
-    src: local('Open Sans Regular'), local('OpenSans-Regular'),
-         url('../fonts/open-sans-v17-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-         url('../fonts/open-sans-v17-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-         url('../fonts/open-sans-v17-latin-regular.woff') format('woff'), /* Modern Browsers */
-         url('../fonts/open-sans-v17-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-         url('../fonts/open-sans-v17-latin-regular.svg#OpenSans') format('svg'); /* Legacy iOS */
-  }
-  
-  /* open-sans-700 - latin */
-  @font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 700;
-    src: url('../fonts/open-sans-v17-latin-700.eot'); /* IE9 Compat Modes */
-    src: local('Open Sans Bold'), local('OpenSans-Bold'),
-         url('../fonts/open-sans-v17-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-         url('../fonts/open-sans-v17-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
-         url('../fonts/open-sans-v17-latin-700.woff') format('woff'), /* Modern Browsers */
-         url('../fonts/open-sans-v17-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
-         url('../fonts/open-sans-v17-latin-700.svg#OpenSans') format('svg'); /* Legacy iOS */
-  }
-
 /* 
   =====
   COLORS
@@ -130,6 +102,8 @@
 --space-4: 1.33em;
 --space-5: 1.66em;
 --space-6: 2em;
+
+--ui-font-family: system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
 
 /* 
@@ -287,11 +261,11 @@ pre code {
 }
 
 .profile-bio {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ui-font-family);
 }
 
 .profile-linkedprofileitem {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ui-font-family);
 
     display: inline-block;
     margin-left: var(--space-2);
@@ -322,7 +296,7 @@ pre code {
 }
 
 .sitenav {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ui-font-family);
     text-align: center;
 }
 
@@ -414,7 +388,7 @@ pre code {
 
 .feed-nav {
     overflow: hidden;
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ui-font-family);
 }
 
 .feed-nav-older {
@@ -443,7 +417,7 @@ pre code {
 
 .article .meta, .adminnav {
     font-size: var(--font-small);
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ui-font-family);
 }
 
 .article {
@@ -476,7 +450,7 @@ pre code {
   }
   
   .article-readmore {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ui-font-family);
     display: block;
     margin: var(--space-3) 0;
     font-size: var(--font-small);
@@ -746,7 +720,6 @@ ul.commalist {
             justify-content: center;
             background: var(--darkBackground);
             color: var(--dark-text);
-            font-family: 'Open Sans';
             font-weight: bold;
             font-size: var(--font-5);                       
         }
@@ -759,7 +732,7 @@ ul.commalist {
             background: linear-gradient(to left, rgba(0,0,0,0), rgba(0,0,0,0.75) 50%);
             color: var(--dark-text);
             padding: var(--space-1) var(--space-3);
-            font-family: 'Open Sans';
+            font-family: var(--ui-font-family);
             font-size: var(--font-small);
             font-weight: bold;
         }
@@ -809,7 +782,7 @@ ul.commalist {
   
   .mentions-list-item {
     font-size: var(--font-small);
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--ui-font-family);
   }
   
   .mentions-list-item .mentions-content {
