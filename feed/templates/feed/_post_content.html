@@ -15,7 +15,7 @@
 {% elif post.is_like %}
 <p>👍 <a class="u-like-of alt" href="{{ post.url }}">{{ post.url }}</a></p>
 {% elif post.is_photo %}
-    {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"feature" %}
+    {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"featured" %}
     {% if forloop.first and forloop.last %}
     <div class="photo-photo">
     {% else %}

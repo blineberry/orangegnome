@@ -1,8 +1,19 @@
 
 {% if post.is_article %}
-<div class="e-content">
-    <p>📄 <a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
+<div class="e-content {{ post.html_class }}-short">
+    {% if post.image_featured %}
+    <a href={{ post.get_permalink}}><img 
+        src="{{ post.image_featured.image.image.url }}"
+        alt="{{ post.image_featured.alt }}"
+        class="u-featured">
+    </a>
+    <div>
+    {% endif %}
+    <p><a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
     {{ post.summary_html | safe }}
+    {% if post.image_featured %}
+    </div>
+    {% endif %}
 </div>
 {% elif post.is_photo %}
 {% with image_count=post.postimage_set.count %}
@@ -30,7 +41,7 @@
         <a 
             class="photo-grid-link" href="{{ post.get_permalink }}">
             <ul>
-                {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"feature" %}
+                {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"featured" %}
                 <li 
                     class="{% if postimage.image.image_height > postimage.image.image_width %}photo-grid-item-portrait{% elif postimage.image.image_height < postimage.image.image_width %}photo-grid-item-landscape{% endif %}">
                     <img 
@@ -53,7 +64,7 @@
         <a 
             class="photo-grid-link" href="{{ post.get_permalink }}">
             <ul>
-                {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"feature"|slice:":2" %}
+                {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"featured"|slice:":2" %}
                 <li 
                     class="{% if postimage.image.image_height > postimage.image.image_width %}photo-grid-item-portrait{% elif postimage.image.image_height < postimage.image.image_width %}photo-grid-item-landscape{% endif %}">
                     <img 

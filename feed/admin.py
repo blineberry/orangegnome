@@ -60,7 +60,7 @@ class PostImagesInlineForm(forms.ModelForm):
 
     class Meta:
         model = PostImage
-        fields = ["image", "alt", "order", "feature"]
+        fields = ["image", "alt", "order", "featured"]
 
 class PostImageInline(admin.StackedInline):
     model = PostImage
@@ -70,7 +70,7 @@ class PostImageInline(admin.StackedInline):
     readonly_fields = ["image_tag"]
     fieldsets = (
         (None, {
-            'fields': ('image_tag', 'image', 'alt', 'order', 'feature',)
+            'fields': ('image_tag', 'image', 'alt', 'order', 'featured',)
         }),
     )
 
@@ -105,6 +105,26 @@ class PostAdmin(admin.ModelAdmin):
     Group related fields together. 
     
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
+    """
+
+    filter_horizontal = ('tags',)
+    """
+    Use the built-in interface for the tags many-to-many relationship.
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
+    """
+
+    list_filter = ["published",]
+    """Fields for filtering in the admin list view."""
+
+class AdminBase(SyndicatableAdmin):
+    inlines = [PostImageInline,SyndicationInline,]
+
+    readonly_fields = ('syndicated_to_mastodon',)
+    """
+    These fields will be shown but uneditable. 
+    
+    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
     """
 
     filter_horizontal = ('tags',)
@@ -162,22 +182,15 @@ class BookmarkModelForm(forms.ModelForm):
         ]
 
 # Admin specs for the Bookmark model
-class BookmarkAdmin(SyndicatableAdmin):
+class BookmarkAdmin(AdminBase):
     """
     Specifications for the Bookmark Admin page.
 
-    Inherits from PublishableAdmin, SyndicatableAdmin, and WebmentionAdmin
+    Inherits from AdminBase
     """
 
     form = BookmarkModelForm
     """Override the dynamically created form with customizations."""
-
-    readonly_fields = ('syndicated_to_mastodon',)
-    """
-    These fields will be shown but uneditable. 
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
-    """
 
     fieldsets = (
         (None, {
@@ -196,18 +209,8 @@ class BookmarkAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
     """
 
-    filter_horizontal = ('tags',)
-    """
-    Use the built-in interface for the tags many-to-many relationship.
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
-    """
-
     list_display = ['url', 'title_txt']
     """The fields to display on the admin list view."""
-
-    list_filter = ["published",]
-    """Fields for filtering in the admin list view."""
        
 class LikeModelForm(forms.ModelForm):
     """
@@ -234,7 +237,7 @@ class LikeModelForm(forms.ModelForm):
         ]
 
 # Admin specs for the Like model
-class LikeAdmin(SyndicatableAdmin):
+class LikeAdmin(AdminBase):
     """
     Specifications for the Like Admin page.
 
@@ -243,13 +246,6 @@ class LikeAdmin(SyndicatableAdmin):
 
     form = LikeModelForm
     """Override the dynamically created form with customizations."""
-
-    readonly_fields = ('syndicated_to_mastodon',)
-    """
-    These fields will be shown but uneditable. 
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
-    """
 
     fieldsets = (
         (None, {
@@ -268,18 +264,8 @@ class LikeAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
     """
 
-    filter_horizontal = ('tags',)
-    """
-    Use the built-in interface for the tags many-to-many relationship.
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
-    """
-
     list_display = ['url',]
     """The fields to display on the admin list view."""
-
-    list_filter = ["published",]
-    """Fields for filtering in the admin list view."""
 
 class NoteModelForm(forms.ModelForm):
     """
@@ -304,7 +290,7 @@ class NoteModelForm(forms.ModelForm):
         ]
 
 # Admin specs for the Note model
-class NoteAdmin(SyndicatableAdmin):
+class NoteAdmin(AdminBase):
     """
     Specifications for the Note Admin page.
 
@@ -313,13 +299,6 @@ class NoteAdmin(SyndicatableAdmin):
 
     form = NoteModelForm
     """Override the dynamically created form with customizations."""
-
-    readonly_fields = ('syndicated_to_mastodon',)
-    """
-    These fields will be shown but uneditable. 
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
-    """
 
     fieldsets = (
         (None, {
@@ -338,16 +317,6 @@ class NoteAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
     """
 
-    filter_horizontal = ('tags',)
-    """
-    Use the built-in interface for the tags many-to-many relationship.
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
-    """    
-
-    list_filter = ["published",]
-    """Fields for filtering in the admin list view."""
-
 class PhotoModelForm(forms.ModelForm):
     """
     Customizations for the Add and Change admin pages.
@@ -357,9 +326,6 @@ class PhotoModelForm(forms.ModelForm):
     post_type = forms.CharField(widget=forms.HiddenInput, initial=Post.PostType.PHOTO)
 
     content_md = forms.CharField(widget=PlainTextCountTextarea(max=Photo.content_max), required=True, help_text="Markdown supported.")
-    # """Display the caption input as a Textarea"""
-
-    # alternative_text = forms.CharField(widget=forms.Textarea, required=False)
     # """Display the caption input as a Textarea"""
 
     class Meta:
@@ -374,7 +340,7 @@ class PhotoModelForm(forms.ModelForm):
         ]
 
 # Admin specs for the Photo model
-class PhotoAdmin(SyndicatableAdmin):
+class PhotoAdmin(AdminBase):
     """
     Specifications for the Note Admin page.
 
@@ -383,15 +349,6 @@ class PhotoAdmin(SyndicatableAdmin):
 
     form = PhotoModelForm
     """Override the dynamically created form with customizations."""
-
-    inlines = [PostImageInline]
-
-    readonly_fields = ('syndicated_to_mastodon',)
-    """
-    These fields will be shown but uneditable. 
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
-    """
 
     fieldsets = (
         (None, {
@@ -410,17 +367,7 @@ class PhotoAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
     """
 
-    filter_horizontal = ('tags',)
-    """
-    Use the built-in interface for the tags many-to-many relationship.
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
-    """
-
     list_display = ['admin_image_tag', 'content_md']
-
-    list_filter = ["published",]
-    """Fields for filtering in the admin list view."""
 
 class ArticleModelForm(forms.ModelForm):
     """
@@ -450,11 +397,10 @@ class ArticleModelForm(forms.ModelForm):
             'post_type',
         ]
 
-class ArticleAdmin(SyndicatableAdmin):
+class ArticleAdmin(AdminBase):
     form = ArticleModelForm
 
     prepopulated_fields = { 'slug': ('title_md',)}
-    readonly_fields = ('syndicated_to_mastodon',)
     
     fieldsets = (
         (None, {
@@ -470,11 +416,6 @@ class ArticleAdmin(SyndicatableAdmin):
             'fields': ('published',)
         })
     )
-
-    filter_horizontal = ('tags',)
-
-    list_filter = ["published",]
-    """Fields for filtering in the admin list view."""
 
 class RepostModelForm(forms.ModelForm):
     """
@@ -510,13 +451,6 @@ class RepostAdmin(SyndicatableAdmin):
     form = RepostModelForm
     """Override the dynamically created form with customizations."""
 
-    readonly_fields = ('syndicated_to_mastodon',)
-    """
-    These fields will be shown but uneditable. 
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.readonly_fields
-    """
-
     fieldsets = (
         (None, {
             'fields': ('post_type', 'url', 'source_name', 'content_md', 'source_author_name', 'source_author_url', 'author', 'tags')
@@ -534,18 +468,8 @@ class RepostAdmin(SyndicatableAdmin):
     https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.fieldsets
     """
 
-    filter_horizontal = ('tags',)
-    """
-    Use the built-in interface for the tags many-to-many relationship.
-    
-    https://docs.djangoproject.com/en/4.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.filter_horizontal
-    """
-
     list_display = ['url', 'source_author_name']
     """The fields to display on the admin list view."""
-
-    list_filter = ["published",]
-    """Fields for filtering in the admin list view."""
 
 # Register your models here.
 admin.site.register(Repost, RepostAdmin)
