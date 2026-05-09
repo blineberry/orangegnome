@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'pages.apps.PagesConfig',
     'profiles.apps.ProfilesConfig',
     'webmentions.apps.WebmentionsConfig',
+    'indieauth.apps.IndieauthConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -185,3 +186,6 @@ SITE_URL = env('SITE_URL')
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 FORMS_URLFIELD_ASSUME_HTTPS = True
+
+# IndieAuth
+INDIEAUTH_ISSUER = env('SITE_URL') + "/"

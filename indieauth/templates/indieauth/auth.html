@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<head>
+    <title></title>
+</head>
+<body>
+    <h1>Allow <a href="{{ model.client_url }}">{{ model.client_name }}</a> to act on your behalf?</h1>
+
+    <p>{{ model.client_name }} ({{ model.client_url }}) is requesting these scopes. You can edit the scopes that will be granted:</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        {% for scope in model.scopes %}
+        <div>
+            <label><input type="checkbox" {% if scope in model.requested_scopes %}checked{% endif %} value="{{ scope }}">{{ scope }}</label>
+        </div>
+        {% endfor %}
+        <div><input type="submit" value="Approve"></div>
+    </form>
+</body>
+</html>

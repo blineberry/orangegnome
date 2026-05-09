@@ -19,10 +19,14 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.views.generic.base import TemplateView
 
+from indieauth.views import MetadataView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('syndications/', include('syndications.urls', namespace='syndications')),
     path('webmentions/', include('webmentions.urls', namespace='webmentions')),
     path('', include('feed.urls', namespace='feed')),
     path('robots.txt', TemplateView.as_view(template_name="base/robots.txt", content_type="text/plain")),
+    path('.well-known/oauth-authorization-server', MetadataView.as_view(), name='indieauth-metadata'),
+    path('indieauth/', include('indieauth.urls', namespace='indieauth'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
