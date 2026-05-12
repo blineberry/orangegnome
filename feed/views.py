@@ -44,6 +44,9 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
         context['rss_title'] = LatestEntriesFeed.description
         context['rss_url'] = "%s/feed" % LatestEntriesFeed.link
 
+        if self.request.path == '/':
+            context['include_indieauth_metadata'] = True
+
         return context    
 
     def get_queryset(self):
