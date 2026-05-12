@@ -240,3 +240,15 @@ class RevokeView(View):
         AccessToken.objects.filter(token=requested_token).delete()
 
         return HttpResponse(status_code=200)
+    
+@method_decorator(csrf_exempt, "dispatch")
+class UserInfoView(View):
+    def post(self, request:HttpRequest, *args, **kwargs):
+        requested_token = request.POST.get("token")
+        
+        token = AccessToken.objects.filter(token=requested_token).first()
+
+        if token is None:
+            return HttpResponse("invalid_token", status_code=401)
+        
+        return JsonResponse(token.to_userinfo_response())

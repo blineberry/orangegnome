@@ -7,4 +7,5 @@ urlpatterns = [
     path('token', views.TokenView.as_view(), name='token'),
     path('introspect', views.TokenView.as_view(), name='introspect'),
     path('token/revoke', views.RevokeView.as_view(), name='revoke'),
+    path('userinfo', views.UserInfoView.as_view(), name='userinfo'),
 ]

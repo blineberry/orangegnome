@@ -263,3 +263,20 @@ class AccessToken(models.Model):
             }
         
         return response
+    
+    def to_userinfo_response(self):
+        scopes:list[str] = self.scope.split(" ")
+        profile:Profile = self.user.profile
+
+        response = {
+            "me": canonicalize_url(profile.url)
+        }
+
+        if "profile" in scopes:
+            response["profile"] = {
+                "name": profile.name,
+                "url": canonicalize_url(profile.url),
+                "photo": profile.photo
+            }
+        
+        return response
