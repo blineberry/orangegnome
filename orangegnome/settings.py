@@ -73,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'indieauth.middleware.indieauth_middleware',
 ]
 
 ROOT_URLCONF = 'orangegnome.urls'
@@ -90,6 +91,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'profiles.context_processors.owner',
                 'base.context_processors.site',
+                'indieauth.context_processors.indieauth'
             ],
         },
     },
@@ -188,4 +190,7 @@ DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # IndieAuth
-INDIEAUTH_ISSUER = env('SITE_URL') + "/"
+INDIEAUTH_ISSUER = env('INDIEAUTH_ISSUER')
+INDIEAUTH_METADATA = env('INDIEAUTH_METADATA')
+INDIEAUTH_AUTH = env('INDIEAUTH_AUTH')
+INDIEAUTH_TOKEN = env('INDIEAUTH_TOKEN')
