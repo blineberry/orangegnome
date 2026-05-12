@@ -26,6 +26,7 @@ class ServerMetadata():
         self.authorization_endpoint =  settings.SITE_URL + reverse('indieauth:auth')
         self.token_endpoint =  settings.SITE_URL + reverse('indieauth:token')
         self.introspection_endpoint =  settings.SITE_URL + reverse('indieauth:introspect')
+        self.revocation_endpoint =  settings.SITE_URL + reverse('indieauth:revoke')
 
     def to_json(self):
         return {

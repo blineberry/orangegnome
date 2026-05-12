@@ -211,3 +211,15 @@ class TokenView(View):
 
 class IntrospectView(View):
     pass
+
+@method_decorator(csrf_exempt, "dispatch")
+class RevokeView(View):
+    def post(self, request:HttpRequest, *args, **kwargs):
+        requested_token = request.POST.get("token")
+
+        if requested_token is None:
+            return HttpResponseBadRequest("No token")
+        
+        AccessToken.objects.filter(token=requested_token).delete()
+
+        return HttpResponse(status_code=200)
