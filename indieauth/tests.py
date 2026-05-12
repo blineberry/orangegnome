@@ -121,40 +121,40 @@ class AuthViewTestCase(TestCase):
     def setUp(self):
         self.view = AuthView()
         self.request = HttpRequest()
+        self.request.session = dict()
         self.request.GET = {
             "client_id": "https://example.com/",
             "redirect_uri": "https://example.com/callback"
         }
 
-    @patch('indieauth.views.get_client_metadata')
-    def test_get(self, get_client_metadata):        
-        get_client_metadata.return_value = None       
+    @patch('indieauth.views.ClientMetadata.fetch')
+    def test_get(self, fetch):        
+        fetch.return_value = None       
         response = self.view.get(self.request)
         self.assertEqual(response.status_code, 200)
 
         client = ClientMetadata()
-        get_client_metadata.return_value = client
+        fetch.return_value = client
         response = self.view.get(self.request)
         self.assertEqual(response.status_code, 200)
 
         client.redirect_uris = ["https://sub.example.com/callback"]
-        get_client_metadata.return_value = client
+        fetch.return_value = client
         response = self.view.get(self.request)
         self.assertEqual(response.status_code, 200)
 
         self.request.GET["redirect_uri"] = "https://sub.example.com/callback"
-        get_client_metadata.return_value = None       
+        fetch.return_value = None       
         response = self.view.get(self.request)
         self.assertEqual(response.status_code, 400)
 
         client = ClientMetadata()
-        get_client_metadata.return_value = client
+        fetch.return_value = client
         response = self.view.get(self.request)
         self.assertEqual(response.status_code, 400)
 
         client.redirect_uris = ["https://sub.example.com/callback"]
-        get_client_metadata.return_value = client
-
+        fetch.return_value = client
         response = self.view.get(self.request)
         self.assertEqual(response.status_code, 200)
 
