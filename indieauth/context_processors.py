@@ -1,5 +1,3 @@
-
-
 from orangegnome import settings
 
 

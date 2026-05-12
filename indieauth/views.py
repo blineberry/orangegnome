@@ -1,5 +1,4 @@
 import ipaddress
-import json
 import re
 from urllib.parse import urlsplit
 
@@ -8,14 +7,10 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
 from django.utils.decorators import method_decorator
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 
-from indieauth.services import canonicalize_url
 from orangegnome import settings
-from profiles.models import Profile
 from indieauth.models import AccessToken, AuthCode, ServerMetadata, ClientMetadata
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
 

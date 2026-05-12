@@ -1,17 +1,16 @@
-import base64
 from datetime import timedelta
 import hashlib
-from json import JSONEncoder
 import random
 import socket
 import string
+import ipaddress
+import re
+from urllib.parse import urlsplit
 
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-import ipaddress
-import re
-from urllib.parse import urlsplit
+
 from indieauth.services import canonicalize_url
 from orangegnome import settings
 from profiles.models import Profile

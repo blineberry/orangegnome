@@ -1,8 +1,4 @@
-import socket
 from urllib.parse import urlsplit
-from typing import TYPE_CHECKING
-
-import requests
 
 # if TYPE_CHECKING:
 #     from indieauth.models import ClientMetadata

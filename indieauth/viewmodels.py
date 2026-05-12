@@ -1,16 +1,6 @@
-import random
-import string
 from urllib.parse import urlsplit
-
-from typing import TYPE_CHECKING
-
-from django.http import HttpRequest, QueryDict
-
+from django.http import QueryDict
 from indieauth.models import AuthCode, ClientMetadata
-
-# if TYPE_CHECKING:
-#     import indieauth.models as models
-
 
 class AuthRequestVM():
     ACCEPT:str = "ACCEPT"

@@ -24,6 +24,7 @@ def indieauth_middleware(get_response):
 
             links.append(f'<{ metadata }>; rel=indieauth-metadata')
             links.append(f'<{ auth }>; rel=indieauth_auth')
+            links.append(f'<{ token }>; rel=indieauth_token')
 
             response["Link"] = (",").join(links)
 
