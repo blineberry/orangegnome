@@ -11,8 +11,10 @@ from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import CsrfViewMiddleware
 
 from indieauth.services import canonicalize_url
+from orangegnome import settings
 from profiles.models import Profile
 from indieauth.models import AccessToken, AuthCode, ServerMetadata, ClientMetadata
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
@@ -24,7 +26,6 @@ class MetadataView(View):
     def get(self, request, *args, **kwargs):
         return JsonResponse(ServerMetadata(reverse).to_json())
 
-@method_decorator(staff_member_required, name='dispatch')    
 class AuthView(View):
     SESSION_REQUEST_KEY = "INDIEAUTH_AUTH_REQUEST"
 
@@ -124,6 +125,9 @@ class AuthView(View):
 
 
     def get(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
+        if not request.user.is_authenticated:
+            return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+        
         success, client, error_msg = AuthView.validate_request(request.GET)
 
         if not success:
@@ -138,8 +142,21 @@ class AuthView(View):
             return self.profile_url_response(request, *args, **kwargs)
         
         return self.auth_code_response(request, *args, **kwargs)
-        
+
+    @staticmethod
+    def get_response(request):
+        pass
+
     def auth_code_response(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+        
+        request.csrf_processing_done = False
+        reason = CsrfViewMiddleware(AuthView.get_response).process_view(request, None, (), {})
+
+        if reason:
+            return HttpResponse("Invalid CSRF token", status_code=403)
+
         success, client, error_msg = AuthView.validate_request(request.POST)
 
         if not success:
