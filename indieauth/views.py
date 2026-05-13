@@ -136,7 +136,7 @@ class AuthView(View):
         return render(request, self.template_name, { "model" : vm })
     
     def post(self, request:HttpRequest, *args, **kwargs):
-        if "authorization_code" in request.POST.keys():
+        if request.POST.get("grant_type", "") == "authorization_code":
             return self.profile_url_response(request, *args, **kwargs)
         
         return self.auth_code_response(request, *args, **kwargs)
@@ -171,8 +171,8 @@ class AuthView(View):
             return redirect(vm.get_redirect_uri())
         
     def profile_url_response(self, request, *args, **kwargs):
-        auth = AuthCode.objects.filter(code = request.POST.get("authorization_code")).first()
-        AuthCode.objects.filter(code = request.POST.get("authorization_code")).delete()
+        auth = AuthCode.objects.filter(code = request.POST.get("code")).first()
+        AuthCode.objects.filter(code = request.POST.get("code")).delete()
 
         success, err_msg = TokenView.validate_request(request.POST, auth)
         

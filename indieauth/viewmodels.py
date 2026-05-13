@@ -84,5 +84,8 @@ class AuthSubmissionVM():
         code.client_id = self.values.get("client_id")
         code.redirect_uri = self.values.get("redirect_uri")
         code.user_id = user_id
+        code.code_challenge_method = self.values.get("code_challenge_method")
+        code.code_challenge = self.values.get("code_challenge")
+        code.scope = self.values.get("scope", "")
         
         return code

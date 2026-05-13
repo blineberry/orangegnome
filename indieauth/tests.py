@@ -1,4 +1,5 @@
 from unittest.mock import Mock, patch
+from urllib.parse import parse_qs, urlsplit
 
 from bs4 import BeautifulSoup
 from django.http import HttpRequest, HttpResponse
@@ -11,6 +12,7 @@ from indieauth.models import AuthRequest, ClientMetadata, ServerMetadata
 from indieauth.viewmodels import AuthRequestVM
 from indieauth.views import AuthView
 from .services import canonicalize_url
+from profiles.models import Profile
 
 # Create your tests here.
 class ServicesTestCase(TestCase):
@@ -460,3 +462,91 @@ class AuthorizationRequestTestCase(TestCase):
             request.return_value = Mock(Response, **s[1])
             response = self.client.post(self.authorization_endpoint, data=self.post_data)
             self.assertEqual(s[2], response.status_code, f'{s}: {response.content}')
+
+class RedeemTheAuthorizationCodeTestCase(TestCase):
+    client = None
+    authorization_endpoint = None
+    auth_data = None
+    post_data = None
+    code_verifier = None
+
+    def setUp(self):
+        self.client = Client()
+        user = User.objects.create_user(username='testuser', password='testpassword')
+        self.client.force_login(user)
+        Profile.objects.create(user=user, url="https://me.example.com").save()
+        self.code_verifier = "aAAi96b43AGcInR_pxWrb8pFKN1z3w2d2YzKOrvEWAWXIRtK1y9QVPCve4LcDYjy0W15KjXUEQ6naKqQIY1-_7Ub2lovyV8EPQq3WAA6DzMq1k6c1qyYo8uZGhKsUULd"        
+        self.authorization_endpoint = reverse("indieauth:auth")
+        self.auth_data = {
+            "response_type": "code",
+            "client_id": "https://example.com/",
+            "redirect_uri": "https://example.com/callback",
+            "state": "statevalue",
+            "code_challenge": "GVdkWuZV3ovoFRqGELA85Ojv4jHe7tu2HC03RW4k-vw",
+            "code_challenge_method": "S256",
+            "me": "https://me.example.com/",
+            AuthRequestVM.ACCEPT: "Accept"
+        }
+        code = self.get_authorization_code()
+        self.post_data = self.get_post_data(code)
+
+        return super().setUp()
+    
+    def get_authorization_code(self)->str:
+        response = self.client.post(self.authorization_endpoint, data=self.auth_data)
+        url_parts = urlsplit(response.url)
+        qs = parse_qs(url_parts.query)
+        return qs.get("code")
+    
+    def get_post_data(self, code:str):
+        return {
+            "grant_type": "authorization_code",
+            "code": code,
+            "client_id": self.auth_data.get("client_id"),
+            "redirect_uri":self.auth_data.get("redirect_uri"),
+            "code_verifier": self.code_verifier
+        }
+    
+    def test_returns_profile_url(self):
+        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        content = response.json()
+        self.assertIsNotNone(content.get("me"))
+        self.assertIsNone(content.get("profile"))
+
+    def test_requires_valid_code(self):
+        self.post_data["code"] = "invalidcode"
+        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+    
+    def test_code_cannot_be_reused(self):
+        self.client.post(self.authorization_endpoint, data=self.post_data)
+        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+    
+    def test_client_id_match(self):
+        self.post_data["client_id"] += "_invalid"
+        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+    
+    def test_redirect_uri_match(self):
+        self.post_data["redirect_uri"] += "_invalid"
+        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+    
+    def test_profile_scope(self):
+        self.auth_data["scope"] = "profile"
+        code = self.get_authorization_code()
+        post_data = self.get_post_data(code)
+
+        response = self.client.post(self.authorization_endpoint, data=post_data)
+        
+        self.assertEqual(200, response.status_code)
+
+        content = response.json()
+        self.assertIsNotNone(content.get("profile"))
+
+    

@@ -1,3 +1,4 @@
+import base64
 from datetime import timedelta
 import hashlib
 import random
@@ -307,7 +308,10 @@ class AuthCode(models.Model):
             return False
         
         if self.code_challenge_method == "S256":
-            return self.code_challenge == hashlib.sha256(code_verifier.encode('utf-8')).digest().hex()
+            result = hashlib.sha256(code_verifier.encode('utf-8')).digest()
+            result = base64.urlsafe_b64encode(result).decode('utf-8')
+            result = result.replace('=', '')
+            return self.code_challenge == result
         
         return False
     
@@ -319,12 +323,19 @@ class AuthCode(models.Model):
             "me": profile.url
         }
 
-        if "profile" in scopes:
-            response["profile"] = {
-                "name": profile.name,
-                "url": canonicalize_url(profile.url),
-                "photo": profile.photo
-            }
+        if "profile" not in scopes:
+            return response
+        
+        response["profile"] = {}
+
+        if profile.name is not None:
+            response["profile"]["name"] = profile.name
+
+        if profile.url is not None:
+            response["profile"]["url"] = canonicalize_url(profile.url)
+        
+        if profile.photo is not None and profile.photo.name.strip() != '':
+                response["profile"]["photo"]= profile.photo.url
         
         return response        
     
