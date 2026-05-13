@@ -223,6 +223,7 @@ class TokenView(View):
         token.save()
 
         return JsonResponse(token.to_token_response())
+    
 
 class IntrospectView(View):
     pass

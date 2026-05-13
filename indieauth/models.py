@@ -15,11 +15,52 @@ from django.contrib.auth.models import User
 import mf2py
 from requests import Response, request
 
-from indieauth.services import canonicalize_url
 from orangegnome import settings
 from profiles.models import Profile
 
 # Create your models here.
+class IndieAuthBase():
+    @staticmethod
+    def generate_random_string(min:int, max:int):
+        length = random.choice(range(min,max,1))
+        return ''.join(random.choices(string.ascii_lowercase, k=length))
+    
+    @staticmethod 
+    def profile_to_dict(profile:Profile)->dict:
+        p = {}
+
+        if profile.name is not None:
+            p["name"] = profile.name
+
+        if profile.url is not None:
+            p["url"] = IndieAuthBase.canonicalize_url(profile.url)
+        
+        if profile.photo is not None and profile.photo.name.strip() != '':
+            p["photo"]= profile.photo.url
+
+        return p
+
+    @staticmethod
+    def canonicalize_url(url:str)->str:
+        split = urlsplit(url)
+
+        path = split.path
+        netloc = split.netloc.lower()
+
+        if path == '':
+            path = '/'
+
+        url = f'{split.scheme}://{netloc}{path}'
+
+        if split.query != '':
+            url += f'?{split.query}'
+
+        if split.fragment != '':
+            url += f'#{split.fragment}'
+
+        return url
+
+
 class ServerMetadata():
     issuer = settings.INDIEAUTH_ISSUER    
     scopes_supported =  ['profile']
@@ -294,8 +335,7 @@ class AuthCode(models.Model):
 
     @staticmethod
     def generate_code():
-        length = random.choice(range(AuthCode.CODE_MIN,AuthCode.CODE_MAX,1))
-        return ''.join(random.choices(string.ascii_lowercase, k=length))
+        return IndieAuthBase.generate_random_string(AuthCode.CODE_MIN,AuthCode.CODE_MAX)
 
     def is_expired(self):
         now = timezone.now()
@@ -326,20 +366,10 @@ class AuthCode(models.Model):
         if "profile" not in scopes:
             return response
         
-        response["profile"] = {}
-
-        if profile.name is not None:
-            response["profile"]["name"] = profile.name
-
-        if profile.url is not None:
-            response["profile"]["url"] = canonicalize_url(profile.url)
-        
-        if profile.photo is not None and profile.photo.name.strip() != '':
-                response["profile"]["photo"]= profile.photo.url
-        
+        response["profile"] = IndieAuthBase.profile_to_dict(profile)        
         return response        
     
-class AccessToken(models.Model):
+class AccessToken(models.Model, IndieAuthBase):
     TOKEN_MIN = 64
     TOKEN_MAX = 128
 
@@ -351,9 +381,8 @@ class AccessToken(models.Model):
     expires_utc = models.DateTimeField(null=True,blank=True)
 
     @staticmethod
-    def generate_code():
-        length = random.choice(range(AccessToken.TOKEN_MIN,AccessToken.TOKEN_MAX,1))
-        return ''.join(random.choices(string.ascii_lowercase, k=length))
+    def generate_token():
+        return IndieAuthBase.generate_random_string(AccessToken.TOKEN_MIN, AccessToken.TOKEN_MAX)
     
     @staticmethod
     def get_default_expires():
@@ -373,31 +402,25 @@ class AccessToken(models.Model):
             "access_token": self.token,
             "token_type": "Bearer",
             "scope": self.scope,
-            "me": canonicalize_url(profile.url)
+            "me": IndieAuthBase.canonicalize_url(profile.url)
         }
 
-        if "profile" in scopes:
-            response["profile"] = {
-                "name": profile.name,
-                "url": canonicalize_url(profile.url),
-                "photo": profile.photo
-            }
+        if "profile" not in scopes:
+            return response
         
-        return response
+        response["profile"] = IndieAuthBase.profile_to_dict(profile)        
+        return response   
     
     def to_userinfo_response(self):
         scopes:list[str] = self.scope.split(" ")
         profile:Profile = self.user.profile
 
         response = {
-            "me": canonicalize_url(profile.url)
+            "me": IndieAuthBase.canonicalize_url(profile.url)
         }
 
-        if "profile" in scopes:
-            response["profile"] = {
-                "name": profile.name,
-                "url": canonicalize_url(profile.url),
-                "photo": profile.photo
-            }
+        if "profile" not in scopes:
+            return response
         
-        return response
+        response["profile"] = IndieAuthBase.profile_to_dict(profile)        
+        return response   

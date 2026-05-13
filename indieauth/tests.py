@@ -465,7 +465,8 @@ class AuthorizationRequestTestCase(TestCase):
 
 class RedeemTheAuthorizationCodeTestCase(TestCase):
     client = None
-    authorization_endpoint = None
+    auth_endpoint = None
+    token_endpoint = None
     auth_data = None
     post_data = None
     code_verifier = None
@@ -476,7 +477,8 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
         self.client.force_login(user)
         Profile.objects.create(user=user, url="https://me.example.com").save()
         self.code_verifier = "aAAi96b43AGcInR_pxWrb8pFKN1z3w2d2YzKOrvEWAWXIRtK1y9QVPCve4LcDYjy0W15KjXUEQ6naKqQIY1-_7Ub2lovyV8EPQq3WAA6DzMq1k6c1qyYo8uZGhKsUULd"        
-        self.authorization_endpoint = reverse("indieauth:auth")
+        self.auth_endpoint = reverse("indieauth:auth")
+        self.token_endpoint = reverse("indieauth:token")
         self.auth_data = {
             "response_type": "code",
             "client_id": "https://example.com/",
@@ -485,6 +487,7 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
             "code_challenge": "GVdkWuZV3ovoFRqGELA85Ojv4jHe7tu2HC03RW4k-vw",
             "code_challenge_method": "S256",
             "me": "https://me.example.com/",
+            "scope": "profile",
             AuthRequestVM.ACCEPT: "Accept"
         }
         code = self.get_authorization_code()
@@ -493,7 +496,7 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
         return super().setUp()
     
     def get_authorization_code(self)->str:
-        response = self.client.post(self.authorization_endpoint, data=self.auth_data)
+        response = self.client.post(self.auth_endpoint, data=self.auth_data)
         url_parts = urlsplit(response.url)
         qs = parse_qs(url_parts.query)
         return qs.get("code")
@@ -507,46 +510,97 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
             "code_verifier": self.code_verifier
         }
     
-    def test_returns_profile_url(self):
-        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+    def test_auth_returns_profile_url(self):
+        response = self.client.post(self.auth_endpoint, data=self.post_data)
+        
+        content = response.json()
+        self.assertIsNotNone(content.get("me"))
+        self.assertIsNotNone(content.get("profile"))
+
+    def test_auth_scope_optional(self):
+        del self.auth_data["scope"]
+        code = self.get_authorization_code()
+        post_data = self.get_post_data(code)
+
+        response = self.client.post(self.auth_endpoint, data=post_data)
+
         content = response.json()
         self.assertIsNotNone(content.get("me"))
         self.assertIsNone(content.get("profile"))
 
-    def test_requires_valid_code(self):
+    def test_auth_requires_valid_code(self):
         self.post_data["code"] = "invalidcode"
-        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        response = self.client.post(self.auth_endpoint, data=self.post_data)
         
         self.assertEqual(400, response.status_code)
     
-    def test_code_cannot_be_reused(self):
-        self.client.post(self.authorization_endpoint, data=self.post_data)
-        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+    def test_auth_code_cannot_be_reused(self):
+        self.client.post(self.auth_endpoint, data=self.post_data)
+        response = self.client.post(self.auth_endpoint, data=self.post_data)
         
         self.assertEqual(400, response.status_code)
     
-    def test_client_id_match(self):
+    def test_auth_client_id_match(self):
         self.post_data["client_id"] += "_invalid"
-        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        response = self.client.post(self.auth_endpoint, data=self.post_data)
         
         self.assertEqual(400, response.status_code)
     
-    def test_redirect_uri_match(self):
+    def test_auth_redirect_uri_match(self):
         self.post_data["redirect_uri"] += "_invalid"
-        response = self.client.post(self.authorization_endpoint, data=self.post_data)
+        response = self.client.post(self.auth_endpoint, data=self.post_data)
         
         self.assertEqual(400, response.status_code)
-    
-    def test_profile_scope(self):
-        self.auth_data["scope"] = "profile"
+
+    def test_auth_code_challenge(self):
+        self.post_data["code_verifier"] += "_invalid"
+        response = self.client.post(self.auth_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+
+    def test_token_returns_response(self):
+        response = self.client.post(self.token_endpoint, data=self.post_data)
+
+        content = response.json()
+        self.assertIsNotNone(content.get("access_token"))
+        self.assertIsNotNone(content.get("me"))
+        self.assertIsNotNone(content.get("profile"))
+
+    def test_token_requires_scope(self):
+        del self.auth_data["scope"]
         code = self.get_authorization_code()
         post_data = self.get_post_data(code)
 
-        response = self.client.post(self.authorization_endpoint, data=post_data)
+        response = self.client.post(self.token_endpoint, data=post_data)
+
+        self.assertEqual(400, response.status_code)
+
+    def test_token_requires_valid_code(self):
+        self.post_data["code"] = "invalidcode"
+        response = self.client.post(self.token_endpoint, data=self.post_data)
         
-        self.assertEqual(200, response.status_code)
-
-        content = response.json()
-        self.assertIsNotNone(content.get("profile"))
-
+        self.assertEqual(400, response.status_code)
     
+    def test_token_code_cannot_be_reused(self):
+        self.client.post(self.token_endpoint, data=self.post_data)
+        response = self.client.post(self.token_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+    
+    def test_token_client_id_match(self):
+        self.post_data["client_id"] += "_invalid"
+        response = self.client.post(self.token_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+    
+    def test_token_redirect_uri_match(self):
+        self.post_data["redirect_uri"] += "_invalid"
+        response = self.client.post(self.token_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+
+    def test_token_code_challenge(self):
+        self.post_data["code_verifier"] += "_invalid"
+        response = self.client.post(self.token_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
