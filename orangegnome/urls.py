@@ -28,5 +28,5 @@ urlpatterns = [
     path('', include('feed.urls', namespace='feed')),
     path('robots.txt', TemplateView.as_view(template_name="base/robots.txt", content_type="text/plain")),
     path('.well-known/oauth-authorization-server', MetadataView.as_view(), name='indieauth-metadata'),
-    path('indieauth/', include('indieauth.urls', namespace='indieauth'))
+    path('indieauth/', include('indieauth.urls', namespace='indieauth')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

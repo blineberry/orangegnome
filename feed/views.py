@@ -34,6 +34,7 @@ class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
         return context
 
 class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
+    allow_empty = True
     canonical_viewname = 'feed:index'
     extra_context = {
         'page_title': 'Brent Lineberry',

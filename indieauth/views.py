@@ -9,8 +9,8 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
+from django.conf import settings
 
-from orangegnome import settings
 from indieauth.models import AccessToken, AuthCode, ServerMetadata, ClientMetadata
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
 
@@ -101,13 +101,16 @@ class AuthView(View):
 
     @staticmethod
     def validate_request(values:QueryDict)->tuple[bool,ClientMetadata,str]:
+        if values.get("code_challenge") is None:
+            return (False, None, "code_challenge required")
+
         client_id = values.get("client_id")
 
         if not AuthView.is_client_id_valid(client_id):
             return (False, None, "invalid client_id")
         
         client:ClientMetadata = ClientMetadata.fetch(client_id)
-
+        
         client_redirect_uris = []
         if client is not None and client.redirect_uris is not None:
             client_redirect_uris = client.redirect_uris
@@ -121,7 +124,7 @@ class AuthView(View):
 
     def get(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
         if not request.user.is_authenticated:
-            return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+            return redirect(reverse("admin:login", query={"next":request.path}))
         
         success, client, error_msg = AuthView.validate_request(request.GET)
 
@@ -144,7 +147,7 @@ class AuthView(View):
 
     def auth_code_response(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+            return redirect(reverse("admin:login", query={"next":request.path}))
         
         request.csrf_processing_done = False
         reason = CsrfViewMiddleware(AuthView.get_response).process_view(request, None, (), {})

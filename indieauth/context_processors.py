@@ -10,3 +10,5 @@ def indieauth(request):
                 'token': settings.INDIEAUTH_TOKEN, 
             }
         }
+    
+    return {}

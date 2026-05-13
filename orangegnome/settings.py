@@ -170,7 +170,10 @@ STORAGES = {
         'BACKEND': 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
     }
 }
-#STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+if DEBUG:
+    STORAGES["staticfiles"]["BACKEND"] = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    
 
 # Mastodon Settings
 MASTODON_INSTANCE = env('MASTODON_INSTANCE')
