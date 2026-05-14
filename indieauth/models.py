@@ -499,7 +499,7 @@ class AccessToken(TokenBase):
             "me": profile.url,
             "client_id": self.client_id,
             "scope": self.scope,
-            "iss": self.get_issued_unix_time()
+            "iat": self.get_issued_unix_time()
         }
 
         if self.expires_utc is not None:

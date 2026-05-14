@@ -722,6 +722,8 @@ class IntrospectionTestCase(TestCase):
         self.assertIsNotNone(content.get("me"))
         self.assertIsNotNone(content.get("client_id"))
         self.assertIsNotNone(content.get("scope"))
+        self.assertIsNotNone(content.get("iat"))
+        self.assertIsNotNone(content.get("exp"))
 
     def test_no_bearer_returns_401(self):
         response = self.client.post(self.introspection_endpoint, self.data)
@@ -752,3 +754,13 @@ class IntrospectionTestCase(TestCase):
         
         content = response.json()
         self.assertFalse(content.get("active"))
+
+    def test_noexpiration_noexp(self):
+        token = AccessToken.objects.get(token=self.access_token.token)
+        token.expires_utc = None
+        token.save()
+        
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.access_token.token}'})
+        
+        content = response.json()
+        self.assertIsNone(content.get("exp"))
