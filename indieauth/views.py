@@ -246,7 +246,42 @@ class TokenView(View):
         return JsonResponse(access.to_token_response(refresh_token=refresh.token))
 
 class IntrospectView(View):
-    pass
+    def get_bearer_token(self, request:HttpRequest)->str:
+        headers = request.headers
+        auth_header = headers.get("Authorization")
+
+        if auth_header is None:
+            return None
+        
+        parts = auth_header.split(" ")
+        token = None
+
+        for p in parts:
+            if p.strip() == "":
+                continue
+            if p.lower() == "bearer":
+                continue
+
+            token = p
+            break
+
+        return token
+
+    def post(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
+        bearer_token = self.get_bearer_token(request)
+
+        if bearer_token is None:
+            return HttpResponse(status=401)
+        
+        if bearer_token != request.POST.get("token"):
+            return JsonResponse({ "active": False })
+        
+        token = AccessToken.objects.filter(token=bearer_token).first()
+
+        if token is None or token.is_expired():
+            return JsonResponse({ "active": False })
+        
+        return JsonResponse(token.to_verification_response())
 
 @method_decorator(csrf_exempt, "dispatch")
 class RevokeView(View):
@@ -268,6 +303,7 @@ class UserInfoView(View):
         token = AccessToken.objects.filter(token=requested_token).first()
 
         if token is None:
-            return HttpResponse("invalid_token", status_code=401)
+            return HttpResponse("invalid_token", status=401)
         
         return JsonResponse(token.to_userinfo_response())
+        

@@ -415,6 +415,12 @@ class TokenBase(models.Model, IndieAuthBase):
         
         return (self.expires_utc - self.issued_utc).seconds
     
+    def is_expired(self):
+        if self.expires_utc is None:
+            return False
+        
+        return timezone.now() >= self.expires_utc
+    
     def get_token_min(self):
         return self.TOKEN_MIN
     
@@ -470,6 +476,36 @@ class AccessToken(TokenBase):
         
         response["profile"] = IndieAuthBase.profile_to_dict(profile)        
         return response
+    
+    def get_issued_unix_time(self):
+        return int(self.issued_utc.timestamp())
+    
+    def get_expires_unix_time(self):
+        if self.expires_utc is None:
+            return
+        
+        return int(self.expires_utc.timestamp())
+    
+    def to_verification_response(self)->dict:
+        profile:Profile = self.user.profile
+
+        if self.is_expired():
+            return {
+                "active": False
+            }
+
+        response = {
+            "active": not self.is_expired(),
+            "me": profile.url,
+            "client_id": self.client_id,
+            "scope": self.scope,
+            "iss": self.get_issued_unix_time()
+        }
+
+        if self.expires_utc is not None:
+            response["exp"] = self.get_expires_unix_time()
+
+        return response 
     
 class RefreshToken(TokenBase):
     TOKEN_MIN = 128

@@ -1,3 +1,5 @@
+from datetime import timedelta
+from typing import Any, Mapping
 from unittest.mock import Mock, patch
 from urllib.parse import parse_qs, urlsplit
 
@@ -6,9 +8,10 @@ from django.http import HttpRequest, HttpResponse
 from django.test import Client, TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 from requests import Response
 
-from indieauth.models import AuthRequest, ClientMetadata, ServerMetadata
+from indieauth.models import AccessToken, AuthRequest, ClientMetadata, ServerMetadata
 from indieauth.viewmodels import AuthRequestVM
 from indieauth.views import AuthView
 from .services import canonicalize_url
@@ -664,7 +667,7 @@ class RefreshTokenTestCase(TestCase):
         response = self.client.post(self.token_endpoint, self.data)
 
         content = response.json()
-        self.assertIsNotNone(response, content.get("access_token"))
+        self.assertIsNotNone(content.get("access_token"))
 
     def test_cant_reuse_token(self):
         self.client.post(self.token_endpoint, self.data)
@@ -690,3 +693,62 @@ class RefreshTokenTestCase(TestCase):
 
         content = response.json()
         self.assertEqual(og_scope, content.get("scope"))
+
+class IntrospectionTestCase(TestCase):
+    client = None
+    introspection_endpoint = None
+    access_token = None
+    data = None
+
+    def setUp(self):
+        self.client = Client()
+        self.introspection_endpoint = reverse("indieauth:introspect")
+        user = User.objects.create_user(username='testuser', password='testpassword')        
+        Profile.objects.create(user=user, url="https://me.example.com").save()
+        self.access_token = AccessToken.objects.create(token="testtoken", scope="profile update", client_id="https://example.com/", user=user, issued_utc=timezone.now(), expires_utc=timezone.now() + timedelta(minutes=5))
+        self.data = {
+            "token": self.access_token.token
+        }
+        
+        return super().setUp()
+    
+    def test_returns_info(self):
+        headers:Mapping[str,Any] = {"Authorization": f'Bearer {self.access_token.token}'}
+
+        response = self.client.post(self.introspection_endpoint, self.data, headers=headers)
+        
+        content = response.json()
+        self.assertIsNotNone(content.get("active"))
+        self.assertIsNotNone(content.get("me"))
+        self.assertIsNotNone(content.get("client_id"))
+        self.assertIsNotNone(content.get("scope"))
+
+    def test_no_bearer_returns_401(self):
+        response = self.client.post(self.introspection_endpoint, self.data)
+        
+        self.assertEqual(401, response.status_code)
+
+    def test_bearers_mismatch_false(self):
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.access_token.token}invalid'})
+        
+        content = response.json()
+        self.assertFalse(content.get("active"))
+
+    def test_notfoundtoken_false(self):
+        invalid_token = self.access_token.token + "invalid"
+        self.data["token"] = invalid_token
+        
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {invalid_token}'})
+        
+        content = response.json()
+        self.assertFalse(content.get("active"))
+
+    def test_expiredtoken_false(self):
+        token = AccessToken.objects.get(token=self.access_token.token)
+        token.expires_utc = timezone.now() - timedelta(seconds=1)
+        token.save()
+        
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.access_token.token}'})
+        
+        content = response.json()
+        self.assertFalse(content.get("active"))
