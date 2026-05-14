@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 from django.conf import settings
 
-from indieauth.models import AccessToken, AuthCode, ServerMetadata, ClientMetadata
+from indieauth.models import AccessToken, AuthCode, RefreshToken, ServerMetadata, ClientMetadata
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
 
 
@@ -120,7 +120,10 @@ class AuthView(View):
         
         return (True, client, "")
 
-
+    # Needed for manual csrf check
+    @staticmethod
+    def get_response(request):
+        pass
 
     def get(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
         if not request.user.is_authenticated:
@@ -140,10 +143,6 @@ class AuthView(View):
             return self.profile_url_response(request, *args, **kwargs)
         
         return self.auth_code_response(request, *args, **kwargs)
-
-    @staticmethod
-    def get_response(request):
-        pass
 
     def auth_code_response(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -191,18 +190,24 @@ class TokenView(View):
         if auth.is_expired():
             return (False, "invalid code")
         
-        if values.get("client_id") != auth.client_id:
+        if values.get("client_id") is None or values.get("client_id") != auth.client_id:
             return (False, "invalid client_id")
         
-        if values.get("redirect_uri") != auth.redirect_uri:
+        if values.get("redirect_uri") is None or values.get("redirect_uri") != auth.redirect_uri:
             return (False, "invalid redirect_uri")
         
-        if not auth.verify_challenge_code(values.get("code_verifier")):
+        if values.get("code_verifier") is None or not auth.verify_challenge_code(values.get("code_verifier")):
             return (False, "invalid code_verifier")
         
         return (True, "")
 
     def post(self, request:HttpRequest, *args, **kwargs):
+        if request.POST.get("grant_type", "") == "refresh_token":
+            return self.refresh_token_response(request, *args, **kwargs)
+        
+        return self.access_token_response(request, *args, **kwargs)
+    
+    def access_token_response(self, request:HttpRequest, *args, **kwargs):
         auth = AuthCode.objects.filter(code = request.POST.get("code")).first()
         AuthCode.objects.filter(code = request.POST.get("code")).delete()
 
@@ -214,16 +219,31 @@ class TokenView(View):
         if auth.scope is None or auth.scope.strip() == "":
             return HttpResponseBadRequest("authorized scopes are required")
         
-        token = AccessToken()
-        token.token = AccessToken.generate_token()
-        token.scope = auth.scope
-        token.user = auth.user
-        token.expires_utc = AccessToken.get_default_expires()
+        access = AccessToken.from_auth_code(auth)
+        refresh = RefreshToken.from_auth_code(auth)
+        access.save()
+        refresh.save()
 
-        token.save()
-
-        return JsonResponse(token.to_token_response())
+        return JsonResponse(access.to_token_response(refresh_token=refresh.token))
     
+    def refresh_token_response(self, request:HttpRequest, *args, **kwargs):
+        if request.POST.get("grant_type") != "refresh_token":
+            return HttpResponseBadRequest("{\"error\": \"invalid grant_type\"}")
+        
+        token = RefreshToken.objects.filter(token=request.POST.get("refresh_token")).first()
+        RefreshToken.objects.filter(token=request.POST.get("refresh_token")).delete()
+
+        if token is None or token.client_id != request.POST.get("client_id"):
+            return HttpResponseBadRequest("{\"error\": \"invalid token\"}")
+        
+        scope = token.update_scope(request.POST.get("scope"))
+
+        access = AccessToken.from_refresh_token(token,scope)
+        refresh = RefreshToken.from_refresh_token(token,scope)
+        access.save()
+        refresh.save()
+
+        return JsonResponse(access.to_token_response(refresh_token=refresh.token))
 
 class IntrospectView(View):
     pass

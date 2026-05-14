@@ -367,11 +367,12 @@ class AuthCode(models.Model):
             return response
         
         response["profile"] = IndieAuthBase.profile_to_dict(profile)        
-        return response        
+        return response
     
-class AccessToken(models.Model, IndieAuthBase):
-    TOKEN_MIN = 64
-    TOKEN_MAX = 128
+class TokenBase(models.Model, IndieAuthBase):
+    TOKEN_MIN = 0
+    TOKEN_MAX = 0
+    DEFAULT_LIFETIME_SEC = 0
 
     token = models.TextField()
     scope = models.CharField(max_length=255)
@@ -380,13 +381,33 @@ class AccessToken(models.Model, IndieAuthBase):
     issued_utc = models.DateTimeField(default=timezone.now)
     expires_utc = models.DateTimeField(null=True,blank=True)
 
-    @staticmethod
-    def generate_token():
-        return IndieAuthBase.generate_random_string(AccessToken.TOKEN_MIN, AccessToken.TOKEN_MAX)
+    @classmethod
+    def from_auth_code(cls, auth_code:AuthCode):
+        token = cls()
+        token.token = token.generate_token()
+        token.scope = auth_code.scope
+        token.user = auth_code.user
+        token.expires_utc = token.calculate_expires_utc()
+        token.client_id = auth_code.client_id
+
+        return token
     
-    @staticmethod
-    def get_default_expires():
-        return timezone.now() + timedelta(minutes=20)
+    @classmethod
+    def from_refresh_token(cls, refresh_token, updated_scope:str=None):
+        token = cls()
+        token.token = token.generate_token()
+        token.scope = refresh_token.scope if updated_scope is not None else updated_scope
+        token.user = refresh_token.user
+        token.expires_utc = token.calculate_expires_utc()
+        token.client_id = refresh_token.client_id
+
+        return token        
+
+    def generate_token(self):
+        return IndieAuthBase.generate_random_string(self.get_token_min(), self.get_token_max())
+    
+    def calculate_expires_utc(self):
+        return timezone.now() + timedelta(seconds=self.get_default_lifetime_seconds())
     
     def expires_in(self):
         if self.expires_utc is None:
@@ -394,7 +415,24 @@ class AccessToken(models.Model, IndieAuthBase):
         
         return (self.expires_utc - self.issued_utc).seconds
     
-    def to_token_response(self):
+    def get_token_min(self):
+        return self.TOKEN_MIN
+    
+    def get_token_max(self):
+        return self.TOKEN_MAX
+    
+    def get_default_lifetime_seconds(self):
+        return self.DEFAULT_LIFETIME_SEC
+
+    class Meta:
+        abstract = True
+    
+class AccessToken(TokenBase):
+    TOKEN_MIN = 64
+    TOKEN_MAX = 128
+    DEFAULT_LIFETIME_SEC = 24 * 60 * 60 # 24 hours
+    
+    def to_token_response(self, refresh_token:str=None)->dict:
         scopes:list[str] = self.scope.split(" ")
         profile:Profile = self.user.profile
 
@@ -405,11 +443,19 @@ class AccessToken(models.Model, IndieAuthBase):
             "me": IndieAuthBase.canonicalize_url(profile.url)
         }
 
+        if refresh_token is not None:
+            response["refresh_token"] = refresh_token
+
+        if self.expires_in():
+            response["expires_in"] = self.expires_in()
+
         if "profile" not in scopes:
             return response
         
-        response["profile"] = IndieAuthBase.profile_to_dict(profile)        
-        return response   
+        response["profile"] = IndieAuthBase.profile_to_dict(profile)  
+
+        return response
+
     
     def to_userinfo_response(self):
         scopes:list[str] = self.scope.split(" ")
@@ -423,4 +469,27 @@ class AccessToken(models.Model, IndieAuthBase):
             return response
         
         response["profile"] = IndieAuthBase.profile_to_dict(profile)        
-        return response   
+        return response
+    
+class RefreshToken(TokenBase):
+    TOKEN_MIN = 128
+    TOKEN_MAX = 256
+    DEFAULT_LIFETIME_SEC = 30 * 24 * 60 * 60 # 30 days
+    
+    def update_scope(self, requested_scope:str)->str:
+        # The client may request a token with the same or fewer scopes than the 
+        # original access token. If omitted, is treated as equal to the original 
+        # scopes granted.
+
+        if requested_scope is None:
+            return self.scope
+        
+        new_scopes = []
+        old_scopes = self.scope.split(" ")
+        requested_scopes = requested_scope.split(" ")
+
+        for scope in requested_scopes:
+            if scope in old_scopes:
+                new_scopes.append(scope)
+
+        return (" ").join(new_scopes)

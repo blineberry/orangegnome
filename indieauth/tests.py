@@ -604,3 +604,89 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
         response = self.client.post(self.token_endpoint, data=self.post_data)
         
         self.assertEqual(400, response.status_code)
+
+class RefreshTokenTestCase(TestCase):
+    client = None
+    token_endpoint = None
+    refresh_token = None
+    data = None
+
+    def setUp(self):
+        self.client = Client()
+        user = User.objects.create_user(username='testuser', password='testpassword')
+        self.client.force_login(user)
+        Profile.objects.create(user=user, url="https://me.example.com").save()
+        code_verifier = "aAAi96b43AGcInR_pxWrb8pFKN1z3w2d2YzKOrvEWAWXIRtK1y9QVPCve4LcDYjy0W15KjXUEQ6naKqQIY1-_7Ub2lovyV8EPQq3WAA6DzMq1k6c1qyYo8uZGhKsUULd"
+        self.token_endpoint = reverse("indieauth:token")
+        client_id = "https://example.com/"
+        redirect_uri = "https://example.com/callback"
+        code_challenge = "GVdkWuZV3ovoFRqGELA85Ojv4jHe7tu2HC03RW4k-vw"
+        scope = "profile read"
+        code = self.get_auth_code(client_id, redirect_uri, code_challenge, scope)
+        self.refresh_token = self.get_refresh_token(code, client_id, redirect_uri, code_verifier)
+        self.data = {
+            "grant_type": "refresh_token",
+            "refresh_token": self.refresh_token,
+            "client_id": client_id,
+            "scope": scope
+        }
+        return super().setUp()
+    
+    def get_refresh_token(self, auth_code, client_id, redirect_uri, code_verifier)->str:
+        response = self.client.post(self.token_endpoint, data={
+            "grant_type": "authorization_code",
+            "code": auth_code,
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "code_verifier": code_verifier
+        })
+
+        content = response.json()
+        return content.get("refresh_token")
+    
+    def get_auth_code(self, client_id, redirect_uri, code_challenge, scope)->str:
+        response = self.client.post(reverse("indieauth:auth"), data={
+            "response_type": "code",
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "state": "statevalue",
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+            "me": "https://me.example.com/",
+            "scope": scope,
+            AuthRequestVM.ACCEPT: "Accept"
+        })
+        url_parts = urlsplit(response.url)
+        qs = parse_qs(url_parts.query)
+        return qs.get("code")
+    
+    def test_returns_token(self):
+        response = self.client.post(self.token_endpoint, self.data)
+
+        content = response.json()
+        self.assertIsNotNone(response, content.get("access_token"))
+
+    def test_cant_reuse_token(self):
+        self.client.post(self.token_endpoint, self.data)
+
+        response = self.client.post(self.token_endpoint, self.data)
+
+        self.assertEqual(400, response.status_code)
+
+    def test_cant_expand_scope(self):
+        og_scope = self.data["scope"]
+        self.data["scope"] += " update"
+
+        response = self.client.post(self.token_endpoint, self.data)
+
+        content = response.json()
+        self.assertEqual(og_scope, content.get("scope"))
+
+    def test_scope_is_optional(self):
+        og_scope = self.data["scope"]
+        del self.data["scope"]
+
+        response = self.client.post(self.token_endpoint, self.data)
+
+        content = response.json()
+        self.assertEqual(og_scope, content.get("scope"))
