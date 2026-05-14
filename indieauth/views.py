@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 from django.conf import settings
 
-from indieauth.models import AccessToken, AuthCode, RefreshToken, ServerMetadata, ClientMetadata
+from indieauth.models import AccessToken, AuthCode, RefreshToken, ServerMetadata, ClientMetadata, TokenBase
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
 
 
@@ -266,6 +266,19 @@ class IntrospectView(View):
             break
 
         return token
+    
+    def get_token(self, request:HttpRequest)->TokenBase:
+        token = request.POST.get("token")
+        access = AccessToken.objects.filter(token=token).first()
+        refresh = RefreshToken.objects.filter(token=token).first()
+
+        if request.POST.get("token_hint") == "refresh_token" and refresh is not None:
+            return refresh
+        
+        if access is not None:
+            return access
+        
+        return refresh
 
     def post(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
         bearer_token = self.get_bearer_token(request)
@@ -273,10 +286,11 @@ class IntrospectView(View):
         if bearer_token is None:
             return HttpResponse(status=401)
         
+        # tokens are not authorized for other tokens
         if bearer_token != request.POST.get("token"):
-            return JsonResponse({ "active": False })
+            return HttpResponse(status=401)
         
-        token = AccessToken.objects.filter(token=bearer_token).first()
+        token = self.get_token(request)
 
         if token is None or token.is_expired():
             return JsonResponse({ "active": False })
@@ -287,13 +301,11 @@ class IntrospectView(View):
 class RevokeView(View):
     def post(self, request:HttpRequest, *args, **kwargs):
         requested_token = request.POST.get("token")
-
-        if requested_token is None:
-            return HttpResponseBadRequest("No token")
         
         AccessToken.objects.filter(token=requested_token).delete()
+        RefreshToken.objects.filter(token=requested_token).delete()
 
-        return HttpResponse(status_code=200)
+        return HttpResponse(status=200)
     
 @method_decorator(csrf_exempt, "dispatch")
 class UserInfoView(View):

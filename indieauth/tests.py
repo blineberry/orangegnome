@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from requests import Response
 
-from indieauth.models import AccessToken, AuthRequest, ClientMetadata, ServerMetadata
+from indieauth.models import AccessToken, AuthRequest, ClientMetadata, RefreshToken, ServerMetadata
 from indieauth.viewmodels import AuthRequestVM
 from indieauth.views import AuthView
 from .services import canonicalize_url
@@ -730,11 +730,10 @@ class IntrospectionTestCase(TestCase):
         
         self.assertEqual(401, response.status_code)
 
-    def test_bearers_mismatch_false(self):
+    def test_bearers_mismatch_401(self):
         response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.access_token.token}invalid'})
         
-        content = response.json()
-        self.assertFalse(content.get("active"))
+        self.assertEqual(401, response.status_code)
 
     def test_notfoundtoken_false(self):
         invalid_token = self.access_token.token + "invalid"
@@ -764,3 +763,47 @@ class IntrospectionTestCase(TestCase):
         
         content = response.json()
         self.assertIsNone(content.get("exp"))
+
+class RevocationTestCase(TestCase):
+    client = None
+    access_token = None
+    refresh_token = None
+    revoke_endpoint = None
+
+    def setUp(self):
+        self.client = Client()
+        client_id = "https://example.com/"
+        user = User.objects.create()
+        profile = Profile.objects.create(user=user,url="https://me.example.com/")
+        self.access_token = AccessToken.create(client_id=client_id,scope="profile read",user=user)
+        self.access_token.save()
+        self.refresh_token = RefreshToken.create(client_id=client_id,scope="profile read",user=user)
+        self.refresh_token.save()
+        self.revoke_endpoint = reverse("indieauth:revoke")
+
+    def test_revoke_access(self):
+        self.assertEqual(1, AccessToken.objects.count())
+
+        response = self.client.post(self.revoke_endpoint, data={"token": self.access_token.token})
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, AccessToken.objects.count())
+
+    def test_revoke_refresh(self):
+        self.assertEqual(1, RefreshToken.objects.count())
+
+        response = self.client.post(self.revoke_endpoint, data={"token": self.refresh_token.token})
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, RefreshToken.objects.count())
+
+    def test_revoke_invalid(self):
+        self.assertEqual(1, AccessToken.objects.count())
+        self.assertEqual(1, RefreshToken.objects.count())
+        token = self.access_token.token + self.refresh_token.token
+
+        response = self.client.post(self.revoke_endpoint, data={"token": token})
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(1, AccessToken.objects.count())
+        self.assertEqual(1, RefreshToken.objects.count())

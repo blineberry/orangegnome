@@ -382,23 +382,26 @@ class TokenBase(models.Model, IndieAuthBase):
     expires_utc = models.DateTimeField(null=True,blank=True)
 
     @classmethod
-    def from_auth_code(cls, auth_code:AuthCode):
-        token = cls()
+    def create(cls, *args, **kwargs):
+        token = cls(*args,**kwargs)
         token.token = token.generate_token()
+        token.expires_utc = token.calculate_expires_utc()
+        return token
+
+    @classmethod
+    def from_auth_code(cls, auth_code:AuthCode):
+        token = cls.create()
         token.scope = auth_code.scope
         token.user = auth_code.user
-        token.expires_utc = token.calculate_expires_utc()
         token.client_id = auth_code.client_id
 
         return token
     
     @classmethod
     def from_refresh_token(cls, refresh_token, updated_scope:str=None):
-        token = cls()
-        token.token = token.generate_token()
+        token = cls.create()
         token.scope = refresh_token.scope if updated_scope is not None else updated_scope
         token.user = refresh_token.user
-        token.expires_utc = token.calculate_expires_utc()
         token.client_id = refresh_token.client_id
 
         return token        
@@ -429,6 +432,27 @@ class TokenBase(models.Model, IndieAuthBase):
     
     def get_default_lifetime_seconds(self):
         return self.DEFAULT_LIFETIME_SEC
+    
+    def to_verification_response(self)->dict:
+        profile:Profile = self.user.profile
+
+        if self.is_expired():
+            return {
+                "active": False
+            }
+
+        response = {
+            "active": not self.is_expired(),
+            "me": profile.url,
+            "client_id": self.client_id,
+            "scope": self.scope,
+            "iat": self.get_issued_unix_time()
+        }
+
+        if self.expires_utc is not None:
+            response["exp"] = self.get_expires_unix_time()
+
+        return response 
 
     class Meta:
         abstract = True
@@ -507,6 +531,11 @@ class AccessToken(TokenBase):
 
         return response 
     
+    def to_verification_response(self)->dict:
+        response = super().to_verification_response()
+        response["token_type"] = "access_token"
+        return response
+    
 class RefreshToken(TokenBase):
     TOKEN_MIN = 128
     TOKEN_MAX = 256
@@ -529,3 +558,8 @@ class RefreshToken(TokenBase):
                 new_scopes.append(scope)
 
         return (" ").join(new_scopes)
+    
+    def to_verification_response(self)->dict:
+        response = super().to_verification_response()
+        response["token_type"] = "refresh_token"
+        return response
