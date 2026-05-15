@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 from requests import Response
 
-from indieauth.models import AccessToken, AuthRequest, ClientMetadata, RefreshToken, ServerMetadata
+from indieauth.models import AccessToken, AuthCode, AuthRequest, ClientMetadata, RefreshToken, ServerMetadata
 from indieauth.viewmodels import AuthRequestVM
 from indieauth.views import AuthView
 from .services import canonicalize_url
@@ -534,6 +534,17 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
 
     def test_auth_requires_valid_code(self):
         self.post_data["code"] = "invalidcode"
+
+        response = self.client.post(self.auth_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
+
+    def test_auth_requires_unexpired_code(self):
+        auths = AuthCode.objects.all()
+        self.assertEqual(1, len(auths))
+        auths[0].issued_utc = auths[0].issued_utc - timedelta(seconds=(AuthCode.DEFAULT_LIFETIME_SEC + 1))
+        auths[0].save()
+
         response = self.client.post(self.auth_endpoint, data=self.post_data)
         
         self.assertEqual(400, response.status_code)
@@ -584,6 +595,16 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
         response = self.client.post(self.token_endpoint, data=self.post_data)
         
         self.assertEqual(400, response.status_code)
+
+    def test_token_requires_unexpired_code(self):
+        auths = AuthCode.objects.all()
+        self.assertEqual(1, len(auths))
+        auths[0].issued_utc = auths[0].issued_utc - timedelta(seconds=(AuthCode.DEFAULT_LIFETIME_SEC + 1))
+        auths[0].save()
+
+        response = self.client.post(self.token_endpoint, data=self.post_data)
+        
+        self.assertEqual(400, response.status_code)
     
     def test_token_code_cannot_be_reused(self):
         self.client.post(self.token_endpoint, data=self.post_data)
@@ -612,7 +633,7 @@ class RedeemTheAuthorizationCodeTestCase(TestCase):
 class RefreshTokenTestCase(TestCase):
     client = None
     token_endpoint = None
-    refresh_token = None
+    refresh_token:RefreshToken = None
     data = None
 
     def setUp(self):
@@ -672,6 +693,15 @@ class RefreshTokenTestCase(TestCase):
 
     def test_cant_reuse_token(self):
         self.client.post(self.token_endpoint, self.data)
+
+        response = self.client.post(self.token_endpoint, self.data)
+
+        self.assertEqual(400, response.status_code)
+
+    def test_cant_use_expired_token(self):
+        refresh = RefreshToken.objects.get(token=self.refresh_token)
+        refresh.expires_utc = timezone.now() - timedelta(seconds=1)
+        refresh.save()
 
         response = self.client.post(self.token_endpoint, self.data)
 
