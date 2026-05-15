@@ -23,6 +23,9 @@
             <label><input name="scope" type="checkbox" checked value="{{ scope }}">{{ scope }}</label>
         </div>
         {% endfor %}
+        {% for warning in model.warnings %}
+        <p>Warning: {{ warning }}</p>
+        {% endfor %}
         <div><input type="submit" value="Approve" name="{{ model.ACCEPT }}"> <input type="submit" value="Deny" name="Deny"></div>
 
     </form>
