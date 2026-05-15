@@ -1,4 +1,6 @@
 from django.views.generic import detail, list, dates, ListView, View
+
+from orangegnome import settings
 from .models import Tag, FeedItem as Post, convert_commonmark_to_html, convert_commonmark_to_plain_text
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
@@ -32,6 +34,7 @@ class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
         return context
 
 class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
+    allow_empty = True
     canonical_viewname = 'feed:index'
     extra_context = {
         'page_title': 'Brent Lineberry',
@@ -43,7 +46,6 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
         context['feed_title'] = None
         context['rss_title'] = LatestEntriesFeed.description
         context['rss_url'] = "%s/feed" % LatestEntriesFeed.link
-
         return context    
 
     def get_queryset(self):
