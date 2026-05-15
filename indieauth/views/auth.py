@@ -1,4 +1,3 @@
-import base64
 import ipaddress
 import re
 from urllib.parse import urlsplit
@@ -7,23 +6,13 @@ from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonR
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
-from django.conf import settings
-from django.utils import timezone
 
-
-from indieauth.models import AccessToken, AuthCode, ClientMetadata, RefreshToken, ServerMetadata, TokenBase
+from indieauth.models import AuthCode, ClientMetadata, ServerMetadata
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
-
-
+from indieauth.views.token import validate_request
 
 # Create your views here.
-class MetadataView(View):
-    def get(self, request, *args, **kwargs):
-        return JsonResponse(ServerMetadata(reverse).to_json())
-
 class AuthView(View):
     SESSION_REQUEST_KEY = "INDIEAUTH_AUTH_REQUEST"
 
@@ -166,7 +155,7 @@ class AuthView(View):
 
         if vm.should_generate_auth_code():
             user = request.user
-            auth = vm.create_auth_code(user.id)
+            auth = AuthCode.from_auth_submission_vm(vm, user.id)
             auth.save()
 
             return redirect(vm.get_redirect_uri(auth.code))
@@ -177,157 +166,10 @@ class AuthView(View):
         auth = AuthCode.objects.filter(code = request.POST.get("code")).first()
         AuthCode.objects.filter(code = request.POST.get("code")).delete()
 
-        success, err_msg = TokenView.validate_request(request.POST, auth)
+        success, err_msg = validate_request(request.POST, auth)
         
         if not success:
             return HttpResponseBadRequest(err_msg)
 
         return JsonResponse(auth.to_profile_url_response())
 
-@method_decorator(csrf_exempt, name="dispatch")
-class TokenView(View):
-    @staticmethod
-    def validate_request(values:QueryDict, auth:AuthCode)->tuple[bool,str]:
-        if auth is None:
-            return (False, "invalid code")
-        
-        if auth.is_expired():
-            return (False, "invalid code")
-        
-        if values.get("client_id") is None or values.get("client_id") != auth.client_id:
-            return (False, "invalid client_id")
-        
-        if values.get("redirect_uri") is None or values.get("redirect_uri") != auth.redirect_uri:
-            return (False, "invalid redirect_uri")
-        
-        if values.get("code_verifier") is None or not auth.verify_challenge_code(values.get("code_verifier")):
-            return (False, "invalid code_verifier")
-        
-        return (True, "")
-
-    def post(self, request:HttpRequest, *args, **kwargs):
-        if request.POST.get("grant_type", "") == "refresh_token":
-            return self.refresh_token_response(request, *args, **kwargs)
-        
-        return self.access_token_response(request, *args, **kwargs)
-    
-    def access_token_response(self, request:HttpRequest, *args, **kwargs):
-        auth = AuthCode.objects.filter(code = request.POST.get("code")).first()
-        AuthCode.objects.filter(code = request.POST.get("code")).delete()
-
-        success, err_msg = TokenView.validate_request(request.POST, auth)
-        
-        if not success:
-            return HttpResponseBadRequest(err_msg)
-        
-        if auth.scope is None or auth.scope.strip() == "":
-            return HttpResponseBadRequest("authorized scopes are required")
-        
-        access = AccessToken.from_auth_code(auth)
-        refresh = RefreshToken.from_auth_code(auth)
-        access.save()
-        refresh.save()
-
-        return JsonResponse(access.to_token_response(refresh_token=refresh.token))
-    
-    def refresh_token_response(self, request:HttpRequest, *args, **kwargs):
-        if request.POST.get("grant_type") != "refresh_token":
-            return HttpResponseBadRequest("{\"error\": \"invalid grant_type\"}")
-        
-        token = RefreshToken.objects.filter(token=request.POST.get("refresh_token"),expires_utc__gte=timezone.now()).first()
-        RefreshToken.objects.filter(token=request.POST.get("refresh_token")).delete()
-
-        if token is None or token.client_id != request.POST.get("client_id"):
-            return HttpResponseBadRequest("{\"error\": \"invalid token\"}")
-        
-        scope = token.update_scope(request.POST.get("scope"))
-
-        access = AccessToken.from_refresh_token(token,scope)
-        refresh = RefreshToken.from_refresh_token(token,scope)
-        access.save()
-        refresh.save()
-
-        return JsonResponse(access.to_token_response(refresh_token=refresh.token))
-
-class IntrospectView(View):    
-    def get_token(self, request:HttpRequest)->TokenBase:
-        token = request.POST.get("token")
-        access = AccessToken.objects.filter(token=token,expires_utc__gte=timezone.now()).first()
-        refresh = RefreshToken.objects.filter(token=token,expires_utc__gte=timezone.now()).first()
-
-        if request.POST.get("token_hint") == "refresh_token" and refresh is not None:
-            return refresh
-        
-        if access is not None:
-            return access
-        
-        return refresh
-
-    def post(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
-        # spec requires auth on this endpoint. Can't use client_id as a Basic
-        # auth username becauseo of colons. Using the token also as the auth
-        # seems ineffective. Using client_id in post body seems like least bad
-        # option.
-        client_id = request.POST.get("client_id")
-
-        if client_id is None:
-            return HttpResponse(status=401)
-        
-        token = self.get_token(request)
-
-        if (token is None or 
-            token.client_id != client_id or 
-            token.is_expired()):
-            return JsonResponse({ "active": False })
-        
-        return JsonResponse(token.to_verification_response())
-
-@method_decorator(csrf_exempt, "dispatch")
-class RevokeView(View):
-    def post(self, request:HttpRequest, *args, **kwargs):
-        requested_token = request.POST.get("token")
-        
-        AccessToken.objects.filter(token=requested_token).delete()
-        RefreshToken.objects.filter(token=requested_token).delete()
-
-        return HttpResponse(status=200)
-    
-@method_decorator(csrf_exempt, "dispatch")
-class UserInfoView(View):
-    def get_bearer_token(self, request:HttpRequest)->str:
-        headers = request.headers
-        auth_header = headers.get("Authorization")
-
-        if auth_header is None:
-            return None
-        
-        parts = auth_header.split(" ")
-        token = None
-
-        for p in parts:
-            if p.strip() == "":
-                continue
-            if p.lower() == "bearer":
-                continue
-
-            token = p
-            break
-
-        return token
-    
-    def get(self, request:HttpRequest, *args, **kwargs):
-        bearer = self.get_bearer_token(request)
-
-        if bearer is None:
-            return HttpResponse("invalid_token", status=401)
-        
-        token = AccessToken.objects.filter(token=bearer,expires_utc__gte=timezone.now()).first()
-
-        if token is None:
-            return HttpResponse("invalid_token", status=401)
-        
-        if "profile" not in token.get_scopes():
-            return HttpResponse("insufficient_scope", status=403)
-        
-        return JsonResponse(token.to_userinfo_response())
-        

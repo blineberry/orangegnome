@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from indieauth.models import AuthTokenBase
 from indieauth.models.server_metadata import ServerMetadata
+from indieauth.viewmodels import AuthSubmissionVM
 from profiles.models import Profile
 
 
@@ -23,6 +24,18 @@ class AuthCode(AuthTokenBase):
     def create(cls):
         code = cls()
         code.code = code.generate_code()
+        return code
+    
+    @classmethod
+    def from_auth_submission_vm(cls, vm:AuthSubmissionVM, user_id):
+        code = cls.create()
+        code.client_id = vm.values.get("client_id")
+        code.redirect_uri = vm.values.get("redirect_uri")
+        code.user_id = user_id
+        code.code_challenge_method = vm.values.get("code_challenge_method")
+        code.code_challenge = vm.values.get("code_challenge")
+        code.scope = vm.values.get("scope", "")
+        
         return code
 
     def generate_code(self):

@@ -140,7 +140,7 @@ class AuthViewTestCase(TestCase):
             "code_challenge": "codechallenge"
         }
 
-    @patch('indieauth.views.ClientMetadata.fetch')
+    @patch('indieauth.models.ClientMetadata.fetch')
     def test_get(self, fetch):        
         fetch.return_value = None       
         response = self.view.get(self.request)
