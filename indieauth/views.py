@@ -13,7 +13,8 @@ from django.middleware.csrf import CsrfViewMiddleware
 from django.conf import settings
 from django.utils import timezone
 
-from indieauth.models import AccessToken, AuthCode, RefreshToken, ServerMetadata, ClientMetadata, TokenBase
+
+from indieauth.models import AccessToken, AuthCode, ClientMetadata, RefreshToken, ServerMetadata, TokenBase
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
 
 
@@ -167,6 +168,7 @@ class AuthView(View):
             user = request.user
             auth = vm.create_auth_code(user.id)
             auth.save()
+
             return redirect(vm.get_redirect_uri(auth.code))
         else:
             return redirect(vm.get_redirect_uri())

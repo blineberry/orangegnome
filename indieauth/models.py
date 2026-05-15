@@ -583,19 +583,3 @@ class RefreshToken(TokenBase):
         response = super().to_verification_response()
         response["token_type"] = "refresh_token"
         return response
-    
-class AccessLog(models.Model):
-    class Action(models.TextChoices):
-        CREATED_AUTH = 'Created from auth code'
-        CREATED_REFRESH = 'Created from refresh token'
-        REDEEMED_PROFILE = 'Redeemed for profile URL'
-        REDEEMED_TOKEN = 'Redeemed for a token'
-        REVOKED = 'Revoked'
-        USER_INFO = 'User info requested'
-
-    access_token = models.ForeignKey(AccessToken, on_delete=models.DO_NOTHING)
-    refresh_token = models.ForeignKey(RefreshToken, on_delete=models.DO_NOTHING)
-    auth_code = models.ForeignKey(AuthCode, on_delete=models.DO_NOTHING)
-    datetime_utc = models.DateTimeField(auto_now_add=True)
-    action = models.CharField(choices=Action,max_length=26)
-    client_id = models.URLField()
