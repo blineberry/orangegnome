@@ -46,19 +46,18 @@ class AuthRequestVM():
         return self.values.get("scope", "").split(" ")
     
     def is_hostname_mismatch(self):
-        if self.client_uri is None:
+        if self.client_uri() is None:
             return False
         
-        if self.client.client_uri is None:
-            return False
-        
-        return urlsplit(self.client_id).netloc != urlsplit(self.client_uri).netloc
+        return urlsplit(self.client_id()).netloc != urlsplit(self.client_uri()).netloc
     
     def warnings(self):
         warnings = []
 
         if self.is_hostname_mismatch():
-            warnings.append(f'The hostname of the client_uri, { self.client_uri }, does not match the hostname of the client_id, { self.client_id }')
+            warnings.append(f'The hostname of the client_uri, { self.client_uri() }, does not match the hostname of the client_id, { self.client_id() }')
+
+        return warnings
 
     def __init__(self, values:QueryDict, client:ClientMetadata):
         self.values = values
