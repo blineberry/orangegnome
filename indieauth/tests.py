@@ -13,9 +13,9 @@ from django.utils import timezone
 from requests import Response
 
 from indieauth.models import AccessToken, AuthCode, AuthRequest, ClientMetadata, RefreshToken, ServerMetadata
+from indieauth.models.auth_token_base import canonicalize_url
 from indieauth.viewmodels import AuthRequestVM
 from indieauth.views import AuthView
-from .services import canonicalize_url
 from profiles.models import Profile
 
 # Create your tests here.
