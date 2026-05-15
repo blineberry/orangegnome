@@ -1,11 +1,9 @@
-import base64
 from datetime import timedelta
-from typing import Any, Mapping
 from unittest.mock import Mock, patch
 from urllib.parse import parse_qs, urlsplit
 
 from bs4 import BeautifulSoup
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from django.test import Client, TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
