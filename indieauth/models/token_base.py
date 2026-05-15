@@ -44,13 +44,18 @@ class TokenBase(AuthTokenBase):
         if self.expires_utc is None:
             return None
         
-        return (self.expires_utc - self.issued_utc).seconds
+        timedelta = self.expires_utc - timezone.now()
+        seconds = int(timedelta.total_seconds())
+        
+        return seconds
     
     def is_expired(self):
         if self.expires_utc is None:
             return False
         
         return timezone.now() >= self.expires_utc
+    
+    is_expired.boolean = True
     
     def to_verification_response(self)->dict:
         profile:Profile = self.user.profile

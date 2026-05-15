@@ -71,6 +71,8 @@ class AuthCode(AuthTokenBase):
         timespan = now - self.issued_utc 
         return timespan.seconds > AuthCode.DEFAULT_LIFETIME_SEC
     
+    is_expired.boolean = True
+    
     def verify_challenge_code(self, code_verifier:str)->bool:
         return verify_challenge_code(code_verifier, self.code_challenge, self.code_challenge_method)
     
