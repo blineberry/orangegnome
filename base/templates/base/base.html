@@ -28,7 +28,7 @@
     {% endblock %}
 
     {% if indieauth.metadata %}
-    <link rel="indieauth-metadata" href="{{ indieauth_metadata }}">
+    <link rel="indieauth-metadata" href="{{ indieauth.metadata }}">
     {% endif %}
     {% if indieauth.auth %}
     <link rel="authorization_endpoint" href="{{ indieauth.auth }}">
