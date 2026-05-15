@@ -1,9 +1,11 @@
 from django.conf import settings
 
+from indieauth.models.auth_code import CODE_CHALLENGE_METHODS
+
 class ServerMetadata():
     issuer = settings.INDIEAUTH_ISSUER    
     scopes_supported =  ['profile']
-    code_challenge_methods_supported = ['S256']
+    code_challenge_methods_supported = CODE_CHALLENGE_METHODS
 
     def __init__(self, reverse):
         self.authorization_endpoint =  settings.SITE_URL + reverse('indieauth:auth')

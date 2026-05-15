@@ -1,5 +1,4 @@
 from .indieauth_base import IndieAuthBase
-from .server_metadata import ServerMetadata
 from .client_metadata import ClientMetadata
 from .auth_request import AuthRequest
 from .auth_token_base import AuthTokenBase
@@ -7,3 +6,4 @@ from .auth_code import AuthCode
 from .token_base import TokenBase
 from .access_token import AccessToken
 from .refresh_token import RefreshToken
+from .server_metadata import ServerMetadata

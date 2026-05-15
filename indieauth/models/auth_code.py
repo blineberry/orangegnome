@@ -5,7 +5,6 @@ from django.db import models
 from django.utils import timezone
 
 from indieauth.models import AuthTokenBase
-from indieauth.models.server_metadata import ServerMetadata
 from indieauth.viewmodels import AuthSubmissionVM
 from profiles.models import Profile
 
