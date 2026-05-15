@@ -1,3 +1,4 @@
+import base64
 from datetime import timedelta
 from typing import Any, Mapping
 from unittest.mock import Mock, patch
@@ -699,23 +700,24 @@ class IntrospectionTestCase(TestCase):
     introspection_endpoint = None
     access_token = None
     data = None
+    client_id = None
 
     def setUp(self):
         self.client = Client()
         self.introspection_endpoint = reverse("indieauth:introspect")
         user = User.objects.create_user(username='testuser', password='testpassword')        
         Profile.objects.create(user=user, url="https://me.example.com").save()
-        self.access_token = AccessToken.objects.create(token="testtoken", scope="profile update", client_id="https://example.com/", user=user, issued_utc=timezone.now(), expires_utc=timezone.now() + timedelta(minutes=5))
+        self.client_id = "https://example.com/"
+        self.access_token = AccessToken.objects.create(token="testtoken", scope="profile update", client_id=self.client_id, user=user, issued_utc=timezone.now(), expires_utc=timezone.now() + timedelta(minutes=5))
         self.data = {
-            "token": self.access_token.token
+            "token": self.access_token.token,
+            "client_id": self.client_id
         }
         
         return super().setUp()
     
     def test_returns_info(self):
-        headers:Mapping[str,Any] = {"Authorization": f'Bearer {self.access_token.token}'}
-
-        response = self.client.post(self.introspection_endpoint, self.data, headers=headers)
+        response = self.client.post(self.introspection_endpoint, self.data)
         
         content = response.json()
         self.assertIsNotNone(content.get("active"))
@@ -725,13 +727,9 @@ class IntrospectionTestCase(TestCase):
         self.assertIsNotNone(content.get("iat"))
         self.assertIsNotNone(content.get("exp"))
 
-    def test_no_bearer_returns_401(self):
+    def test_no_auth_returns_401(self):
+        del self.data["client_id"]
         response = self.client.post(self.introspection_endpoint, self.data)
-        
-        self.assertEqual(401, response.status_code)
-
-    def test_bearers_mismatch_401(self):
-        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.access_token.token}invalid'})
         
         self.assertEqual(401, response.status_code)
 
@@ -739,7 +737,7 @@ class IntrospectionTestCase(TestCase):
         invalid_token = self.access_token.token + "invalid"
         self.data["token"] = invalid_token
         
-        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {invalid_token}'})
+        response = self.client.post(self.introspection_endpoint, self.data)
         
         content = response.json()
         self.assertFalse(content.get("active"))
@@ -749,7 +747,7 @@ class IntrospectionTestCase(TestCase):
         token.expires_utc = timezone.now() - timedelta(seconds=1)
         token.save()
         
-        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.access_token.token}'})
+        response = self.client.post(self.introspection_endpoint, self.data)
         
         content = response.json()
         self.assertFalse(content.get("active"))
@@ -759,7 +757,7 @@ class IntrospectionTestCase(TestCase):
         token.expires_utc = None
         token.save()
         
-        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.access_token.token}'})
+        response = self.client.post(self.introspection_endpoint, self.data)
         
         content = response.json()
         self.assertIsNone(content.get("exp"))

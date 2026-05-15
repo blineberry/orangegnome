@@ -1,3 +1,4 @@
+import base64
 import ipaddress
 import re
 from urllib.parse import urlsplit
@@ -281,18 +282,20 @@ class IntrospectView(View):
         return refresh
 
     def post(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
-        bearer_token = self.get_bearer_token(request)
+        # spec requires auth on this endpoint. Can't use client_id as a Basic
+        # auth username becauseo of colons. Using the token also as the auth
+        # seems ineffective. Using client_id in post body seems like least bad
+        # option.
+        client_id = request.POST.get("client_id")
 
-        if bearer_token is None:
-            return HttpResponse(status=401)
-        
-        # tokens are not authorized for other tokens
-        if bearer_token != request.POST.get("token"):
+        if client_id is None:
             return HttpResponse(status=401)
         
         token = self.get_token(request)
 
-        if token is None or token.is_expired():
+        if (token is None or 
+            token.client_id != client_id or 
+            token.is_expired()):
             return JsonResponse({ "active": False })
         
         return JsonResponse(token.to_verification_response())
