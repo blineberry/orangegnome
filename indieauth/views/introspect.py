@@ -24,6 +24,10 @@ class IntrospectView(View):
         return refresh
 
     def post(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
+        # return 401 until I encounter a use case and an understanding on
+        # expected auth
+        return HttpResponse(status=401)
+
         # spec requires auth on this endpoint. Can't use client_id as a Basic
         # auth username becauseo of colons. Using the token also as the auth
         # seems ineffective. Using client_id in post body seems like least bad
