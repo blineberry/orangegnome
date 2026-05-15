@@ -79,8 +79,7 @@ class AuthSubmissionVM():
         return True 
         
     def create_auth_code(self, user_id):
-        code = AuthCode()
-        code.code = AuthCode.generate_code()
+        code = AuthCode.create()
         code.client_id = self.values.get("client_id")
         code.redirect_uri = self.values.get("redirect_uri")
         code.user_id = user_id

@@ -319,29 +319,68 @@ class AuthRequest():
         
         return self.redirect_uri in client.redirect_uris
     
-class AuthCode(models.Model):
-    CODE_MIN = 16
-    CODE_MAX = 45
-    LIFESPAN_SEC = 5 * 60
+class AuthTokenBase(models.Model):
+    TOKEN_MIN = 0
+    TOKEN_MAX = 0
+    DEFAULT_LIFETIME_SEC = 0
 
-    code = models.CharField(max_length=CODE_MAX, unique=True)
-    client_id = models.URLField()
-    redirect_uri = models.URLField()
-    issued_utc = models.DateTimeField(default=timezone.now)
-    code_challenge = models.CharField(max_length=255)
-    code_challenge_method = models.CharField(max_length=10)
     scope = models.CharField(max_length=255, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    issued_utc = models.DateTimeField(default=timezone.now)
+    client_id = models.URLField()
+    revoked_utc = models.DateTimeField(null=True,blank=True)
 
-    @staticmethod
-    def generate_code():
-        return IndieAuthBase.generate_random_string(AuthCode.CODE_MIN,AuthCode.CODE_MAX)
+    def generate_token(self):
+        return IndieAuthBase.generate_random_string(self.get_token_min(), self.get_token_max())
+    
+    def revoke(self):
+        self.revoked_utc = timezone.now()
+
+    def is_revoked(self):
+        return self.revoked_utc is not None
+    
+    def get_token_min(self):
+        return self.TOKEN_MIN
+    
+    def get_token_max(self):
+        return self.TOKEN_MAX
+    
+    def get_default_lifetime_seconds(self):
+        return self.DEFAULT_LIFETIME_SEC
+
+    class Meta:
+        abstract = True
+    
+class AuthCode(AuthTokenBase):
+    CODE_MIN = 16
+    CODE_MAX = 45
+    DEFAULT_LIFETIME_SEC = 5 * 60
+
+    code = models.CharField(max_length=CODE_MAX, unique=True)
+    redirect_uri = models.URLField()
+    code_challenge = models.CharField(max_length=255)
+    code_challenge_method = models.CharField(max_length=10)
+
+    @classmethod
+    def create(cls):
+        code = cls()
+        code.code = code.generate_code()
+        return code
+
+    def generate_code(self):
+        return self.generate_token()
+    
+    def get_token_min(self):
+        return self.CODE_MIN
+    
+    def get_token_max(self):
+        return self.CODE_MAX
 
     def is_expired(self):
         now = timezone.now()
 
         timespan = now - self.issued_utc 
-        return timespan.seconds > AuthCode.LIFESPAN_SEC
+        return timespan.seconds > AuthCode.DEFAULT_LIFETIME_SEC
     
     def verify_challenge_code(self, code_verifier:str)->bool:
         if self.code_challenge_method not in ServerMetadata.code_challenge_methods_supported:
@@ -369,16 +408,8 @@ class AuthCode(models.Model):
         response["profile"] = IndieAuthBase.profile_to_dict(profile)        
         return response
     
-class TokenBase(models.Model, IndieAuthBase):
-    TOKEN_MIN = 0
-    TOKEN_MAX = 0
-    DEFAULT_LIFETIME_SEC = 0
-
+class TokenBase(AuthTokenBase, IndieAuthBase):
     token = models.TextField()
-    scope = models.CharField(max_length=255)
-    client_id = models.URLField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    issued_utc = models.DateTimeField(default=timezone.now)
     expires_utc = models.DateTimeField(null=True,blank=True)
 
     @classmethod
@@ -404,10 +435,7 @@ class TokenBase(models.Model, IndieAuthBase):
         token.user = refresh_token.user
         token.client_id = refresh_token.client_id
 
-        return token        
-
-    def generate_token(self):
-        return IndieAuthBase.generate_random_string(self.get_token_min(), self.get_token_max())
+        return token            
     
     def calculate_expires_utc(self):
         return timezone.now() + timedelta(seconds=self.get_default_lifetime_seconds())
@@ -423,15 +451,6 @@ class TokenBase(models.Model, IndieAuthBase):
             return False
         
         return timezone.now() >= self.expires_utc
-    
-    def get_token_min(self):
-        return self.TOKEN_MIN
-    
-    def get_token_max(self):
-        return self.TOKEN_MAX
-    
-    def get_default_lifetime_seconds(self):
-        return self.DEFAULT_LIFETIME_SEC
     
     def to_verification_response(self)->dict:
         profile:Profile = self.user.profile
@@ -491,14 +510,12 @@ class AccessToken(TokenBase):
         scopes:list[str] = self.scope.split(" ")
         profile:Profile = self.user.profile
 
-        response = {
-            "me": IndieAuthBase.canonicalize_url(profile.url)
-        }
+        response = {}
 
         if "profile" not in scopes:
             return response
         
-        response["profile"] = IndieAuthBase.profile_to_dict(profile)        
+        response = IndieAuthBase.profile_to_dict(profile)        
         return response
     
     def get_issued_unix_time(self):
@@ -509,6 +526,9 @@ class AccessToken(TokenBase):
             return
         
         return int(self.expires_utc.timestamp())
+    
+    def get_scopes(self):
+        return self.scope.split(" ")
     
     def to_verification_response(self)->dict:
         profile:Profile = self.user.profile
@@ -563,3 +583,19 @@ class RefreshToken(TokenBase):
         response = super().to_verification_response()
         response["token_type"] = "refresh_token"
         return response
+    
+class AccessLog(models.Model):
+    class Action(models.TextChoices):
+        CREATED_AUTH = 'Created from auth code'
+        CREATED_REFRESH = 'Created from refresh token'
+        REDEEMED_PROFILE = 'Redeemed for profile URL'
+        REDEEMED_TOKEN = 'Redeemed for a token'
+        REVOKED = 'Revoked'
+        USER_INFO = 'User info requested'
+
+    access_token = models.ForeignKey(AccessToken, on_delete=models.DO_NOTHING)
+    refresh_token = models.ForeignKey(RefreshToken, on_delete=models.DO_NOTHING)
+    auth_code = models.ForeignKey(AuthCode, on_delete=models.DO_NOTHING)
+    datetime_utc = models.DateTimeField(auto_now_add=True)
+    action = models.CharField(choices=Action,max_length=26)
+    client_id = models.URLField()

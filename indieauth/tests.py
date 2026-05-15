@@ -805,3 +805,34 @@ class RevocationTestCase(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(1, AccessToken.objects.count())
         self.assertEqual(1, RefreshToken.objects.count())
+
+class UserInfoTestCase(TestCase):
+    client = None
+    access_token = None
+    userinfo_endpoint = None
+
+    def setUp(self):
+        self.client = Client()
+        client_id = "https://example.com/"
+        user = User.objects.create()
+        profile = Profile.objects.create(user=user,url="https://me.example.com/")
+        self.access_token = AccessToken.create(client_id=client_id,scope="profile read",user=user)
+        self.access_token.save()
+        self.userinfo_endpoint = reverse("indieauth:userinfo")
+    
+    def test_returns_info(self):
+        response = self.client.get(self.userinfo_endpoint, headers={"Authorization": f'Bearer {self.access_token.token}'})
+
+        content = response.json()
+        self.assertIsNotNone(content.get("name"))
+        self.assertIsNotNone(content.get("url"))
+
+    def test_no_token_returns_401(self):
+        response = self.client.get(self.userinfo_endpoint)
+
+        self.assertEqual(401, response.status_code)
+
+    def test_missing_token_returns_401(self):
+        response = self.client.get(self.userinfo_endpoint)
+
+        self.assertEqual(401, response.status_code)

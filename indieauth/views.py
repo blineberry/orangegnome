@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import CsrfViewMiddleware
 from django.conf import settings
+from django.utils import timezone
 
 from indieauth.models import AccessToken, AuthCode, RefreshToken, ServerMetadata, ClientMetadata, TokenBase
 from indieauth.viewmodels import AuthRequestVM, AuthSubmissionVM
@@ -231,7 +232,7 @@ class TokenView(View):
         if request.POST.get("grant_type") != "refresh_token":
             return HttpResponseBadRequest("{\"error\": \"invalid grant_type\"}")
         
-        token = RefreshToken.objects.filter(token=request.POST.get("refresh_token")).first()
+        token = RefreshToken.objects.filter(token=request.POST.get("refresh_token"),expires_utc__gte=timezone.now()).first()
         RefreshToken.objects.filter(token=request.POST.get("refresh_token")).delete()
 
         if token is None or token.client_id != request.POST.get("client_id"):
@@ -246,32 +247,11 @@ class TokenView(View):
 
         return JsonResponse(access.to_token_response(refresh_token=refresh.token))
 
-class IntrospectView(View):
-    def get_bearer_token(self, request:HttpRequest)->str:
-        headers = request.headers
-        auth_header = headers.get("Authorization")
-
-        if auth_header is None:
-            return None
-        
-        parts = auth_header.split(" ")
-        token = None
-
-        for p in parts:
-            if p.strip() == "":
-                continue
-            if p.lower() == "bearer":
-                continue
-
-            token = p
-            break
-
-        return token
-    
+class IntrospectView(View):    
     def get_token(self, request:HttpRequest)->TokenBase:
         token = request.POST.get("token")
-        access = AccessToken.objects.filter(token=token).first()
-        refresh = RefreshToken.objects.filter(token=token).first()
+        access = AccessToken.objects.filter(token=token,expires_utc__gte=timezone.now()).first()
+        refresh = RefreshToken.objects.filter(token=token,expires_utc__gte=timezone.now()).first()
 
         if request.POST.get("token_hint") == "refresh_token" and refresh is not None:
             return refresh
@@ -312,13 +292,40 @@ class RevokeView(View):
     
 @method_decorator(csrf_exempt, "dispatch")
 class UserInfoView(View):
-    def post(self, request:HttpRequest, *args, **kwargs):
-        requested_token = request.POST.get("token")
+    def get_bearer_token(self, request:HttpRequest)->str:
+        headers = request.headers
+        auth_header = headers.get("Authorization")
+
+        if auth_header is None:
+            return None
         
-        token = AccessToken.objects.filter(token=requested_token).first()
+        parts = auth_header.split(" ")
+        token = None
+
+        for p in parts:
+            if p.strip() == "":
+                continue
+            if p.lower() == "bearer":
+                continue
+
+            token = p
+            break
+
+        return token
+    
+    def get(self, request:HttpRequest, *args, **kwargs):
+        bearer = self.get_bearer_token(request)
+
+        if bearer is None:
+            return HttpResponse("invalid_token", status=401)
+        
+        token = AccessToken.objects.filter(token=bearer,expires_utc__gte=timezone.now()).first()
 
         if token is None:
             return HttpResponse("invalid_token", status=401)
+        
+        if "profile" not in token.get_scopes():
+            return HttpResponse("insufficient_scope", status=403)
         
         return JsonResponse(token.to_userinfo_response())
         
