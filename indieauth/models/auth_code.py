@@ -9,8 +9,27 @@ from indieauth.models.server_metadata import ServerMetadata
 from indieauth.viewmodels import AuthSubmissionVM
 from profiles.models import Profile
 
+CODE_CHALLENGE_METHODS = ["S256"]
+
+def is_code_challenge_supported(method:str)->bool:
+    return method in CODE_CHALLENGE_METHODS
+
+def verify_challenge_code(code:str, challenge:str, method:str)->bool:
+    if not is_code_challenge_supported(method):
+            return False
+        
+    if method == "S256":
+        result = hashlib.sha256(code.encode('utf-8')).digest()
+        result = base64.urlsafe_b64encode(result).decode('utf-8')
+        result = result.replace('=', '')
+        return challenge == result
+    
+    return False
 
 class AuthCode(AuthTokenBase):
+    class CodeChallengeMethod(models.TextChoices):
+        S256="S256"
+
     CODE_MIN = 16
     CODE_MAX = 45
     DEFAULT_LIFETIME_SEC = 5 * 60
@@ -18,7 +37,7 @@ class AuthCode(AuthTokenBase):
     code = models.CharField(max_length=CODE_MAX, unique=True)
     redirect_uri = models.URLField()
     code_challenge = models.CharField(max_length=255)
-    code_challenge_method = models.CharField(max_length=10)
+    code_challenge_method = models.CharField(choices=CodeChallengeMethod, max_length=10)
 
     @classmethod
     def create(cls):
@@ -54,16 +73,7 @@ class AuthCode(AuthTokenBase):
         return timespan.seconds > AuthCode.DEFAULT_LIFETIME_SEC
     
     def verify_challenge_code(self, code_verifier:str)->bool:
-        if self.code_challenge_method not in ServerMetadata.code_challenge_methods_supported:
-            return False
-        
-        if self.code_challenge_method == "S256":
-            result = hashlib.sha256(code_verifier.encode('utf-8')).digest()
-            result = base64.urlsafe_b64encode(result).decode('utf-8')
-            result = result.replace('=', '')
-            return self.code_challenge == result
-        
-        return False
+        return verify_challenge_code(code_verifier, self.code_challenge, self.code_challenge_method)
     
     def to_profile_url_response(self):
         scopes:list[str] = self.scope.split(" ")
