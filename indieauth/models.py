@@ -328,17 +328,10 @@ class AuthTokenBase(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     issued_utc = models.DateTimeField(default=timezone.now)
     client_id = models.URLField()
-    revoked_utc = models.DateTimeField(null=True,blank=True)
 
     def generate_token(self):
         return IndieAuthBase.generate_random_string(self.get_token_min(), self.get_token_max())
-    
-    def revoke(self):
-        self.revoked_utc = timezone.now()
-
-    def is_revoked(self):
-        return self.revoked_utc is not None
-    
+        
     def get_token_min(self):
         return self.TOKEN_MIN
     
