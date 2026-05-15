@@ -263,7 +263,7 @@ class AuthorizationRequestTestCase(TestCase):
             "headers": {}
         }
     
-    @patch('indieauth.models.request')
+    @patch('indieauth.models.client_metadata.request')
     def test_get_returns_view(self, request):
         response = self.client.get(self.authorization_endpoint, data=self.get_data)
 
@@ -284,7 +284,7 @@ class AuthorizationRequestTestCase(TestCase):
         
         self.assertEqual(response.status_code, 400)
 
-    @patch('indieauth.models.request')
+    @patch('indieauth.models.client_metadata.request')
     def test_get_valid_client_id_required(self,request):        
         request.return_value = Mock(Response)
         attrs = {'json.return_value' : {}}
@@ -334,7 +334,7 @@ class AuthorizationRequestTestCase(TestCase):
         response = self.client.get(self.authorization_endpoint, data=self.get_data)
         self.assertEqual(400, response.status_code)
 
-    @patch('indieauth.models.request')
+    @patch('indieauth.models.client_metadata.request')
     def test_get_valid_redirect_url_required(self, request):
         request.return_value = Mock(Response)
         attrs =  self.create_client_metadata(self.get_data.get("client_id"), [])
@@ -390,7 +390,7 @@ class AuthorizationRequestTestCase(TestCase):
         
         self.assertEqual(response.status_code, 400)
 
-    @patch('indieauth.models.request')
+    @patch('indieauth.models.client_metadata.request')
     def test_post_valid_client_id_required(self,request):        
         request.return_value = Mock(Response)
         attrs = {'json.return_value' : {}}
@@ -440,7 +440,7 @@ class AuthorizationRequestTestCase(TestCase):
         response = self.client.post(self.authorization_endpoint, data=self.post_data)
         self.assertEqual(400, response.status_code)
 
-    @patch('indieauth.models.request')
+    @patch('indieauth.models.client_metadata.request')
     def test_post_valid_redirect_url_required(self, request):
         request.return_value = Mock(Response)
         attrs =  self.create_client_metadata(self.post_data.get("client_id"), [])
