@@ -6,8 +6,9 @@ from indieauth.models import ClientMetadata
 
 def get_authorized_scopes(scope, user):
     scopes = scope.split(" ")
+    has_profile = hasattr(user,"profile")
 
-    if "profile" in scopes and user.profile is None:
+    if "profile" in scopes and not has_profile:
         scopes.remove("profile")
 
     return scopes
@@ -54,6 +55,9 @@ class AuthRequestVM():
         return self.values.get("me")
 
     def scopes(self):
+        return self.values.get("scope", "").split(" ")
+    
+    def authorized_scopes(self):
         return get_authorized_scopes(self.values.get("scope", ""), self.user)
     
     def is_hostname_mismatch(self):

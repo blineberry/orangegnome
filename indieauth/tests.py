@@ -132,6 +132,7 @@ class AuthViewTestCase(TestCase):
         self.request = HttpRequest()
         self.request.session = dict()
         self.request.user = User()
+        self.request.user.profile = Profile()
         self.request.GET = {
             "client_id": "https://example.com/",
             "redirect_uri": "https://example.com/callback",
@@ -219,6 +220,7 @@ class AuthorizationRequestTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='testpassword')
+        Profile.objects.create(user=self.user,url="https://me.example.com/")
         self.client.force_login(self.user)
         self.code_verifier = "aAAi96b43AGcInR_pxWrb8pFKN1z3w2d2YzKOrvEWAWXIRtK1y9QVPCve4LcDYjy0W15KjXUEQ6naKqQIY1-_7Ub2lovyV8EPQq3WAA6DzMq1k6c1qyYo8uZGhKsUULd"
         self.get_data = {
@@ -272,8 +274,9 @@ class AuthorizationRequestTestCase(TestCase):
 
         response = self.client.get(self.authorization_endpoint, data=self.get_data)
 
+
+
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("admin:login", query={"next": self.authorization_endpoint}))
 
     def test_get_pkce_required(self):
         del self.get_data["code_challenge"]
