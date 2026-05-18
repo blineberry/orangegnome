@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from syndications.mastodon_client import Client as MastodonClient
-from django.db.models import UniqueConstraint
+from django.db.models import ImageField, UniqueConstraint
 import bleach
 from webmentions.models import OutgoingContent
 from django.urls import reverse
@@ -20,206 +20,7 @@ class Syndication(models.Model):
     url = models.URLField()
 
 
-class SyndicationAbstract():
-    name = models.TextField(max_length=50)
-    url = models.TextField(max_length=2000)
 
-    @staticmethod
-    def syndicate_to_mastodon(status=None, media=None):
-        if media is not None:
-            response = MastodonClient.post_media(media.file, media.thumbnail, media.description, media.focus)
-
-            if status is not None:
-                status.media_ids = [response['id']]
-
-        return MastodonClient.post_status(status.status, status.idempotency_key, status.in_reply_to_id, status.media_ids)
-    
-    @staticmethod
-    def favorite_on_mastodon(id=None):
-        if id is None:
-            return
-        
-        return MastodonClient.favorite_status(id)
-    
-    @staticmethod
-    def unfavorite_on_mastodon(id=None):
-        if id is None:
-            return
-        
-        return MastodonClient.unfavorite_status(id)
-    
-    @staticmethod
-    def boost_on_mastodon(id=None):
-        if id is None:
-            return
-        
-        return MastodonClient.boost_status(id)
-    
-    @staticmethod
-    def unboost_on_mastodon(id=None):
-        if id is None:
-            return
-        
-        return MastodonClient.unboost_status(id)
-
-    @staticmethod
-    def delete_from_mastodon(id):
-        return MastodonClient.delete_status(id)
-    
-    @staticmethod
-    def update_mastodon_replies(id):
-        status = MastodonStatus.objects.filter(id_str=id).first()
-
-        if status is None:
-            replies = MastodonReply.objects.filter(in_reply_to_id_str=id)
-            for reply in replies:
-                reply.delete()
-            return
-
-        context = MastodonClient.get_status_context(id)
-
-        if context is None:
-            return
-        
-        if context.get("descendants") is None:
-            replies = MastodonReply.objects.filter(in_reply_to_id_str=id)
-            for reply in replies:
-                reply.delete()
-            return
-        
-        processed_ids = []
-        
-        for descendent in context["descendants"]:
-            if descendent.get("in_reply_to_id") != id:
-                continue
-
-            descendent_status = MastodonClient.get_status(descendent.get("id"))
-
-            content = descendent_status["content"]
-            content = bleach.clean(content, tags=bleach.sanitizer.ALLOWED_TAGS.union(('p', 'br')))
-            content = bleach.linkify(content)
-
-            MastodonReply.objects.update_or_create(
-                id_str=descendent_status["id"],                 
-                defaults={
-                    'in_reply_to_id_str':descendent_status["in_reply_to_id"],
-                    'content':content,
-                    'author_name':descendent_status["account"].get("display_name"),
-                    'author_url':descendent_status["account"].get("url"),
-                    'author_photo':descendent_status["account"].get("avatar_static"),
-                    'published':descendent_status["created_at"],
-                    'url':descendent_status["url"],
-                    'reply_to_url':status.content_object.get_permalink()
-                }                
-            )
-
-            processed_ids.append(descendent_status["id"])
-
-        replies = MastodonReply.objects.filter(in_reply_to_id_str=status.id_str).exclude(id_str__in=processed_ids)
-        for reply in replies:
-            reply.delete()
-
-    @staticmethod
-    def update_mastodon_boosts(id):
-        print('updating mastodon boosts for status ' + id)
-        status = MastodonStatus.objects.filter(id_str=id).first()
-
-        if status is None:
-            print('status is none')
-            boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
-            for boost in boosts:
-                boost.delete()
-            return
-
-        accounts = MastodonClient.get_status_boost_accounts_all(id)
-
-        if accounts is None:
-            print('accounts is none')
-            boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
-            for boost in boosts:
-                boost.delete()
-            return
-                
-        processed_ids = []
-        
-        print(str(len(accounts)) + ' accounts to process')
-        for account in accounts:
-            boost = MastodonBoost.objects.update_or_create(
-                account_id_str=account["id"],
-                boost_of_id_str=status.id_str,
-                defaults={
-                    'url': status.url,
-                    'author_name': account["display_name"],
-                    'author_url': account["url"],
-                    'author_photo': account["avatar_static"],
-                    'boost_of_id_str': status.id_str,
-                    'repost_of_url': status.content_object.get_permalink()
-                }
-            )[0]
-
-            boost_status = MastodonClient.get_account_status_by_reblog_of_id(reblog_of_id=boost.boost_of_id_str, account_id=boost.account_id_str)
-
-            processed_ids.append(account["id"])
-
-            if boost_status is None:
-                print('no status found')
-                continue
-            
-            print('boost status id ', boost_status.get('id'))
-            boost.published = boost_status.get("created_at")
-            boost.save()
-
-            
-        print(str(len(processed_ids)) + ' boosts processed')
-        boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
-        
-        print(str(len(boosts)) + ' boosts to remove')
-        for boost in boosts:
-            boost.delete()
-
-    @staticmethod
-    def update_mastodon_favourites(id):
-        status = MastodonStatus.objects.filter(id_str=id).first()
-
-        if status is None:
-            favourites = MastodonFavourite.objects.filter(like_of_url=status.id_str)
-            for favourite in favourites:
-                favourite.delete()
-            return
-
-        accounts = MastodonClient.get_status_favorite_accounts_all(id)
-        
-        if accounts is None:
-            favourites = MastodonFavourite.objects.filter(like_of_url=status.id_str)
-            for favourite in favourites:
-                favourite.delete()
-            return
-        
-        processed_ids = []
-
-        for account in accounts:
-            MastodonFavourite.objects.update_or_create(
-                account_id_str=account["id"],
-                favourite_of_id_str=status.id_str,
-                defaults={
-                    'url':status.url,
-                    'author_name':account["display_name"],
-                    'author_url':account["url"],
-                    'author_photo':account["avatar_static"],
-                    'favourite_of_id_str':status.id_str,
-                    'like_of_url':status.content_object.get_permalink()
-                }
-            )     
-
-            processed_ids.append(account["id"])
-
-        favourites = MastodonFavourite.objects.all().filter(favourite_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
-
-        for favourite in favourites:
-            favourite.delete()
-
-    class Meta:
-        abstract = True
 
 #class StravaLatLng(models.Model):
 #    lat = models.FloatField()
@@ -434,7 +235,7 @@ class MastodonSyndicatable(models.Model):
         """Return the tags that should be parsed and added to the status."""
         raise NotImplementedError("get_mastodon_tags not implemented.")
     
-    def has_mastodon_media(self):
+    def has_mastodon_media(self)->bool:
         """Returns True if the Model has media to upload."""
         return False
     
@@ -471,16 +272,12 @@ class MastodonSyndicatable(models.Model):
             return None
         
         return path_parts[2]
+    
+    def get_mastodon_media_image_tuples(self)->list[tuple[ImageField,str]]:
+        """Return a list of a tuples of ImageField and description text."""
+        raise NotImplementedError("get_mastodon_media_image_tuples not implemented.")
 
-    def get_mastodon_media_image_field(self):
-        """Returns the ImageField for the media."""
-        raise NotImplementedError("get_mastodon_media_image_field not implemented.")
-
-    def get_mastodon_media_description(self):
-        """Returns the description for the media."""
-        raise NotImplementedError("get_mastodon_media_description not implemented.")
-
-    def get_mastodon_status_update(self):
+    def get_mastodon_status_update(self)->MastodonStatusUpdate:
         # Get the basic Mastodon Status object from the content.
         status = MastodonStatusUpdate(self.to_mastodon_status())
 
@@ -500,17 +297,19 @@ class MastodonSyndicatable(models.Model):
         status.status = MastodonSyndicatable.add_hashtags(status.status, self.get_mastodon_tags())
         
         return status
-
-    def get_mastodon_media_upload(self):
+    
+    def get_mastodon_media_uploads(self)->list[MastodonMediaUpload]:
         if not self.has_mastodon_media():
-            return None
+            return []
+        
+        postimage_tuples = self.get_mastodon_media_image_tuples()
+        media_uploads = []
 
-        media = self.get_mastodon_media_image_field()
-        # https://stackoverflow.com/a/35974071/814492
-        file = (media.name.split('/')[-1], media)
+        for t in postimage_tuples:
+            file = (t[0].name.split('/')[-1], t[0])
+            media_uploads.append(MastodonMediaUpload(file, description=t[1]))
 
-        media_upload = MastodonMediaUpload(file, description=self.get_mastodon_media_description())
-        return media_upload
+        return media_uploads
 
     @staticmethod
     def parse_mastodon_url(url):
@@ -660,6 +459,210 @@ class MastodonFavourite(Like):
                 name="unique_mastodon_account_id_str_favourite_of_id_str",
             ),
         ]
+
+class SyndicationAbstract():
+    name = models.TextField(max_length=50)
+    url = models.TextField(max_length=2000)
+
+    @staticmethod
+    def syndicate_to_mastodon(status=None, media:list[MastodonMediaUpload]=None):
+        if status is not None:
+            status.media_ids = []
+
+        if media is not None:
+            for m in media:
+                response = MastodonClient.post_media(m.file, m.thumbnail, m.description, m.focus)
+
+                status.media_ids.append(response['id'])
+
+        return MastodonClient.post_status(status.status, status.idempotency_key, status.in_reply_to_id, status.media_ids)
+    
+    @staticmethod
+    def favorite_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.favorite_status(id)
+    
+    @staticmethod
+    def unfavorite_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.unfavorite_status(id)
+    
+    @staticmethod
+    def boost_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.boost_status(id)
+    
+    @staticmethod
+    def unboost_on_mastodon(id=None):
+        if id is None:
+            return
+        
+        return MastodonClient.unboost_status(id)
+
+    @staticmethod
+    def delete_from_mastodon(id):
+        return MastodonClient.delete_status(id)
+    
+    @staticmethod
+    def update_mastodon_replies(id):
+        status = MastodonStatus.objects.filter(id_str=id).first()
+
+        if status is None:
+            replies = MastodonReply.objects.filter(in_reply_to_id_str=id)
+            for reply in replies:
+                reply.delete()
+            return
+
+        context = MastodonClient.get_status_context(id)
+
+        if context is None:
+            return
+        
+        if context.get("descendants") is None:
+            replies = MastodonReply.objects.filter(in_reply_to_id_str=id)
+            for reply in replies:
+                reply.delete()
+            return
+        
+        processed_ids = []
+        
+        for descendent in context["descendants"]:
+            if descendent.get("in_reply_to_id") != id:
+                continue
+
+            descendent_status = MastodonClient.get_status(descendent.get("id"))
+
+            content = descendent_status["content"]
+            content = bleach.clean(content, tags=bleach.sanitizer.ALLOWED_TAGS.union(('p', 'br')))
+            content = bleach.linkify(content)
+
+            MastodonReply.objects.update_or_create(
+                id_str=descendent_status["id"],                 
+                defaults={
+                    'in_reply_to_id_str':descendent_status["in_reply_to_id"],
+                    'content':content,
+                    'author_name':descendent_status["account"].get("display_name"),
+                    'author_url':descendent_status["account"].get("url"),
+                    'author_photo':descendent_status["account"].get("avatar_static"),
+                    'published':descendent_status["created_at"],
+                    'url':descendent_status["url"],
+                    'reply_to_url':status.content_object.get_permalink()
+                }                
+            )
+
+            processed_ids.append(descendent_status["id"])
+
+        replies = MastodonReply.objects.filter(in_reply_to_id_str=status.id_str).exclude(id_str__in=processed_ids)
+        for reply in replies:
+            reply.delete()
+
+    @staticmethod
+    def update_mastodon_boosts(id):
+        print('updating mastodon boosts for status ' + id)
+        status = MastodonStatus.objects.filter(id_str=id).first()
+
+        if status is None:
+            print('status is none')
+            boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
+            for boost in boosts:
+                boost.delete()
+            return
+
+        accounts = MastodonClient.get_status_boost_accounts_all(id)
+
+        if accounts is None:
+            print('accounts is none')
+            boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str)
+            for boost in boosts:
+                boost.delete()
+            return
+                
+        processed_ids = []
+        
+        print(str(len(accounts)) + ' accounts to process')
+        for account in accounts:
+            boost = MastodonBoost.objects.update_or_create(
+                account_id_str=account["id"],
+                boost_of_id_str=status.id_str,
+                defaults={
+                    'url': status.url,
+                    'author_name': account["display_name"],
+                    'author_url': account["url"],
+                    'author_photo': account["avatar_static"],
+                    'boost_of_id_str': status.id_str,
+                    'repost_of_url': status.content_object.get_permalink()
+                }
+            )[0]
+
+            boost_status = MastodonClient.get_account_status_by_reblog_of_id(reblog_of_id=boost.boost_of_id_str, account_id=boost.account_id_str)
+
+            processed_ids.append(account["id"])
+
+            if boost_status is None:
+                print('no status found')
+                continue
+            
+            print('boost status id ', boost_status.get('id'))
+            boost.published = boost_status.get("created_at")
+            boost.save()
+
+            
+        print(str(len(processed_ids)) + ' boosts processed')
+        boosts = MastodonBoost.objects.filter(boost_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
+        
+        print(str(len(boosts)) + ' boosts to remove')
+        for boost in boosts:
+            boost.delete()
+
+    @staticmethod
+    def update_mastodon_favourites(id):
+        status = MastodonStatus.objects.filter(id_str=id).first()
+
+        if status is None:
+            favourites = MastodonFavourite.objects.filter(like_of_url=status.id_str)
+            for favourite in favourites:
+                favourite.delete()
+            return
+
+        accounts = MastodonClient.get_status_favorite_accounts_all(id)
+        
+        if accounts is None:
+            favourites = MastodonFavourite.objects.filter(like_of_url=status.id_str)
+            for favourite in favourites:
+                favourite.delete()
+            return
+        
+        processed_ids = []
+
+        for account in accounts:
+            MastodonFavourite.objects.update_or_create(
+                account_id_str=account["id"],
+                favourite_of_id_str=status.id_str,
+                defaults={
+                    'url':status.url,
+                    'author_name':account["display_name"],
+                    'author_url':account["url"],
+                    'author_photo':account["avatar_static"],
+                    'favourite_of_id_str':status.id_str,
+                    'like_of_url':status.content_object.get_permalink()
+                }
+            )     
+
+            processed_ids.append(account["id"])
+
+        favourites = MastodonFavourite.objects.all().filter(favourite_of_id_str=status.id_str).exclude(account_id_str__in=processed_ids)
+
+        for favourite in favourites:
+            favourite.delete()
+
+    class Meta:
+        abstract = True
 
 class MastodonStatusesToProcess(models.Model):
     id_str = models.CharField(max_length=40)
