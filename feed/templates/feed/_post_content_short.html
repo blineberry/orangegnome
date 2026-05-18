@@ -1,18 +1,14 @@
 
 {% if post.is_article %}
 <div class="e-content {{ post.html_class }}-short">
+    <p class="{{ post.html_class }}-short-title"><a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></p>
+    <div class="{{ post.html_class }}-short-summary">{{ post.summary_html | safe }}</div>
     {% if post.image_featured %}
-    <a href={{ post.get_permalink}}><img 
+    <a class="{{ post.html_class }}-short-img" href="{{ post.get_permalink }}"><img 
         src="{{ post.image_featured.image.image.url }}"
         alt="{{ post.image_featured.alt }}"
         class="u-featured">
     </a>
-    <div>
-    {% endif %}
-    <p><a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
-    {{ post.summary_html | safe }}
-    {% if post.image_featured %}
-    </div>
     {% endif %}
 </div>
 {% elif post.is_photo %}
