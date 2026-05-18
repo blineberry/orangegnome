@@ -3,9 +3,10 @@ import hashlib
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 from indieauth.models import AuthTokenBase
-from indieauth.viewmodels import AuthSubmissionVM
+from indieauth.viewmodels import AuthSubmissionVM, get_authorized_scopes
 from profiles.models import Profile
 
 CODE_CHALLENGE_METHODS = ["S256"]
@@ -45,14 +46,14 @@ class AuthCode(AuthTokenBase):
         return code
     
     @classmethod
-    def from_auth_submission_vm(cls, vm:AuthSubmissionVM, user_id):
+    def from_auth_submission_vm(cls, vm:AuthSubmissionVM, user:User):
         code = cls.create()
         code.client_id = vm.values.get("client_id")
         code.redirect_uri = vm.values.get("redirect_uri")
-        code.user_id = user_id
+        code.user_id = user.id
         code.code_challenge_method = vm.values.get("code_challenge_method")
         code.code_challenge = vm.values.get("code_challenge")
-        code.scope = vm.values.get("scope", "")
+        code.scope = " ".join(get_authorized_scopes(vm.values.get("scope", ""),user))
         
         return code
 

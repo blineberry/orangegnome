@@ -119,14 +119,20 @@ class AuthView(View):
 
     def get(self, request:HttpRequest, *args, **kwargs)->HttpResponse:
         if not request.user.is_authenticated:
-            return redirect(reverse("admin:login", query={"next":request.path}))
+            return redirect(reverse("admin:login", query={"next":request.get_full_path_info()}))
+        
+        # the profile one-to-one record has the url, which is required on many
+        # responses. if the user doesn't have a profile, the user is not
+        # authorized for indieauth.
+        if hasattr(request.user,"profile") == False:
+            return HttpResponse("Unauthorized. Does not have a profile.", status=403)
         
         success, client, error_msg = AuthView.validate_request(request.GET)
 
         if not success:
             return HttpResponseBadRequest(error_msg)    
 
-        vm = AuthRequestVM(request.GET, client)
+        vm = AuthRequestVM(request.GET, client, request.user)
         
         return render(request, self.template_name, { "model" : vm })
     
@@ -136,9 +142,12 @@ class AuthView(View):
         
         return self.auth_code_response(request, *args, **kwargs)
 
-    def auth_code_response(self, request, *args, **kwargs):
+    def auth_code_response(self, request:HttpRequest, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect(reverse("admin:login", query={"next":request.path}))
+            return redirect(reverse("admin:login", query={"next":request.get_full_path_info()}))
+        
+        if hasattr(request.user,"profile") == False:
+            return HttpResponse("Unauthorized. Does not have a profile.", status=403)
         
         request.csrf_processing_done = False
         reason = CsrfViewMiddleware(AuthView.get_response).process_view(request, None, (), {})
@@ -155,7 +164,7 @@ class AuthView(View):
 
         if vm.should_generate_auth_code():
             user = request.user
-            auth = AuthCode.from_auth_submission_vm(vm, user.id)
+            auth = AuthCode.from_auth_submission_vm(vm, user)
             auth.save()
 
             return redirect(vm.get_redirect_uri(auth.code))

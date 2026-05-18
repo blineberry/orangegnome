@@ -3,6 +3,10 @@
     <title></title>
 </head>
 <body>
+    <form method="post" action="{% url 'admin:logout' %}">
+        {% csrf_token %}
+        <p>Logged in as {{ user }}. <button type="submit">Log out</button>.
+    </form>
     <div>{{ model.client_id }}</div>
     <h1>Allow <a target="_blank" href="{{ model.client_url }}">{{ model.client_name }}</a> to act on your behalf?</h1>
 
@@ -20,7 +24,8 @@
 
         {% for scope in model.scopes %}
         <div>
-            <label><input name="scope" type="checkbox" checked value="{{ scope }}">{{ scope }}</label>
+            <label><input name="scope" type="checkbox" {% if scope in model.authorized_scopes %}checked{% else %}disabled{% endif %} value="{{ scope }}">{{ scope }}</label>
+            {% if scope not in model.authorized_scopes %}<span>(Logged in user is not authorized for this requested scope.)</span>{% endif %}
         </div>
         {% endfor %}
         {% for warning in model.warnings %}

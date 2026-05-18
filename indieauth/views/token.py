@@ -3,6 +3,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db.models import Q
 
 from indieauth.models import AccessToken, AuthCode, RefreshToken
 
@@ -56,7 +57,7 @@ class TokenView(View):
         if request.POST.get("grant_type") != "refresh_token":
             return HttpResponseBadRequest("{\"error\": \"invalid grant_type\"}")
         
-        token = RefreshToken.objects.filter(token=request.POST.get("refresh_token"),expires_utc__gte=timezone.now()).first()
+        token = RefreshToken.objects.filter(Q(token=request.POST.get("refresh_token")),Q(expires_utc__gte=timezone.now()) | Q(expires_utc=None)).first()
         RefreshToken.objects.filter(token=request.POST.get("refresh_token")).delete()
 
         if token is None or token.client_id != request.POST.get("client_id"):
