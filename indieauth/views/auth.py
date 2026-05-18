@@ -126,7 +126,7 @@ class AuthView(View):
         if not success:
             return HttpResponseBadRequest(error_msg)    
 
-        vm = AuthRequestVM(request.GET, client)
+        vm = AuthRequestVM(request.GET, client, request.user)
         
         return render(request, self.template_name, { "model" : vm })
     
@@ -136,9 +136,9 @@ class AuthView(View):
         
         return self.auth_code_response(request, *args, **kwargs)
 
-    def auth_code_response(self, request, *args, **kwargs):
+    def auth_code_response(self, request:HttpRequest, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect(reverse("admin:login", query={"next":request.path}))
+            return redirect(reverse("admin:login", query={"next":request.get_full_path_info()}))
         
         request.csrf_processing_done = False
         reason = CsrfViewMiddleware(AuthView.get_response).process_view(request, None, (), {})
@@ -155,7 +155,7 @@ class AuthView(View):
 
         if vm.should_generate_auth_code():
             user = request.user
-            auth = AuthCode.from_auth_submission_vm(vm, user.id)
+            auth = AuthCode.from_auth_submission_vm(vm, user)
             auth.save()
 
             return redirect(vm.get_redirect_uri(auth.code))

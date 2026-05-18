@@ -1,11 +1,22 @@
 from urllib.parse import urlsplit
 from django.http import QueryDict
+from django.contrib.auth.models import User
 from indieauth.models import ClientMetadata
+
+
+def get_authorized_scopes(scope, user):
+    scopes = scope.split(" ")
+
+    if "profile" in scopes and user.profile is None:
+        scopes.remove("profile")
+
+    return scopes
 
 class AuthRequestVM():
     ACCEPT:str = "ACCEPT"
     values:QueryDict = QueryDict()
     client:ClientMetadata = None
+    user:User = None
 
     def client_id(self):
         return self.values.get("client_id")
@@ -43,7 +54,7 @@ class AuthRequestVM():
         return self.values.get("me")
 
     def scopes(self):
-        return self.values.get("scope", "").split(" ")
+        return get_authorized_scopes(self.values.get("scope", ""), self.user)
     
     def is_hostname_mismatch(self):
         if self.client_uri() is None:
@@ -59,9 +70,10 @@ class AuthRequestVM():
 
         return warnings
 
-    def __init__(self, values:QueryDict, client:ClientMetadata):
+    def __init__(self, values:QueryDict, client:ClientMetadata, user:User):
         self.values = values
         self.client = client
+        self.user = user
 
 class AuthSubmissionVM():
     values:QueryDict = QueryDict() 
