@@ -390,13 +390,13 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
             
         return self.image() is not None
     
-    def get_mastodon_media_image_field(self):
-        """Returns the ImageField for the media."""
-        return self.image()
-    
-    def get_mastodon_media_description(self):
-        """Returns the description for the media."""
-        return self.alternative_text()
+    def get_mastodon_media_image_tuples(self):
+        tuples = []
+
+        for i in self.postimage_set.order_by("-featured","order")[:4]:
+            tuples.append((i.image.image, i.alt))
+
+        return tuples
     
     def image_max_width(self):
         images = self.images.all()

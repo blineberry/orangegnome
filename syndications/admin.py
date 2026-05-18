@@ -106,7 +106,7 @@ class SyndicatableAdmin(admin.ModelAdmin):
             return self.__syndicate_mastodon_boost(request,obj)
 
         try:
-            media = obj.get_mastodon_media_upload()
+            media = obj.get_mastodon_media_uploads()
             status = obj.get_mastodon_status_update()
             response = SyndicationAbstract.syndicate_to_mastodon(status, media)
         except Exception as e:
