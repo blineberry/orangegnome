@@ -689,6 +689,17 @@ class RefreshTokenTestCase(TestCase):
         content = response.json()
         self.assertIsNotNone(content.get("access_token"))
 
+    def test_no_exp_returns_token(self):
+        tokens = RefreshToken.objects.all()
+        for t in tokens:
+            t.expires_utc = None
+            t.save()
+
+        response = self.client.post(self.token_endpoint, self.data)
+
+        content = response.json()
+        self.assertIsNotNone(content.get("access_token"))
+
     def test_cant_reuse_token(self):
         self.client.post(self.token_endpoint, self.data)
 
@@ -738,17 +749,14 @@ class IntrospectionTestCase(TestCase):
         self.client_id = "https://example.com/"
         self.access_token = AccessToken.objects.create(token="testtoken", scope="profile update", client_id=self.client_id, user=user, issued_utc=timezone.now(), expires_utc=timezone.now() + timedelta(minutes=5))
         self.data = {
-            "token": self.access_token.token,
-            "client_id": self.client_id
+            "token": self.access_token.token
         }
         
         return super().setUp()
     
     def test_returns_info(self):
-        response = self.client.post(self.introspection_endpoint, self.data)
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.data.get("token")}'})
         
-        self.assertEqual(401, response.status_code)
-        return
         content = response.json()
         self.assertIsNotNone(content.get("active"))
         self.assertIsNotNone(content.get("me"))
@@ -758,7 +766,6 @@ class IntrospectionTestCase(TestCase):
         self.assertIsNotNone(content.get("exp"))
 
     def test_no_auth_returns_401(self):
-        del self.data["client_id"]
         response = self.client.post(self.introspection_endpoint, self.data)
         
         self.assertEqual(401, response.status_code)
@@ -767,10 +774,7 @@ class IntrospectionTestCase(TestCase):
         invalid_token = self.access_token.token + "invalid"
         self.data["token"] = invalid_token
         
-        response = self.client.post(self.introspection_endpoint, self.data)
-
-        self.assertEqual(401, response.status_code)
-        return
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.data.get("token")}'})
         
         content = response.json()
         self.assertFalse(content.get("active"))
@@ -780,10 +784,7 @@ class IntrospectionTestCase(TestCase):
         token.expires_utc = timezone.now() - timedelta(seconds=1)
         token.save()
         
-        response = self.client.post(self.introspection_endpoint, self.data)
-
-        self.assertEqual(401, response.status_code)
-        return
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.data.get("token")}'})
         
         content = response.json()
         self.assertFalse(content.get("active"))
@@ -793,11 +794,8 @@ class IntrospectionTestCase(TestCase):
         token.expires_utc = None
         token.save()
         
-        response = self.client.post(self.introspection_endpoint, self.data)
+        response = self.client.post(self.introspection_endpoint, self.data, headers={"Authorization": f'Bearer {self.data.get("token")}'})
 
-        self.assertEqual(401, response.status_code)
-        return
-        
         content = response.json()
         self.assertIsNone(content.get("exp"))
 
@@ -860,6 +858,18 @@ class UserInfoTestCase(TestCase):
         self.userinfo_endpoint = reverse("indieauth:userinfo")
     
     def test_returns_info(self):
+        response = self.client.get(self.userinfo_endpoint, headers={"Authorization": f'Bearer {self.access_token.token}'})
+
+        content = response.json()
+        self.assertIsNotNone(content.get("name"))
+        self.assertIsNotNone(content.get("url"))
+    
+    def test_no_exp_returns_info(self):
+        tokens = AccessToken.objects.all()
+        for t in tokens:
+            t.expires_utc = None
+            t.save()
+
         response = self.client.get(self.userinfo_endpoint, headers={"Authorization": f'Bearer {self.access_token.token}'})
 
         content = response.json()

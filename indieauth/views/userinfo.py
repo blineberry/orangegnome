@@ -3,6 +3,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db.models import Q
 
 from indieauth.models import AccessToken
 
@@ -36,7 +37,7 @@ class UserInfoView(View):
         if bearer is None:
             return HttpResponse("invalid_token", status=401)
         
-        token = AccessToken.objects.filter(token=bearer,expires_utc__gte=timezone.now()).first()
+        token = AccessToken.objects.filter(Q(token=bearer),Q(expires_utc__gte=timezone.now()) | Q(expires_utc=None)).first()
 
         if token is None:
             return HttpResponse("invalid_token", status=401)
