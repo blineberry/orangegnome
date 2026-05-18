@@ -1,3 +1,4 @@
+{% load auto_id %}
 {% if post.is_bookmark %}
 <p>🔖 <a class="alt u-bookmark-of {% if post.title_txt %}h-cite{% endif %}" href="{{ post.url }}">{{ post.get_title_or_url_txt }}</a></p>
 {% if post.has_quote_or_content %}
@@ -79,7 +80,7 @@
 {% else %}
 {% if post.content_html %}
 <div class="e-content">
-    {{ post.content_html|safe }}
+    {{ post.content_html|safe|auto_id }}
 </div>
 {% endif %}
 {% endif %}
