@@ -1,7 +1,7 @@
 from django.views.generic import detail, list, dates, ListView, View
 
 from orangegnome import settings
-from .models import Tag, FeedItem as Post, convert_commonmark_to_html, convert_commonmark_to_plain_text
+from .models import Tag, Post as Post, convert_commonmark_to_html, convert_commonmark_to_plain_text
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
 from django.utils import timezone
