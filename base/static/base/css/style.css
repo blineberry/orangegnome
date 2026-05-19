@@ -112,7 +112,8 @@
   ===== 
 */
 body {
-    padding: var(--space-2);
+    padding: 0;
+    margin: 0;
 
     font-size: var(--font-root);
     line-height: 1.6;
@@ -233,6 +234,7 @@ pre code {
 */
 
 .profile {
+    margin-top: var(--space-3);
     text-align: center;
 }
 
@@ -285,19 +287,89 @@ pre code {
 
 .siteheader, .sitemain, .sitefooter {
     margin: 2em auto;
+    padding: var(--space-2);
 }
 
 .siteheader {
     margin-top: 0;
+    padding: 0;
+}
 
-    .profile + .sitenav {
-        margin-top: var(--space-3);
+.sitenav, .secondarynav {
+    padding: var(--space-2);
+    align-items: center;
+
+    font-family: var(--ui-font-family);
+    font-size: var(--font-small);
+
+    a:link, a:visited {
+        color: var(--primary-darken-8);
     }
+
+    a:hover, a:active {
+        color: var(--primary-darken-2);
+    }
+
+    .sitenav-listitem button {
+        appearance: none;
+        border: 0 none;
+        background: transparent;
+        color: var(--primary-darken-8);
+        text-decoration: underline;
+        cursor: pointer;
+        margin: 0;
+        padding: 0;
+        font-size: var(--font-1);
+        
+        &:hover, &:active {
+            color: var(--primary-darken-2);
+        }
+
+        &::before {
+            content: '▷ ';
+        }
+
+    }
+
+    .sitenav-title {
+        font-weight: bold;
+        
+        &:link, &:visited {
+            text-decoration: none;
+        }
+
+        &:hover, &:active {
+            text-decoration: underline;
+        }
+    }    
 }
 
 .sitenav {
-    font-family: var(--ui-font-family);
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    anchor-name: --sitenav;
+    background: var(--primary);
+}
+
+.siteheader:has(#sitenav-posttype-nav:popover-open) button[popovertarget=sitenav-posttype-nav]::before {
+    content: '▽ ';
+}
+.siteheader:has(#sitenav-admin-nav:popover-open) button[popovertarget=sitenav-admin-nav]::before {
+    content: '▽ ';
+}
+
+.secondarynav {
+    border: 0 none;
+    background: var(--primary-lighten);
+    width: auto;
+    text-align: right;    
+    padding: var(--space-2);
+    position: absolute;
+    position-anchor: --sitenav;
+    inset-block-start: anchor(left);
+    inset-block-end: anchor(right);
+
+    font-size: var(--font-small);
 }
 
 .sitenav-list {
@@ -319,8 +391,14 @@ pre code {
     max-width: 28em;
 }
 
+.sitemain {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 .sitefooter {
-    margin-bottom: 0;
+    margin-bottom: var(--space-2);
+    margin-left: var(--space-2);
     padding-left: 4em;
     box-sizing: border-box;
     background: url("../images/logo_361x294.png") center left no-repeat;

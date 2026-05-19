@@ -38,31 +38,50 @@
     {% endif %}
     <link rel="microsub" href="https://aperture.p3k.io/microsub/891">
 </head>
-<body>
-    {% if user.is_staff %}
-        <nav class="adminnav">
-            <a href="{% url 'admin:index' %}">Admin</a>
-            {% if edit_link %}
-            | <a href="{{ edit_link }}">Edit</a>
-            {% endif %}
-        </nav>
-    {% endif %}
+<body>    
     <header class="siteheader">
-        <div class="h-card profile {% block hcard_class %}{% endblock %}">
-            <a rel="me" href="{% url 'feed:index' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="A profile photo of {{ profiles.site_owner.name }}"></a>
-            <h1 class="p-name profile-name">{{ profiles.site_owner.name }}</h1>
-            {% block hcard %}
-            {% endblock %}
-        </div>
         <nav class="sitenav">
+            <a class="sitenav-title" href="{% url 'feed:index' %}">{{ base.site_name }}</a>
             <ul class="sitenav-list">
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:index' %}">Home</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:articles' %}">Articles</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:notes' %}">Notes</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:photos' %}">Photos</a></li>
-                <li class="sitenav-listitem"><a class="sitenav-listlink alt" href="{% url 'feed:bookmarks' %}">Links</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:index' %}">Home</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:posts' %}">All Posts</a></li>
+                <li class="sitenav-listitem"><button popovertarget="sitenav-posttype-nav">Post Types</button></li>   
+                <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:tagindex' %}">Tags</a></li>             
+                {% if user.is_staff %}
+                {% if edit_link %}
+                <li class="sitenav-listitem"><button popovertarget="sitenav-admin-nav">Admin</button></li>  
+                {% else %}
+                <li class="sitenav-listitem"><a href="{% url 'admin:index' %}">Admin</a></li>  
+                {% endif %}
+                {% endif %}
             </ul>
         </nav>
+        <nav id="sitenav-posttype-nav" class="secondarynav" popover>   
+            <ul class="sitenav-list">         
+            <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:articles' %}">Articles</a></li>
+            <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:notes' %}">Notes</a></li>
+            <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:photos' %}">Photos</a></li>
+            <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:bookmarks' %}">Links</a></li>
+            <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:reposts' %}">Reposts</a></li>
+            <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:likes' %}">Likes</a></li>
+            </ul>
+        </nav>
+        {% if user.is_staff and edit_link %}                              
+        <nav id="sitenav-admin-nav" class="secondarynav" popover>
+            <ul class="sitenav-list">
+            <li class="sitenav-listitem"><a href="{% url 'admin:index' %}">Admin</a>
+            {% if edit_link %}
+            <li class="sitenav-listitem"><a href="{{ edit_link }}">Edit</a>
+            {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        <div class="h-card profile {% block hcard_class %}{% endblock %}">
+            <a rel="me" href="{% url 'feed:index' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="A profile photo of {{ profiles.site_owner.name }}"></a>
+            <div class="p-name profile-name">{{ profiles.site_owner.name }}</div>
+            {% block hcard %}
+            {% endblock %}
+        </div>        
     </header>
     <div class="sitemain">
     {% block body %}
