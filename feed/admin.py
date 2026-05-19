@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tag, Syndication, Image, PostImage, FeedItem as Post, Bookmark, Like, Note, Photo, Article, Repost
+from .models import Tag, Syndication, Image, PostImage, Post as Post, Bookmark, Like, Note, Photo, Article, Repost
 from django import forms
 from django.utils import timezone
 from syndications.admin import SyndicatableAdmin as SAAdmin

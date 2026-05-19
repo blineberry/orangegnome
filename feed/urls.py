@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import views
 from .feed import LatestEntriesFeed
 from django.views.generic import RedirectView
-from .models import FeedItem as Post
+from .models import Post as Post
 
 app_name = 'feed'
 urlpatterns = [

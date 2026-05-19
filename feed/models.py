@@ -86,7 +86,7 @@ class Tag(models.Model):
     def to_hashtag(self, strip_special_characters = True):
         return "#" + self.to_pascale_case(strip_special_characters)
 
-class FeedItem(Webmentionable, MastodonSyndicatable):
+class Post(Webmentionable, MastodonSyndicatable):
     class PostType(models.TextChoices):
         ARTICLE = 'ARTICLE'
         BOOKMARK = 'BOOKMARK'
@@ -153,7 +153,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return post_type.lower()
     
     def html_class(self):
-        return FeedItem.get_html_class(self.post_type)
+        return Post.get_html_class(self.post_type)
 
     @staticmethod
     def get_site_url():
@@ -170,7 +170,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     
     def get_absolute_url(self):
         """Returns the url for the post relative to the root."""
-        if self.post_type == FeedItem.PostType.ARTICLE:
+        if self.post_type == Post.PostType.ARTICLE:
             return reverse('feed:detail', args=[self.id, self.slug])
             
         return reverse('feed:detail', args=[self.id])
@@ -179,18 +179,18 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return self.get_site_url() + self.get_absolute_url()
 
     def __str__(self):
-        if (self.post_type == FeedItem.PostType.BOOKMARK or 
-            self.post_type == FeedItem.PostType.LIKE):
+        if (self.post_type == Post.PostType.BOOKMARK or 
+            self.post_type == Post.PostType.LIKE):
             return self.url
         
-        if (self.post_type == FeedItem.PostType.NOTE or
-            self.post_type == FeedItem.PostType.PHOTO):
+        if (self.post_type == Post.PostType.NOTE or
+            self.post_type == Post.PostType.PHOTO):
             return self.content_txt()
         
-        if self.post_type == FeedItem.PostType.ARTICLE:
+        if self.post_type == Post.PostType.ARTICLE:
             return self.title_txt()
         
-        if self.post_type == FeedItem.PostType.REPOST:
+        if self.post_type == Post.PostType.REPOST:
             t = Truncator(strip_tags(self.content_txt()))
             return t.chars(50)
         
@@ -221,17 +221,17 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         """
         Returns the title for feed item indexes.
         """
-        if self.post_type == FeedItem.PostType.BOOKMARK:
+        if self.post_type == Post.PostType.BOOKMARK:
             return self.get_title_or_url_txt()
         
-        if (self.post_type == FeedItem.PostType.NOTE or
-            self.post_type == FeedItem.PostType.PHOTO):
+        if (self.post_type == Post.PostType.NOTE or
+            self.post_type == Post.PostType.PHOTO):
             return self.content_txt()
         
-        if self.post_type == FeedItem.PostType.ARTICLE:
+        if self.post_type == Post.PostType.ARTICLE:
             return self.title_txt()
         
-        if self.post_type == FeedItem.PostType.REPOST:
+        if self.post_type == Post.PostType.REPOST:
             return f'Reposted {self.source_author_name}'
         
         return ''
@@ -293,11 +293,11 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
     def has_quote(self):
         """Returns True if Bookmark has a quote."""
-        return FeedItem.is_none_or_whitespace(self.quote_md)
+        return Post.is_none_or_whitespace(self.quote_md)
 
     def has_content(self):
         """Returns True if Bookmark has content."""
-        return FeedItem.is_none_or_whitespace(self.content_md)
+        return Post.is_none_or_whitespace(self.content_md)
 
     def has_quote_or_content(self):
         """Returns True if post has either quote or content."""
@@ -335,7 +335,7 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
     def to_mastodon_status(self):
         """Return the content that should be the Status of a mastodon post."""
-        if self.post_type == FeedItem.PostType.BOOKMARK:
+        if self.post_type == Post.PostType.BOOKMARK:
             if self.has_quote_or_content() is not True:
                 raise Exception("No content to post to Mastodon.")
 
@@ -349,11 +349,11 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
 
             return content + self.url
         
-        if (self.post_type == FeedItem.PostType.NOTE or
-            self.post_type == FeedItem.PostType.PHOTO):
+        if (self.post_type == Post.PostType.NOTE or
+            self.post_type == Post.PostType.PHOTO):
             return self.content_txt()
         
-        if self.post_type == FeedItem.PostType.ARTICLE:
+        if self.post_type == Post.PostType.ARTICLE:
             return f'{self.summary_txt()}\n\n{self.get_permalink()}'
         
         raise Exception("No content to post to Mastodon.")
@@ -377,8 +377,8 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
         return self.is_repost()
     
     def get_mastodon_url(self):
-        if (self.post_type == FeedItem.PostType.LIKE or
-            self.post_type == FeedItem.PostType.REPOST):
+        if (self.post_type == Post.PostType.LIKE or
+            self.post_type == Post.PostType.REPOST):
             return self.url
         
         return None
@@ -468,11 +468,11 @@ class FeedItem(Webmentionable, MastodonSyndicatable):
     admin_image_tag.short_description = 'Preview'
         
 class Syndication(SyndicationsSyndication):
-    syndicated_post = models.ForeignKey(FeedItem, on_delete=models.CASCADE, related_name="syndications")
+    syndicated_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="syndications")
 
 class PostImage(models.Model):
     image = models.ForeignKey(Image,on_delete=models.CASCADE)
-    post = models.ForeignKey(FeedItem, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
     order = models.PositiveSmallIntegerField(blank=True, null=True, default=50)
     alt = models.CharField(blank=True, max_length=255)
     featured = models.BooleanField(default=False)
@@ -499,8 +499,8 @@ class PostTypeManager(models.Manager):
         qs = super().get_queryset()
         return qs.filter(post_type=self.post_type)      
 
-class Article(FeedItem):
-    objects = PostTypeManager(FeedItem.PostType.ARTICLE)
+class Article(Post):
+    objects = PostTypeManager(Post.PostType.ARTICLE)
 
     title_max = 100
     summary_max = 280
@@ -535,8 +535,8 @@ class Article(FeedItem):
     class Meta:
         proxy = True  
 
-class Bookmark(FeedItem):
-    objects = PostTypeManager(FeedItem.PostType.BOOKMARK)
+class Bookmark(Post):
+    objects = PostTypeManager(Post.PostType.BOOKMARK)
 
     title_max = 100    
     quote_max = 280
@@ -568,8 +568,8 @@ class Bookmark(FeedItem):
     class Meta:
         proxy = True
 
-class Like(FeedItem):
-    objects = PostTypeManager(FeedItem.PostType.LIKE)
+class Like(Post):
+    objects = PostTypeManager(Post.PostType.LIKE)
 
     def validate_publishable(self):
         if not self.published:
@@ -583,8 +583,8 @@ class Like(FeedItem):
     class Meta:
         proxy = True
 
-class Note(FeedItem):
-    objects = PostTypeManager(FeedItem.PostType.NOTE)
+class Note(Post):
+    objects = PostTypeManager(Post.PostType.NOTE)
 
     content_max= 560
     
@@ -602,8 +602,8 @@ class Note(FeedItem):
     class Meta:
         proxy = True
 
-class Photo(FeedItem):
-    objects = PostTypeManager(FeedItem.PostType.PHOTO)
+class Photo(Post):
+    objects = PostTypeManager(Post.PostType.PHOTO)
     content_max = 560
     
     def validate_publishable(self):
@@ -620,8 +620,8 @@ class Photo(FeedItem):
     class Meta:
         proxy = True
 
-class Repost(FeedItem):
-    objects = PostTypeManager(FeedItem.PostType.REPOST)
+class Repost(Post):
+    objects = PostTypeManager(Post.PostType.REPOST)
 
     class Meta:
         proxy = True
