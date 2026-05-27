@@ -1,0 +1,17 @@
+{% extends 'base/extended_hcard.html' %}
+
+{% block meta %}
+    {{ block.super }}
+
+    {% for meta in profiles.site_owner.meta_tags.all %}
+    <meta name="{{ meta.name }}" content="{{ meta.content }}">
+    {% endfor %}
+{% endblock %}
+
+{% block body %}
+
+<main class="post-list">
+    {% include 'feed/_postfeed.html' with feed=postfeed %}
+</main>
+
+{% endblock %}

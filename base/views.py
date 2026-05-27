@@ -30,6 +30,12 @@ class PermalinkResponseMixin(TemplateResponseMixin):
 
     May need to be implmented by child classes.
     """
+    canonical_view_query = {}
+    """
+    Any additional view query for the canonical view. I.e. `[self.kwargs['pk'], self.kwargs['slug']]`.
+
+    May need to be implmented by child classes.
+    """
 
     def get_canonical_viewname(self, context):
         """Returns the canonical_viewname from the child class."""
@@ -38,11 +44,15 @@ class PermalinkResponseMixin(TemplateResponseMixin):
     def get_canonical_view_args(self, context):
         """Returns the canonical_view_args from the child class."""
         return self.canonical_view_args
+    
+    def get_canonical_view_query(self, context):
+        """Returns query arguments from the child class."""
+        return self.canonical_view_query
 
     def get_context_data(self, **kwargs):
         """Returns the view context dictionary after adding a `permalink` entry."""
         context = super().get_context_data(**kwargs)
-        context['permalink'] = self.request.build_absolute_uri(reverse(self.get_canonical_viewname(context), args=self.get_canonical_view_args(context)))
+        context['permalink'] = self.request.build_absolute_uri(reverse(self.get_canonical_viewname(context), args=self.get_canonical_view_args(context), query=self.get_canonical_view_query(context)))
         return context
 
 class PageTitleResponseMixin(TemplateResponseMixin):

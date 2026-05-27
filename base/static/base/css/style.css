@@ -428,6 +428,24 @@ pre code {
   ===== 
 */
 
+.feed-header, .feed-footer {
+    color: var(--light-text-lighten)
+}
+
+.feed-header small {
+    font-size: var(--font-small)
+}
+
+.feed-header .feed-full-text {
+    font-family: var(--ui-font-family);
+    font-size: var(--font-small);
+}
+
+.feed .feed-nav {
+    text-align:center;
+}
+
+
 .feed-list {
     list-style:none;
     margin: var(--space-6) 0;
