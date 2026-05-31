@@ -53,6 +53,7 @@ class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
         context['feed_title'] = None
         context['rss_title'] = LatestEntriesFeed.description
         context['rss_url'] = "%s/feed" % LatestEntriesFeed.link
+        context['is_home'] = True
         return context    
 
     def get_queryset(self):
