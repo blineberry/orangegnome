@@ -39,114 +39,6 @@ class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
         context['feed_title'] = context['page_title']
 
         return context
-
-class IndexView(PermalinkResponseMixin, FeedItemArchiveView):
-    allow_empty = True
-    canonical_viewname = 'feed:index'
-    extra_context = {
-        'page_title': 'Brent Lineberry',
-    }
-    template_name = 'feed/post_archive.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['feed_title'] = None
-        context['rss_title'] = LatestEntriesFeed.description
-        context['rss_url'] = "%s/feed" % LatestEntriesFeed.link
-        context['is_home'] = True
-        return context    
-
-    def get_queryset(self):
-        return super().get_queryset().filter(published__lte=timezone.now()).exclude(post_type=Post.PostType.LIKE).order_by('-published')
-
-class FeedItemDateArchiveView(FeedItemArchiveView):
-    make_object_list = True
-    template_name = 'feed/post_archive.html'
-
-class YearView(PermalinkResponseMixin, dates.YearArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):    
-    canonical_viewname = 'feed:year'
-    
-    def get_canonical_view_args(self, context):
-        return [context['year'].strftime("%Y")]
-
-    def get_page_title(self, context):
-        return '{d.year} Archives | Brent Lineberry'.format(d = context['year'])
-
-
-class MonthView(PermalinkResponseMixin, dates.MonthArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
-    canonical_viewname = 'feed:month'
-    month_format = '%m'
-    
-    def get_canonical_view_args(self, context):
-        return [context['month'].strftime("%Y"), context['month'].strftime("%m")]
-
-    def get_page_title(self, context):
-        return '{d:%B} {d.year} Archives | Brent Lineberry'.format(d = context['month'])
-
-class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
-    canonical_viewname = 'feed:day'
-    month_format = '%m'
-    
-    def get_canonical_view_args(self, context):
-        return [context['day'].strftime("%Y"), context['day'].strftime("%m"), context['day'].strftime("%d")]
-
-    def get_page_title(self, context):
-        return '{d:%B} {d.day}, {d.year} Archives | Brent Lineberry'.format(d = context['day'])
-    
-class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
-    paginate_by = 10
-    template_name = 'feed/post_archive.html'
-    canonical_viewname = 'feed:tag'
-
-    def get_canonical_view_args(self, context):
-        return [self.kwargs['pk'], self.kwargs['slug']]
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Tag.objects.all())
-        
-        return super().get(request, *args, **kwargs)
-
-    def get_page_title(self, context):
-        return self.object.name
-
-    def get_queryset(self):
-        return self.object.feed_items.filter(published__lte=timezone.now()).order_by('-published')
-        
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context["page_title"] = f'{self.object.name} | Brent Lineberry'
-        return context
-    
-class TagIndex(ListView, PageTitleResponseMixin):
-    model = Tag
-    template_name = 'feed/tags.html'
-    ordering = ['name']
-
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context["page_title"] = 'Tags | Brent Lineberry'
-        return context
-
-@method_decorator([staff_member_required, csrf_exempt], name='dispatch')
-class CommonmarkConversion(View):
-    def post(self, request, *args, **kwargs):
-        body = json.loads(request.body)
-
-        input = body.get("input")
-        block_content = body.get("blockContent", True)
-
-        if input is None:
-            return HttpResponse("input property is required", status=400)
-
-        conversion = {
-            "input": input,
-            "html": convert_commonmark_to_html(input, block_content),
-            "plain": convert_commonmark_to_plain_text(input)
-        }
-
-        return JsonResponse(conversion)
     
 class DTListView(ListView):
     ORDER_ASC = "asc"
@@ -312,6 +204,9 @@ class DTListView(ListView):
         return context
 
 class FeedView(DTListView):
+    def get_feed_alts(self,context):
+        return []
+
     def get_uid_url(self, context):
         return None
     
@@ -340,6 +235,7 @@ class FeedView(DTListView):
 
         feed.url = self.get_url(context)
         feed.uid = self.get_uid_url(context)
+        feed.alternates = self.get_feed_alts(context)
         feed.name = self.get_name()
         feed.author = self.get_author()
         feed.photo = self.get_photo()
@@ -354,9 +250,99 @@ class FeedView(DTListView):
 
         context["feed"] = feed
         return context
+
+
+
+class FeedItemDateArchiveView(FeedItemArchiveView):
+    make_object_list = True
+    template_name = 'feed/post_archive.html'
+
+class YearView(PermalinkResponseMixin, dates.YearArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):    
+    canonical_viewname = 'feed:year'
+    
+    def get_canonical_view_args(self, context):
+        return [context['year'].strftime("%Y")]
+
+    def get_page_title(self, context):
+        return '{d.year} Archives | Brent Lineberry'.format(d = context['year'])
+
+
+class MonthView(PermalinkResponseMixin, dates.MonthArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
+    canonical_viewname = 'feed:month'
+    month_format = '%m'
+    
+    def get_canonical_view_args(self, context):
+        return [context['month'].strftime("%Y"), context['month'].strftime("%m")]
+
+    def get_page_title(self, context):
+        return '{d:%B} {d.year} Archives | Brent Lineberry'.format(d = context['month'])
+
+class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
+    canonical_viewname = 'feed:day'
+    month_format = '%m'
+    
+    def get_canonical_view_args(self, context):
+        return [context['day'].strftime("%Y"), context['day'].strftime("%m"), context['day'].strftime("%d")]
+
+    def get_page_title(self, context):
+        return '{d:%B} {d.day}, {d.year} Archives | Brent Lineberry'.format(d = context['day'])
+    
+class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
+    paginate_by = 10
+    template_name = 'feed/post_archive.html'
+    canonical_viewname = 'feed:tag'
+
+    def get_canonical_view_args(self, context):
+        return [self.kwargs['pk'], self.kwargs['slug']]
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Tag.objects.all())
         
+        return super().get(request, *args, **kwargs)
+
+    def get_page_title(self, context):
+        return self.object.name
+
+    def get_queryset(self):
+        return self.object.feed_items.filter(published__lte=timezone.now()).order_by('-published')
+        
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f'{self.object.name} | Brent Lineberry'
+        return context
+    
+class TagIndex(ListView, PageTitleResponseMixin):
+    model = Tag
+    template_name = 'feed/tags.html'
+    ordering = ['name']
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = 'Tags | Brent Lineberry'
+        return context
+
+@method_decorator([staff_member_required, csrf_exempt], name='dispatch')
+class CommonmarkConversion(View):
+    def post(self, request, *args, **kwargs):
+        body = json.loads(request.body)
+
+        input = body.get("input")
+        block_content = body.get("blockContent", True)
+
+        if input is None:
+            return HttpResponse("input property is required", status=400)
+
+        conversion = {
+            "input": input,
+            "html": convert_commonmark_to_html(input, block_content),
+            "plain": convert_commonmark_to_plain_text(input)
+        }
+
+        return JsonResponse(conversion)
+    
 class PostIndex(PermalinkResponseMixin, FeedView):
-    post_type = None
     extra_context = {
         'page_title': 'Posts | Brent Lineberry',
         'feed_title': 'Posts',
@@ -365,6 +351,21 @@ class PostIndex(PermalinkResponseMixin, FeedView):
     order_field = 'published'
     model = Post
     full_feed = False
+    canonical_viewname = 'feed:posts'
+
+    def get_feed_alts(self,context):
+        alts = []
+
+        if not self.full_feed:
+            return alts
+        
+        query = {}
+        if self.order == self.ORDER_ASC:
+            query["order"] = self.ORDER_ASC
+
+        alts.append(LinkVM(url=reverse(self.get_viewname(context), query=query), text="View partial content feed"))
+
+        return alts
 
     def get_uid_url(self, context):
         # if self.full_feed is True, then this is the full feed and there is no
@@ -396,6 +397,55 @@ class PostIndex(PermalinkResponseMixin, FeedView):
 
         if request.GET.get("full", False):
             self.full_feed = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['feed'].name = context['page_title']
+
+        postfeed = PostFeedVM.from_feedvm(context['feed'])
+        postfeed.posts = context["object_list"]
+        postfeed.full = self.full_feed
+
+        cur_url, cur_text = self.get_current(self.get_viewname(context))
+
+        if cur_text is not None and cur_text.strip() != "":
+            postfeed.subtitle = cur_text
+
+        context["postfeed"] = postfeed 
+        print(context["feed"].alternates)
+        return context
+    
+    def get_viewname(self, context)->str:
+        return self.get_canonical_viewname(context)
+
+    def get_canonical_viewname(self, context):
+        return self.canonical_viewname
+    
+    def get_canonical_view_query(self, context):
+        query = {}
+
+        if self.full_feed:
+            query["full"] = True
+
+        if self.get_order() == self.ORDER_ASC:
+            query["order"] = self.ORDER_ASC
+        
+            if self.after is not None:
+                query["after"] = self.after
+        elif self.before is not None:
+            query["before"] = self.before
+
+        return query
+
+    def get_queryset(self) -> QuerySet[Any]:
+        qs = super().get_queryset()
+
+        qs = qs.filter(published__lte=timezone.now())
+        
+        return qs
+        
+class PostTypeIndex(PostIndex):
+    post_type = None        
 
     def get_titles(self):
         page_title = 'Posts | Brent Lineberry'
@@ -430,22 +480,7 @@ class PostIndex(PermalinkResponseMixin, FeedView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'], context['feed_title'] = self.get_titles()
-        context['feed'].name = context['page_title']
-
-        postfeed = PostFeedVM.from_feedvm(context['feed'])
-        postfeed.posts = context["object_list"]
-        postfeed.full = self.full_feed
-
-        cur_url, cur_text = self.get_current(self.get_viewname(context))
-
-        if cur_text is not None and cur_text.strip() != "":
-            postfeed.subtitle = cur_text
-
-        context["postfeed"] = postfeed 
         return context
-    
-    def get_viewname(self, context)->str:
-        return self.get_canonical_viewname(context)
 
     def get_canonical_viewname(self, context):
         if self.post_type == Post.PostType.ARTICLE: 
@@ -467,34 +502,37 @@ class PostIndex(PermalinkResponseMixin, FeedView):
             return 'feed:reposts'          
         
         return 'feed:posts'
-    
-    def get_canonical_view_query(self, context):
-        query = {}
-
-        if self.full_feed:
-            query["full"] = True
-
-        if self.get_order() == self.ORDER_ASC:
-            query["order"] = self.ORDER_ASC
-        
-            if self.after is not None:
-                query["after"] = self.after
-        elif self.before is not None:
-            query["before"] = self.before
-
-        return query
 
     def get_queryset(self) -> QuerySet[Any]:
         qs = super().get_queryset()
 
         if self.post_type is not None:
             qs = qs.filter(post_type=self.post_type)
-
-        qs = qs.filter(published__lte=timezone.now())
         
         return qs
 
-        
+class HomeView(PostIndex):
+    allow_empty = True
+    canonical_viewname = 'feed:index'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        del context['feed_title']
+        context['rss_title'] = LatestEntriesFeed.description
+        context['rss_url'] = "%s/feed" % LatestEntriesFeed.link
+        context['is_home'] = context.get("feed") is None or context["feed"].prev is None
+        context['page_title'] = 'Brent Lineberry'
+        return context
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        qs.exclude(post_type=Post.PostType.LIKE)
+
+        return qs
+    
+    def get_canonical_viewname(self, context):
+        return self.canonical_viewname
     
 class PostDetailView(ForceSlugMixin, WebmentionableMixin, PermalinkResponseMixin, detail.DetailView):
     pk = 0

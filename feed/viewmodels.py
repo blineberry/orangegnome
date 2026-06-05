@@ -79,6 +79,7 @@ class ImageVM(object):
 class FeedVM(object):
     url:str = None
     uid:str = None
+    alternates:list[LinkVM] = []
     name:str = None
     author:AuthorVM = None
     photo:ImageVM = None
@@ -100,5 +101,6 @@ class PostFeedVM(FeedVM):
         c.photo = vm.photo
         c.prev = vm.prev
         c.next = vm.next
+        c.alternates = vm.alternates
 
         return c

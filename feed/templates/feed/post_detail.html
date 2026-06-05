@@ -39,5 +39,11 @@
 {% endblock %}
 
 {% block body %}
-{% include 'feed/_post.html' with post=post is_first=True %}
+{% if post.is_article %}
+    {% include 'feed/_article_detail.html' with post=post %}
+{% else %}
+<div class="container">
+    {% include 'feed/_post.html' with post=post is_first=True %}
+</div>
+{% endif %}
 {% endblock %}

@@ -4,28 +4,30 @@
             <div class="feed-header-content">
             {% if feed.name %}
             <h1 class="feed-name p-name">
-                {% if feed.url %}
-                <a class="u-url" href="{{ feed.url }}">
-                {% endif %}
-                {{ feed_title }}
-                {% if feed.url %}
-                </a>
-                {% if postfeed.subtitle %}
-                <small class="feed-subtitle">{{ postfeed.subtitle }}</small>
-                {% endif %}
+                {% if feed.url and feed_title %}<a class="u-url" href="{{ feed.url }}">{% endif %}{{ feed_title }}{% if feed.url %}</a>
+                    {% if postfeed.subtitle %}
+                    <small class="feed-subtitle">{{ postfeed.subtitle }}</small>
+                    {% endif %}
                 {% endif %}
             </h1>
             {% elif feed.url %}
             <a class="u-url alt" href="{{ feed.url }}">{{feed.url}}</a>
-            {% endif %}
-            {% if feed.uid %}
-            <a class="u-url u-uid alt feed-full-text" href="{{ feed.uid }}">Full text feed</a>
+            {% endif %}            
+            {% if feed.uid or feed.alternates|length > 0 %}
+            <ul class="feed-alternates">
+                {% if feed.uid %}
+                <li class="feed-alternates-item"><a class="u-url u-uid ui feed-full-text" href="{{ feed.uid }}">View full content feed</a></li>
+                {% endif %}
+                {% for alt in feed.alternates %}
+                <li class="feed-alternates-item"><a class="ui feed-alt font-small" href="{{ alt.url }}">{{ alt.text }}</a></li>
+                {% endfor %}
+            </ul>
             {% endif %}
             </div>   
         </div>
         {% if feed.prev %}
         <nav class="feed-nav">
-            <a class="feed-prev  btn btn-primary font-small font-bold" rel="prev" href="{{ feed.prev.url }}">{{ feed.prev.text }}</a>
+            <a class="feed-prev  btn font-small font-bold" rel="prev" href="{{ feed.prev.url }}">{{ feed.prev.text }}</a>
         </nav>
         {% endif %}
     </header>
@@ -45,7 +47,7 @@
     <footer class="feed-footer">
         {% if feed.next %}
         <nav class="feed-nav">
-            <a class="feed-next btn btn-primary font-small font-bold" rel="next" href="{{ feed.next.url }}">{{ feed.next.text }}</a>
+            <a class="feed-next btn font-small font-bold" rel="next" href="{{ feed.next.url }}">{{ feed.next.text }}</a>
         </nav>
         {% endif %}
     </footer>

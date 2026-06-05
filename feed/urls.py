@@ -6,7 +6,7 @@ from .models import Post as Post
 
 app_name = 'feed'
 urlpatterns = [
-    path('', views.IndexView.as_view(), name='index'),
+    path('', views.HomeView.as_view(), name='index'),
     path('date/<int:year>/', include([
         path('', views.YearView.as_view(), name='year'),
         path('<int:month>/', include([
@@ -22,12 +22,12 @@ urlpatterns = [
     path('posts/', views.PostIndex.as_view(), name="posts"),
     path('posts/<int:pk>', views.PostDetailView.as_view(), {"wm_app_name": 'feed', "wm_model_name": "FeedItem"}, name="detail"),
     path('posts/<int:pk>/<slug:slug>', views.PostDetailView.as_view(), {"wm_app_name": 'feed', "wm_model_name": "FeedItem"}, name="detail"),
-    path('bookmarks/', views.PostIndex.as_view(post_type=Post.PostType.BOOKMARK), name="bookmarks"),
-    path('likes/', views.PostIndex.as_view(post_type=Post.PostType.LIKE), name="likes"),
-    path('notes/', views.PostIndex.as_view(post_type=Post.PostType.NOTE), name="notes"),
-    path('photos/', views.PostIndex.as_view(post_type=Post.PostType.PHOTO), name="photos"),
-    path('articles/', views.PostIndex.as_view(post_type=Post.PostType.ARTICLE), name="articles"),
-    path('reposts/', views.PostIndex.as_view(post_type=Post.PostType.REPOST), name="reposts"),
+    path('bookmarks/', views.PostTypeIndex.as_view(post_type=Post.PostType.BOOKMARK), name="bookmarks"),
+    path('likes/', views.PostTypeIndex.as_view(post_type=Post.PostType.LIKE), name="likes"),
+    path('notes/', views.PostTypeIndex.as_view(post_type=Post.PostType.NOTE), name="notes"),
+    path('photos/', views.PostTypeIndex.as_view(post_type=Post.PostType.PHOTO), name="photos"),
+    path('articles/', views.PostTypeIndex.as_view(post_type=Post.PostType.ARTICLE), name="articles"),
+    path('reposts/', views.PostTypeIndex.as_view(post_type=Post.PostType.REPOST), name="reposts"),
     path('bookmarks/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='bookmarkdetail_old'),
     path('likes/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='likedetail_old'),
     path('notes/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='notedetail_old'),
