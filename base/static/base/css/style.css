@@ -343,6 +343,11 @@ a.btn {
     padding-bottom: var(--space-2);
 }
 
+.px-2 {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+}
+
 
 
 /* 
@@ -474,6 +479,7 @@ a.btn {
 
     .sitenav-title {
         font-weight: bold;
+        margin-right: var(--space-3);
         
         &:link, &:visited {
             text-decoration: none;
@@ -615,7 +621,6 @@ a.btn {
     max-width: 28rem;
     list-style:none;
     margin: var(--space-6) auto;
-    padding: 0;
 
     h1, .display1 {
         font-size: var(--font-5);
@@ -741,6 +746,18 @@ a.btn {
         color: var(--light-text);
         font-size: var(--font-root);
         font-style: italic;
+    }
+
+    .post-header {
+        padding: var(--space-2);
+    }
+
+    .post-content, .post-footer {
+        padding: 0 var(--space-2);
+    }
+
+    .webmentions {
+        padding: 0 var(--space-2);
     }
 }
 

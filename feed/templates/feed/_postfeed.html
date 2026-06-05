@@ -1,6 +1,6 @@
 <div class="feed h-feed">
     <header class="feed-header">     
-        <div class="bg-primary">
+        <div class="bg-primary px-2">
             <div class="feed-header-content">
             {% if feed.name %}
             <h1 class="feed-name p-name">
@@ -32,7 +32,7 @@
         {% endif %}
     </header>
     {% block feed_list %}
-    <ul class="feed-list">
+    <ul class="feed-list px-2">
         {% for post in feed.posts %}
         <li class="feed-item" id="feed-item-{{post.id}}">
             {% if postfeed.full %}

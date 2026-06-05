@@ -1,6 +1,6 @@
 <article class="post h-entry {{ post.post_type|lower }} article-detail">
     {% block postheader %}
-    <header class="post-header bg-primary">
+    <header class="post-header bg-primary px-2 py-1">
         <div class="container">
         {% include 'feed/_post_header_meta.html' with post=post %}        
         <h1 class="p-name post-title"><a class="post-link" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>        
