@@ -42,7 +42,7 @@
 {% if post.is_article %}
     {% include 'feed/_article_detail.html' with post=post %}
 {% else %}
-<div class="container">
+<div class="container mt-6">
     {% include 'feed/_post.html' with post=post is_first=True %}
 </div>
 {% endif %}
