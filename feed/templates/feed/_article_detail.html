@@ -55,9 +55,7 @@
     {% endblock %}
     {% block webmentions %}
         {% if webmentions %}
-        <div class="container">
         {% include 'feed/_webmentions.html' with webmentions=webmentions %} 
-        </div>
         {% endif %}       
     {% endblock webmentions %}
 </article>

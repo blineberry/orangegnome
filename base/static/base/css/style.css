@@ -329,6 +329,10 @@ a.btn {
     margin-top: var(--space-6);
 }
 
+.p-2 {
+    padding: var(--space-2);
+}
+
 .pt-6 {
     padding-top: var(--space-6);
 }
@@ -514,7 +518,6 @@ a.btn {
     border: 0 none;
     background: var(--primary-darken-1);
     width: auto;
-    text-align: right;
     position: absolute;
     position-anchor: --sitenav;
     inset-block-start: anchor(left);
@@ -532,6 +535,7 @@ a.btn {
     list-style:none;
     margin: 0;
     padding: 0; 
+    text-align: right;
 }
 
 .sitenav-listitem {
@@ -1226,4 +1230,9 @@ ul.commalist {
   
   .firstpartymentions-list-item .mentions-content-title {
     font-weight: bold;
+  }
+
+  .tags-title {
+    font-size: 2.33rem;
+    font-style: italic;
   }
