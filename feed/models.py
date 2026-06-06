@@ -194,7 +194,7 @@ class Post(Webmentionable, MastodonSyndicatable):
             t = Truncator(strip_tags(self.content_txt()))
             return t.chars(50)
         
-        return 'FeedItem'
+        return 'Post'
 
     def is_article(self):
         return self.post_type == self.PostType.ARTICLE

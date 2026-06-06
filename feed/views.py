@@ -1,9 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 
 from django.urls import reverse
-from django.views.generic import detail, dates, ListView, View
-from django.views.generic.list import MultipleObjectMixin
-from django.shortcuts import redirect
+from django.views.generic import detail, ListView, View
 
 from feed.viewmodels import EntryVM, FeedVM, LinkVM, PostFeedVM
 from .models import Tag, Post as Post, convert_commonmark_to_html, convert_commonmark_to_plain_text
@@ -18,21 +16,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models.query import QuerySet
 from typing import Any
 from webmentions.views import WebmentionableMixin
-
-class PublishedMultipleObjectMixin(MultipleObjectMixin):
-    def get_queryset(self):
-        return super().get_queryset().filter(published__lte=timezone.now())
-
-class FeedItemArchiveView(PublishedMultipleObjectMixin, dates.ArchiveIndexView):
-    model = Post
-    date_field = 'published'
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['feed_title'] = context['page_title']
-
-        return context
     
 class DTListView(ListView):
     ORDER_ASC = "asc"
