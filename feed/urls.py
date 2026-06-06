@@ -11,7 +11,7 @@ urlpatterns = [
         path('', views.YearView.as_view(), name='year'),
         path('<int:month>/', include([
             path('', views.MonthView.as_view(), name='month'),
-            path('<int:day>', views.DayView.as_view(), name='day')
+            path('<int:day>/', views.DayView.as_view(), name='day')
         ])),
     ])),
     path('tags/', views.TagIndex.as_view(), name='tagindex'),

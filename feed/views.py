@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from django.urls import reverse
 from django.views.generic import TemplateView, detail, dates, ListView, View
@@ -74,7 +74,7 @@ class DTListView(ListView):
     def get_dt_format(self):
         return self.dt_format
     
-    def dt_paginate_queryset(self, queryset:QuerySet[Post], page_size:int, viewname:str)->tuple[QuerySet[Post],str,str,str,str]:
+    def dt_paginate_queryset(self, queryset:QuerySet[Post], page_size:int, viewname:str, context)->tuple[QuerySet[Post],str,str,str,str]:
         prev_url = None
         prev_text = None
         next_url = None
@@ -117,7 +117,7 @@ class DTListView(ListView):
                 next_query["after"] = last.published.isoformat()
             else:
                 next_query["before"] = last.published.isoformat()
-            next_url = reverse(viewname, query=next_query)
+            next_url = reverse(viewname, args=self.get_canonical_view_args(context), query=next_query)
 
         if before is None and after is None:
             return (page, prev_url, prev_text, next_url, next_text)
@@ -144,9 +144,9 @@ class DTListView(ListView):
                 dt = list(previous)[-1].published
                 prev_key = "after" if self.order == self.ORDER_ASC else "before"
                 prev_query[prev_key] = dt.isoformat()
-                prev_url = reverse(viewname, query=prev_query)
+                prev_url = reverse(viewname, args=self.get_canonical_view_args(context), query=prev_query)
             else: 
-                prev_url = reverse(viewname, query=prev_query)
+                prev_url = reverse(viewname, args=self.get_canonical_view_args(context), query=prev_query)
 
         return (page, prev_url, prev_text, next_url, next_text)
     
@@ -170,7 +170,7 @@ class DTListView(ListView):
 
         return query
 
-    def get_current(self, viewname):
+    def get_current(self, viewname, context):
         query = self.get_base_query()
         text = ""
         if self.get_order() == self.ORDER_ASC:
@@ -183,13 +183,13 @@ class DTListView(ListView):
             text = f'Before {timezone.datetime.fromisoformat(self.before).strftime(self.get_dt_format())}'
             query["before"] = self.before
 
-        url = reverse(viewname, query=query)
+        url = reverse(viewname, args=self.get_canonical_view_args(context), query=query)
         return (url, text,)
     
     def get_first_page_url(self, context):
         query = self.get_base_query()
 
-        return reverse(self.get_viewname(context), query=query)
+        return reverse(self.get_viewname(context), args=self.get_canonical_view_args(context), query=query)
     
     def get_context_data(self, **kwargs):
         paginate_by = self.paginate_by
@@ -199,8 +199,8 @@ class DTListView(ListView):
 
         queryset = context.get("object_list")
         viewname = self.get_viewname(context)
-        context["object_list"], context["prev_url"], context["prev_text"], context["next_url"], context["next_text"] = self.dt_paginate_queryset(queryset, self.paginate_by, viewname)
-        context["cur_url"], context['cur_text'] = self.get_current(viewname)
+        context["object_list"], context["prev_url"], context["prev_text"], context["next_url"], context["next_text"] = self.dt_paginate_queryset(queryset, self.paginate_by, viewname, context)
+        context["cur_url"], context['cur_text'] = self.get_current(viewname, context)
         return context
 
 class FeedView(DTListView):
@@ -256,36 +256,6 @@ class FeedView(DTListView):
 class FeedItemDateArchiveView(FeedItemArchiveView):
     make_object_list = True
     template_name = 'feed/post_archive.html'
-
-class YearView(PermalinkResponseMixin, dates.YearArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):    
-    canonical_viewname = 'feed:year'
-    
-    def get_canonical_view_args(self, context):
-        return [context['year'].strftime("%Y")]
-
-    def get_page_title(self, context):
-        return '{d.year} Archives | Brent Lineberry'.format(d = context['year'])
-
-
-class MonthView(PermalinkResponseMixin, dates.MonthArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
-    canonical_viewname = 'feed:month'
-    month_format = '%m'
-    
-    def get_canonical_view_args(self, context):
-        return [context['month'].strftime("%Y"), context['month'].strftime("%m")]
-
-    def get_page_title(self, context):
-        return '{d:%B} {d.year} Archives | Brent Lineberry'.format(d = context['month'])
-
-class DayView(PermalinkResponseMixin, dates.DayArchiveView, FeedItemDateArchiveView, PageTitleResponseMixin):
-    canonical_viewname = 'feed:day'
-    month_format = '%m'
-    
-    def get_canonical_view_args(self, context):
-        return [context['day'].strftime("%Y"), context['day'].strftime("%m"), context['day'].strftime("%d")]
-
-    def get_page_title(self, context):
-        return '{d:%B} {d.day}, {d.year} Archives | Brent Lineberry'.format(d = context['day'])
     
 class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
     paginate_by = 10
@@ -363,7 +333,7 @@ class PostIndex(PermalinkResponseMixin, FeedView):
         if self.order == self.ORDER_ASC:
             query["order"] = self.ORDER_ASC
 
-        alts.append(LinkVM(url=reverse(self.get_viewname(context), query=query), text="View partial content feed"))
+        alts.append(LinkVM(url=reverse(self.get_viewname(context), args=self.get_canonical_view_args(context), query=query), text="View partial content feed"))
 
         return alts
 
@@ -380,7 +350,7 @@ class PostIndex(PermalinkResponseMixin, FeedView):
         if self.order == self.ORDER_ASC:
             query["order"] = self.ORDER_ASC
 
-        return reverse(self.get_viewname(context), query=query)
+        return reverse(self.get_viewname(context), args=self.get_canonical_view_args(context), query=query)
     
 
     def get_base_query(self):
@@ -406,7 +376,7 @@ class PostIndex(PermalinkResponseMixin, FeedView):
         postfeed.posts = context["object_list"]
         postfeed.full = self.full_feed
 
-        cur_url, cur_text = self.get_current(self.get_viewname(context))
+        cur_url, cur_text = self.get_current(self.get_viewname(context), context)
 
         if cur_text is not None and cur_text.strip() != "":
             postfeed.subtitle = cur_text
@@ -585,3 +555,93 @@ class PostDetailView(ForceSlugMixin, WebmentionableMixin, PermalinkResponseMixin
             context["page_title"] = f'{post.source_author_name} reposted by Brent Lineberry'
 
         return context
+    
+class YearView(PostIndex):
+    canonical_viewname = 'feed:year'
+    date = None
+    year = None
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+
+        self.year = self.kwargs.get("year")
+        self.date = date(self.year, 1, 1)
+    
+    def get_canonical_view_args(self, context):
+        return [self.date.strftime("%Y")]
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        if self.year is not None:
+            qs = qs.filter(published__year=self.year)
+        
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = '{d.year} Archives | Brent Lineberry'.format(d = self.date)
+        context['feed_title'] = '{d.year} Archives'.format(d = self.date)
+
+        return context
+    
+class MonthView(YearView):
+    canonical_viewname = 'feed:month'
+    month = None
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+
+        self.month = self.kwargs.get("month")
+        self.date = date(self.year, self.month, 1)
+    
+    def get_canonical_view_args(self, context):
+        args = super().get_canonical_view_args(context)
+        args.append(self.month)
+        return args
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = '{d:%B} {d.year} Archives | Brent Lineberry'.format(d = self.date)
+        context['feed_title'] = '{d:%B} {d.year} Archives'.format(d = self.date)
+
+        return context
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        if self.year is not None:
+            qs = qs.filter(published__month=self.month)
+        
+        return qs
+    
+class DayView(MonthView):
+    canonical_viewname = 'feed:day'
+    day = None
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+
+        self.year = self.kwargs.get("year")
+        self.month = self.kwargs.get("month")
+        self.day = self.kwargs.get("day")
+
+        self.date = date(self.year, self.month, self.day)
+    
+    def get_canonical_view_args(self, context):
+        return [self.date.strftime("%Y"), self.date.strftime("%m"), self.date.strftime("%d")]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = '{d:%B} {d.day}, {d.year} Archives | Brent Lineberry'.format(d = self.date)
+        context['feed_title'] = '{d:%B} {d.day}, {d.year} Archives'.format(d = self.date)
+
+        return context
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        if self.year is not None:
+            qs = qs.filter(published__day=self.day)
+        
+        return qs
