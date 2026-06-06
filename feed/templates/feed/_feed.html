@@ -1,0 +1,41 @@
+<div class="feed h-feed">
+    <header class="feed-header">        
+        {% if feed.name %}
+        <h1 class="feed-name p-name">
+            {% if feed.url %}
+            <a class="u-url" href="{{ feed.url }}">
+            {% endif %}
+            {{ feed_title }}
+            {% if feed.url %}
+            </a>
+            {% endif %}
+        </h1>
+        {% elif feed.url %}
+        <a class="u-url" href="{{ feed.url }}">{{feed.url}}</a>
+        {% endif %}
+        {% if feed.uid %}
+        <a class="u-url u-uid" href="{{ feed.uid }}">Full text feed</a>
+        {% endif %}
+        {% if feed.prev %}
+        <nav class="feed-nav">
+            <a class="feed-prev" rel="prev" href="{{ feed.prev.url }}">{{ feed.prev.text }}</a>
+        </nav>
+        {% endif %}
+    </header>
+    {% block feed_list %}
+    <ul class="feed-list">
+        {% for entry in feed.entries %}
+        <li class="feed-item" id="feed-item-{{post.id}}">
+            {% include 'feed/_entry.html' with entry=entry is_first=forloop.first %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+    <footer>
+        {% if feed.next %}
+        <nav class="feed-nav">
+            <a class="feed-next" rel="next" href="{{ feed.next.url }}">{{ feed.next.text }}</a>
+        </nav>
+        {% endif %}
+    </footer>
+</div>

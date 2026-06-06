@@ -1,20 +1,21 @@
-<article class="article h-entry {{ post.post_type|lower }}">
+<article class="post h-entry {{ post.post_type|lower }}">
     {% block postheader %}
-    <header class="article-header">
+    <header class="post-header">
         {% include 'feed/_post_header_meta.html' with post=post %}
         {% if post.is_article %}        
-            <h1 class="p-name"><a class="article-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
-            <div class="article-summary p-summary">{{ post.summary_html | safe }}</div>
+            <h1 class="p-name"><a class="post-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
+            <div class="post-summary p-summary">{{ post.summary_html | safe }}</div>
         {% endif %}
+        <div class="h-card p-author post-author"><a class="u-url" href="{{ post.author.url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" /><span>{{ post.author.name }}</span></a></div>
     </header>
     {% endblock %}
     {% block postcontent %}
-    <div class="article-content">
+    <div class="post-content">
         {% include 'feed/_post_content.html' with post=post is_first=is_first %}
     </div>
 {% endblock %}
 {% block postfooter %}
-    <footer class="article-footer">
+    <footer class="post-footer">
         {% include 'feed/_post_footer_meta.html' with post=post %}
     </footer>
     {% endblock %}

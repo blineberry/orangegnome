@@ -3,8 +3,7 @@
 {% endif %}
 <div class="meta">
     {% if post.is_published %}
-    <div class="postmeta-published">Published by 
-        <span class="h-card p-author postmeta-published-author"><a class="u-url alt" href="{{ object.get_site_url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" />{{ post.author.name }}</a></span> on 
+    <div class="postmeta-published"> 
         <a class="u-url alt" href="{{ post.get_absolute_url }}"><time class="dt-published" datetime="{{ post.published|date:'c' }}">{{ post.published|date:'M j, Y' }}</time></a>
     </div>
     {% else %}

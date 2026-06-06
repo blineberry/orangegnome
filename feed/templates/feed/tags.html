@@ -2,13 +2,19 @@
 
 {% block body %}
 
-<h1>Tags</h1>
+<div class="bg-primary">
+    <div class="container py-2">
+        <h1 class="m-0">Tags</h1>
+    </div>
+</div>
 
-<ul class="linklist">
-{% for tag in object_list %}
-<li class="linklist-item"><a href="{% url 'feed:tag' pk=tag.id slug=tag.slug %}">{{tag.name}}</a></li>
-{% endfor %}
-</ul>
+<div class="container">
+    <ul class="linklist">
+    {% for tag in object_list %}
+    <li class="linklist-item"><a href="{% url 'feed:tag' pk=tag.id slug=tag.slug %}">{{tag.name}}</a></li>
+    {% endfor %}
+    </ul>
+</div>
 
 
 {% endblock %}

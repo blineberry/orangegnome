@@ -243,7 +243,7 @@ class Post(Webmentionable, MastodonSyndicatable):
         return self.get_permalink()
     
     def get_edit_link(self):
-        model_name = 'feeditem'
+        model_name = 'post'
 
         if self.post_type is not None:
             model_name = self.post_type.lower()

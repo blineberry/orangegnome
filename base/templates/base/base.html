@@ -38,7 +38,7 @@
     {% endif %}
     <link rel="microsub" href="https://aperture.p3k.io/microsub/891">
 </head>
-<body>    
+<body class="site">    
     <header class="siteheader">
         <nav class="sitenav">
             <a class="sitenav-title" href="{% url 'feed:index' %}">{{ base.site_name }}</a>
@@ -76,17 +76,22 @@
             </ul>
         </nav>
         {% endif %}
+        {% if is_home %}
         <div class="h-card profile {% block hcard_class %}{% endblock %}">
             <a rel="me" href="{% url 'feed:index' %}" class="u-url u-uid profile-link"><img width="128" height="128" class="u-photo profile-image" src="{{ profiles.site_owner.photo.url }}" alt="A profile photo of {{ profiles.site_owner.name }}"></a>
             <div class="p-name profile-name">{{ profiles.site_owner.name }}</div>
-            {% block hcard %}
-            {% endblock %}
+            <p class="p-note profile-bio">{{ profiles.site_owner.short_bio }}</p>
+            <ul class="linked-profiles profile-linkedprofilelist">
+            {% for profile in profiles.site_owner.linkedprofile_set.all %}
+                <li class="profile-linkedprofileitem"><a class="profile-linkedprofilelink" rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
+            {% endfor %} 
         </div>        
+        {% endif %}
     </header>
-    <div class="sitemain">
+    <main class="sitemain">
     {% block body %}
     {% endblock %}
-    </div>
+    </main>
     <footer class="sitefooter">
         <nav class="sitefooter-content sitefooter-nav">
             <ul>
