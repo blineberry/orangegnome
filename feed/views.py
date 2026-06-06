@@ -1,13 +1,11 @@
 from datetime import date, datetime
 
 from django.urls import reverse
-from django.views.generic import TemplateView, detail, dates, ListView, View
+from django.views.generic import detail, dates, ListView, View
 from django.views.generic.list import MultipleObjectMixin
 from django.shortcuts import redirect
 
-from feed.viewmodels import AuthorVM, EntryVM, FeedVM, LinkVM, PostFeedVM
-from orangegnome import settings
-from profiles.models import Profile
+from feed.viewmodels import EntryVM, FeedVM, LinkVM, PostFeedVM
 from .models import Tag, Post as Post, convert_commonmark_to_html, convert_commonmark_to_plain_text
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
@@ -22,10 +20,6 @@ from typing import Any
 from webmentions.views import WebmentionableMixin
 
 class PublishedMultipleObjectMixin(MultipleObjectMixin):
-    def get_queryset(self):
-        return super().get_queryset().filter(published__lte=timezone.now())
-
-class PublishedSingleObjectMixin(detail.SingleObjectMixin):
     def get_queryset(self):
         return super().get_queryset().filter(published__lte=timezone.now())
 
@@ -249,37 +243,6 @@ class FeedView(DTListView):
         feed.entries = self.objects_to_entries(context["object_list"])
 
         context["feed"] = feed
-        return context
-
-
-
-class FeedItemDateArchiveView(FeedItemArchiveView):
-    make_object_list = True
-    template_name = 'feed/post_archive.html'
-    
-class TagArchive(ForceSlugMixin, PermalinkResponseMixin, detail.SingleObjectMixin, FeedItemArchiveView, PageTitleResponseMixin):
-    paginate_by = 10
-    template_name = 'feed/post_archive.html'
-    canonical_viewname = 'feed:tag'
-
-    def get_canonical_view_args(self, context):
-        return [self.kwargs['pk'], self.kwargs['slug']]
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Tag.objects.all())
-        
-        return super().get(request, *args, **kwargs)
-
-    def get_page_title(self, context):
-        return self.object.name
-
-    def get_queryset(self):
-        return self.object.feed_items.filter(published__lte=timezone.now()).order_by('-published')
-        
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context["page_title"] = f'{self.object.name} | Brent Lineberry'
         return context
     
 class TagIndex(ListView, PageTitleResponseMixin):
@@ -645,3 +608,28 @@ class DayView(MonthView):
             qs = qs.filter(published__day=self.day)
         
         return qs
+    
+class TagArchive(PostIndex):
+    canonical_viewname = 'feed:tag'
+    tag_id = 0
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+
+        self.tag_id = self.kwargs.get("pk")
+
+    def get_canonical_view_args(self, context):
+        return [self.kwargs['pk'], self.kwargs['slug']]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        return qs.filter(tags__id=self.tag_id)
+        
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        tag = Tag.objects.get(pk=self.tag_id)
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f'{tag.name} | Brent Lineberry'
+        context["feed_title"] = f'{tag.name}'
+        return context
