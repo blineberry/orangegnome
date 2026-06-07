@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views.generic import detail, ListView, View
 
 from feed.viewmodels import EntryVM, FeedVM, LinkVM, PostFeedVM
-from .models import Tag, Post as Post, convert_commonmark_to_html, convert_commonmark_to_plain_text
+from .models import Image, PostImage, Tag, Post as Post, convert_commonmark_to_html, convert_commonmark_to_plain_text
 from base.views import PermalinkResponseMixin, PageTitleResponseMixin, ForceSlugMixin
 from .feed import LatestEntriesFeed
 from django.utils import timezone
@@ -13,6 +13,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Q, Count
 from django.db.models.query import QuerySet
 from typing import Any
 from webmentions.views import WebmentionableMixin
@@ -34,22 +35,46 @@ class DTListView(ListView):
         self.order = self.ORDER_ASC if request.GET.get("order") == self.ORDER_ASC else self.ORDER_DESC
 
         if self.order == self.ORDER_ASC:
-            try:
-                self.after = timezone.datetime.fromisoformat(request.GET.get("after")).isoformat()
-            except Exception as e:
-                print(e)
-                self.after = None
+            self.after = self.parse_after_str(request.GET.get("after"))
         else:
-            try:
-                self.before = timezone.datetime.fromisoformat(request.GET.get("before")).isoformat()
-            except:
-                self.before = None
+            self.before = self.parse_before_str(request.GET.get("before"))
 
-    def get_viewname(self):
+    def get_viewname(self, context):
         return self.viewname
 
     def get_dt_format(self):
         return self.dt_format
+    
+    def get_obj_order_field(self, obj):
+        return obj.published
+    
+    def parse_order_field_str(self, s):
+        try:
+            return timezone.datetime.fromisoformat(s)
+        except Exception as e:
+            return None
+    
+    def parse_before_str(self, s):
+        return self.parse_order_field_str(s)
+    
+    def parse_after_str(self, s):
+        return self.parse_order_field_str(s)
+        
+    def before_str(self):
+        return self.before.isoformat()
+    
+    def after_str(self):
+        return self.after.isoformat()
+    
+    def get_obj_order_field_display(self, f):
+        return f.strftime(self.get_dt_format())
+        
+    def before_display(self):
+        return self.get_obj_order_field_display(self.before)
+    
+    def after_display(self):
+        return self.get_obj_order_field_display(self.after)   
+
     
     def dt_paginate_queryset(self, queryset:QuerySet[Post], page_size:int, viewname:str, context)->tuple[QuerySet[Post],str,str,str,str]:
         prev_url = None
@@ -60,24 +85,14 @@ class DTListView(ListView):
         if queryset.count() <= 0:
             return (queryset, prev_url, prev_text, next_url, next_text)
         
-        try:
-            before = timezone.datetime.fromisoformat(self.before)
-        except:
-            before = None
-        
-        try:
-            after = timezone.datetime.fromisoformat(self.after)
-        except:
-            after = None
-
         filter_args = {}
-        if before is not None:
+        if self.before is not None:
             filter_args[f'{self.get_order_field()}__lt'] = self.before
-        if after is not None:
+        if self.after is not None:
             filter_args[f'{self.get_order_field()}__gt'] = self.after
         
         dt_queryset = queryset.filter(**filter_args)
-        page = dt_queryset[:page_size]     
+        page = dt_queryset[:page_size]
 
         last = None 
 
@@ -91,20 +106,20 @@ class DTListView(ListView):
             next_text = "Load newer" if self.order == self.ORDER_ASC else "Load older"
             next_query = self.get_base_query()
             if self.order == self.ORDER_ASC:
-                next_query["after"] = last.published.isoformat()
+                next_query["after"] = self.get_obj_order_field(last)
             else:
-                next_query["before"] = last.published.isoformat()
+                next_query["before"] = self.get_obj_order_field(last)
             next_url = reverse(viewname, args=self.get_canonical_view_args(context), query=next_query)
 
-        if before is None and after is None:
+        if self.before is None and self.after is None:
             return (page, prev_url, prev_text, next_url, next_text)
         
         filter_args = {}
 
         if self.order == self.ORDER_ASC:
-            filter_args[f'{self.get_order_field()}__lte'] = after
+            filter_args[f'{self.get_order_field()}__lte'] = self.after
         else: 
-            filter_args[f'{self.get_order_field()}__gte'] = before
+            filter_args[f'{self.get_order_field()}__gte'] = self.before
 
         previous_qs = queryset.filter(**filter_args)
 
@@ -118,9 +133,9 @@ class DTListView(ListView):
             prev_query = self.get_base_query()
 
             if previous_count > page_size:
-                dt = list(previous)[-1].published
+                of = self.get_obj_order_field(list(previous)[-1])
                 prev_key = "after" if self.order == self.ORDER_ASC else "before"
-                prev_query[prev_key] = dt.isoformat()
+                prev_query[prev_key] = self.parse_order_field_str(of)
                 prev_url = reverse(viewname, args=self.get_canonical_view_args(context), query=prev_query)
             else: 
                 prev_url = reverse(viewname, args=self.get_canonical_view_args(context), query=prev_query)
@@ -154,10 +169,10 @@ class DTListView(ListView):
             text = "After"
         
             if self.after is not None:
-                text += f' {timezone.datetime.fromisoformat(self.after).strftime(self.get_dt_format())}'
+                text += f' {self.get_obj_order_field_display(self.after)}'
                 query["after"] = self.after
         elif self.before is not None:
-            text = f'Before {timezone.datetime.fromisoformat(self.before).strftime(self.get_dt_format())}'
+            text = f'Before {self.get_obj_order_field_display(self.before)}'
             query["before"] = self.before
 
         url = reverse(viewname, args=self.get_canonical_view_args(context), query=query)
@@ -328,7 +343,6 @@ class PostIndex(PermalinkResponseMixin, FeedView):
             postfeed.subtitle = cur_text
 
         context["postfeed"] = postfeed 
-        print(context["feed"].alternates)
         return context
     
     def get_viewname(self, context)->str:
@@ -616,3 +630,52 @@ class TagArchive(PostIndex):
         context["page_title"] = f'{tag.name} | Brent Lineberry'
         context["feed_title"] = f'{tag.name}'
         return context
+    
+class PhotostreamView(PermalinkResponseMixin, FeedView):
+    canonical_viewname = "feed:photostream"
+    model = Image
+    template_name = 'feed/photostream.html'
+    order_field = 'id'
+    extra_context = {
+        'page_title': 'Photostream | Brent Lineberry',
+        'feed_title': 'Photostream',
+    }
+    full_feed = False
+    paginate_by = 99
+
+    def get_obj_order_field(self, obj):
+        return obj.id
+
+    def parse_order_field_str(self, s):
+        try:
+            return int(s)
+        except:
+            return None
+    
+    def get_obj_order_field_display(self, f):
+        return str(f)
+
+    def get_viewname(self, context)->str:
+        return self.get_canonical_viewname(context)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['feed'].name = context['page_title']
+
+        postfeed = PostFeedVM.from_feedvm(context['feed'])
+        postfeed.full = self.full_feed
+
+        cur_url, cur_text = self.get_current(self.get_viewname(context), context)
+
+        if cur_text is not None and cur_text.strip() != "":
+            postfeed.subtitle = cur_text
+
+        context["postfeed"] = postfeed 
+        return context
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        qs = qs.annotate(post_count=Count('posts', filter=Q(posts__published__lte=timezone.now()))) #.filter(post_count__gt=0)
+        
+        return qs
