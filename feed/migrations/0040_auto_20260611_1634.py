@@ -13,10 +13,16 @@ def up(apps, schema_editor):
             continue
 
         first_created = item.posts.order_by("created").first()
+        first_published = item.posts.order_by("published").first()
         last_updated = item.posts.order_by("-updated").first()
 
-        item.created = first_created.created
-        item.updated = last_updated.updated
+        dates = [first_created.created, first_published.published, last_updated.updated]
+
+        created = min(d for d in dates if d is not None)
+        updated = max(d for d in dates if d is not None)
+        
+        item.created = created
+        item.updated = updated
         
         item.save()
 
