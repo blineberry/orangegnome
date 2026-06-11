@@ -34,5 +34,6 @@ urlpatterns = [
     path('photos/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='photodetail_old'),
     path('articles/<int:pk>/<slug:slug>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='articleodetail_old'),
     path('reposts/<int:pk>', RedirectView.as_view(permanent=True, pattern_name='feed:detail'), name='repostdetail_old'),
-    path('photostream/', views.PhotostreamView.as_view(), name='photostream'),
+    path('images/', views.ImageIndexView.as_view(), name='images'),
+    path('images/<int:pk>', views.ImageView.as_view(), name='image')
 ]

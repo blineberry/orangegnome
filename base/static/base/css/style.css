@@ -1249,3 +1249,12 @@ ul.commalist {
         display: block;
     }
   }
+
+  .image-detail {
+    .feed-header figure img {
+        max-width: 100%;
+        max-height: 66vh;
+        margin: 0 auto;
+        display: block;
+    }
+  }

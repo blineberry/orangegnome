@@ -13,7 +13,8 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q, Count
+from django.db.models import F, Q, Count, Min, Prefetch
+from django.db.models.lookups import GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual
 from django.db.models.query import QuerySet
 from typing import Any
 from webmentions.views import WebmentionableMixin
@@ -75,7 +76,25 @@ class DTListView(ListView):
     def after_display(self):
         return self.get_obj_order_field_display(self.after)   
 
+    def get_dt_queryset(self, queryset):
+        filter_args = {}
+        if self.before is not None:
+            filter_args[f'{self.get_order_field()}__lt'] = self.before
+        if self.after is not None:
+            filter_args[f'{self.get_order_field()}__gt'] = self.after
+        
+        return queryset.filter(**filter_args)
     
+    def get_previous_qs(self, queryset):
+        filter_args = {}
+
+        if self.order == self.ORDER_ASC:
+            filter_args[f'{self.get_order_field()}__lte'] = self.after
+        else: 
+            filter_args[f'{self.get_order_field()}__gte'] = self.before
+
+        return queryset.filter(**filter_args)
+
     def dt_paginate_queryset(self, queryset:QuerySet[Post], page_size:int, viewname:str, context)->tuple[QuerySet[Post],str,str,str,str]:
         prev_url = None
         prev_text = None
@@ -85,13 +104,7 @@ class DTListView(ListView):
         if queryset.count() <= 0:
             return (queryset, prev_url, prev_text, next_url, next_text)
         
-        filter_args = {}
-        if self.before is not None:
-            filter_args[f'{self.get_order_field()}__lt'] = self.before
-        if self.after is not None:
-            filter_args[f'{self.get_order_field()}__gt'] = self.after
-        
-        dt_queryset = queryset.filter(**filter_args)
+        dt_queryset = self.get_dt_queryset(queryset)
         page = dt_queryset[:page_size]
 
         last = None 
@@ -114,14 +127,7 @@ class DTListView(ListView):
         if self.before is None and self.after is None:
             return (page, prev_url, prev_text, next_url, next_text)
         
-        filter_args = {}
-
-        if self.order == self.ORDER_ASC:
-            filter_args[f'{self.get_order_field()}__lte'] = self.after
-        else: 
-            filter_args[f'{self.get_order_field()}__gte'] = self.before
-
-        previous_qs = queryset.filter(**filter_args)
+        previous_qs = self.get_previous_qs(queryset)
 
         previous = previous_qs.reverse()[:page_size + 1]
         previous_count = previous.count()
@@ -135,7 +141,7 @@ class DTListView(ListView):
             if previous_count > page_size:
                 of = self.get_obj_order_field(list(previous)[-1])
                 prev_key = "after" if self.order == self.ORDER_ASC else "before"
-                prev_query[prev_key] = self.parse_order_field_str(of)
+                prev_query[prev_key] = of
                 prev_url = reverse(viewname, args=self.get_canonical_view_args(context), query=prev_query)
             else: 
                 prev_url = reverse(viewname, args=self.get_canonical_view_args(context), query=prev_query)
@@ -457,7 +463,7 @@ class HomeView(PostIndex):
     def get_queryset(self):
         qs = super().get_queryset()
 
-        qs.exclude(post_type=Post.PostType.LIKE)
+        qs = qs.exclude(post_type=Post.PostType.LIKE)
 
         return qs
     
@@ -631,32 +637,59 @@ class TagArchive(PostIndex):
         context["feed_title"] = f'{tag.name}'
         return context
     
-class PhotostreamView(PermalinkResponseMixin, FeedView):
-    canonical_viewname = "feed:photostream"
+class ImageIndexView(PermalinkResponseMixin, FeedView):
+    canonical_viewname = "feed:images"
     model = Image
     template_name = 'feed/photostream.html'
-    order_field = 'id'
+    order_field = 'published'
     extra_context = {
         'page_title': 'Photostream | Brent Lineberry',
         'feed_title': 'Photostream',
     }
     full_feed = False
-    paginate_by = 99
+    paginate_by = 3
 
-    def get_obj_order_field(self, obj):
-        return obj.id
+    # def get_obj_order_field(self, obj):
+    #     return obj.id
 
-    def parse_order_field_str(self, s):
-        try:
-            return int(s)
-        except:
-            return None
+    # def parse_order_field_str(self, s):
+    #     try:
+    #         return int(s)
+    #     except:
+    #         return None
     
-    def get_obj_order_field_display(self, f):
-        return str(f)
+    # def get_obj_order_field_display(self, f):
+    #     return str(f)
+
+    def get_order_field(self):
+        return F(self.order_field)
+    
+    def get_ordering(self):
+        order = self.get_order()
+        return [F(self.order_field) if order == "asc" else F(self.order_field).desc(),]
 
     def get_viewname(self, context)->str:
         return self.get_canonical_viewname(context)
+
+    def get_dt_queryset(self, queryset):
+        filter_args = {}
+
+        if self.before is not None:
+            queryset = queryset.filter(LessThan(F("published"), self.before))
+        if self.after is not None:
+            queryset = queryset.filter(GreaterThan(F("published"), self.after))
+        
+        return queryset
+    
+    def get_previous_qs(self, queryset):
+        filter_args = {}
+
+        if self.order == self.ORDER_ASC:
+            queryset = queryset.filter(LessThanOrEqual(F("published"), self.after))
+        else: 
+            queryset = queryset.filter(GreaterThanOrEqual(F("published"), self.before))
+
+        return queryset.filter(**filter_args)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -676,6 +709,34 @@ class PhotostreamView(PermalinkResponseMixin, FeedView):
     def get_queryset(self):
         qs = super().get_queryset()
 
-        qs = qs.annotate(post_count=Count('posts', filter=Q(posts__published__lte=timezone.now()))) #.filter(post_count__gt=0)
+        qs = qs.annotate(post_count=Count('posts', filter=Q(posts__published__lte=timezone.now())))
+        qs = qs.annotate(published=Min('posts__published'))
+        qs = qs.filter(post_count__gt=0)
+        qs = qs.prefetch_related(Prefetch("posts", queryset=Post.objects.filter(published__lte=timezone.now())))
         
         return qs
+    
+class ImageView(PermalinkResponseMixin, detail.DetailView):
+    pk = 0
+    canonical_viewname = 'feed:image'        
+    template_name = 'feed/image_detail.html'
+    model = Image
+
+    def get_canonical_view_args(self, context):
+        canonical_view_args = [self.pk]
+        
+        return canonical_view_args
+    
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+
+        image = self.get_object()
+        posts = image.posts.filter(published__lte=timezone.now()).order_by("-published")
+
+        context['image'] = image
+        context['posts'] = posts
+        context['permalink'] = reverse(self.canonical_viewname, args=self.get_canonical_view_args(context))
+
+        return context

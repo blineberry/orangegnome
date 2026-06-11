@@ -3,7 +3,15 @@
 {% block feed_list %}
 <ul class="feed-list px-2">
         {% for image in object_list %}
-        <li><img src="{{ image.image.url }}" alt="{{ image.description }}" {% if forloop.counter > 3 %}loading="lazy"{% endif %}></li>
+        <li>
+            {% if image.posts.count == 1 %}
+            <a href="{{ image.posts.first.get_absolute_url }}">
+            {% else %}
+            <a href="{% url 'feed:image' pk=image.id %}">
+            {% endif %}
+                <img src="{{ image.image.url }}" alt="{{ image.description }}" {% if forloop.counter > 3 %}loading="lazy"{% endif %}>
+            </a>
+        </li>
         {% endfor %}
     </ul>
 {% endblock %}

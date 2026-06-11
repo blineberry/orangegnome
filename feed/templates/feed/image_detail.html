@@ -1,0 +1,41 @@
+{% extends 'base/extended_hcard.html' %}
+
+{% block meta %}
+    {{ block.super }}
+
+    <meta name="og:image" content="{{ image.image.url }}" />
+    <meta name="og:image:alt" content="{{ image.description }}">  
+
+    {% for meta in post.author.meta_tags.all %}
+    <meta 
+        {% if meta.name %}
+        name="{{ meta.name }}"
+        {% endif %}
+        {% if meta.content %}
+        content="{{ meta.content }}"
+        {% endif %} >
+    {% endfor %}
+
+{% endblock %}
+
+{% block body %}
+<div class="feed h-feed image-detail">
+    <header class="feed-header">     
+        <div class="bg-primary px-2">
+            <div class="feed-header-content">
+                <figure>
+                    <img src="{{ image.image.url }}">
+                    <figcaption>{{ image.description }}</figcaption>
+                </figure>
+            </div>   
+        </div>
+    </header>
+    <ul class="feed-list px-2">
+        {% for post in posts %}
+        <li class="feed-item" id="feed-item-{{post.id}}">
+            {% include 'feed/_post_short.html' with post=post is_first=forloop.first %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
