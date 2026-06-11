@@ -52,6 +52,9 @@ class Image(models.Model):
 
     description = models.CharField(blank=True, max_length=255)
 
+    created = models.DateTimeField(null=True)
+    updated = models.DateTimeField(null=True)
+
     def __str__(self):
         return self.description
     
