@@ -6,7 +6,7 @@
             <h1 class="p-name"><a class="post-link alt" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>
             <div class="post-summary p-summary">{{ post.summary_html | safe }}</div>
         {% endif %}
-        <div class="h-card p-author post-author"><a class="u-url" href="{{ post.author.url }}"><img class="u-photo" src="{{ post.author.photo.url }}" /><span>{{ post.author.name }}</span></a></div>
+        <div class="h-card p-author post-author"><a class="u-url" href="{{ post.author.url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="" /><span>{{ post.author.name }}</span></a></div>
     </header>
     {% endblock %}
     {% block postcontent %}
