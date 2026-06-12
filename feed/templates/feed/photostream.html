@@ -1,0 +1,9 @@
+{% extends 'feed/post_list.html' %}
+
+{% block body %}
+
+<div class="photostream">
+    {% include 'feed/_photostreamfeed.html' with feed=postfeed %}
+</div>
+
+{% endblock %}

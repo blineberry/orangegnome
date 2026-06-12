@@ -45,6 +45,7 @@
             <ul class="sitenav-list">
                 <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:index' %}">Home</a></li>
                 <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:posts' %}">All Posts</a></li>
+                <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:images' %}">Photostream</a></li>
                 <li class="sitenav-listitem"><button popovertarget="sitenav-posttype-nav">Post Types</button></li>   
                 <li class="sitenav-listitem"><a class="sitenav-listlink" href="{% url 'feed:tagindex' %}">Tags</a></li>             
                 {% if user.is_staff %}

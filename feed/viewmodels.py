@@ -2,7 +2,7 @@ from datetime import datetime
 
 from profiles.models import Profile
 
-from .models import Post
+from .models import Image, Post
     
 class LinkVM(object):
     url:str = None

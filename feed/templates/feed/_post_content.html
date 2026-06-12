@@ -19,7 +19,7 @@
     {% for postimage in post.postimage_set.all|dictsort:"order"|dictsortreversed:"featured" %}
     {% if forloop.first and forloop.last %}
     <div class="photo-photo">
-    {% else %}
+    {% elif forloop.first %}
     <ul class="photo-photos">
         <li>
     {% endif %}
@@ -37,11 +37,11 @@
             {% if not is_first or not forloop.first %}loading="lazy"{% endif %}>
     </a>
     {% if not forloop.first and not forloop.last %}
-        <li>
+    </li>
         {% endif %}
     {% if forloop.first and forloop.last %}
     </div>
-    {% else %}
+    {% elif forloop.last %}
         </li>
     </ul>
     {% endif %}

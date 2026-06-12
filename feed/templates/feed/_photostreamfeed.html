@@ -1,0 +1,13 @@
+{% extends 'feed/_postfeed.html' %}
+
+{% block feed_list %}
+<ul class="feed-list px-2">
+        {% for image in object_list %}
+        <li>
+            <a href="{% url 'feed:image' pk=image.id %}">
+                <img src="{{ image.image.url }}" alt="{{ image.description }}" {% if forloop.counter > 9 %}loading="lazy"{% endif %}>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
