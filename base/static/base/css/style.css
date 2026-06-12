@@ -765,6 +765,12 @@ a.btn {
     }
 }
 
+.article-detail-authorpublished {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .article .meta, .adminnav {
     font-size: var(--font-small);
     font-family: var(--ui-font-family);

@@ -2,13 +2,15 @@
     {% block postheader %}
     <header class="post-header bg-primary px-2 py-1">
         <div class="container">
+
+        <div class="meta"><a class="alt" href="{{ post.get_edit_link }}">Edit</a></div>
         {% include 'feed/_post_header_meta.html' with post=post %}        
         <h1 class="p-name post-title"><a class="post-link" href="{{ post.get_permalink }}">{{ post.title_html | safe }}</a></h1>        
         <div class="post-summary p-summary">{{ post.summary_html | safe }}</div>        
         {% if user.is_staff %}
-        <div class="meta"><a class="alt" href="{{ post.get_edit_link }}">Edit</a></div>
         {% endif %}
-        <div class="meta">
+        <div class="meta article-detail-authorpublished">
+            <div class="h-card p-author post-author"><a class="u-url" href="{{ post.author.url }}"><img class="u-photo" src="{{ post.author.photo.url }}" /><span>{{ post.author.name }}</span></a></div>
             {% if post.is_published %}
             <div class="postmeta-published"> 
                 <a class="u-url alt" href="{{ post.get_absolute_url }}"><time class="dt-published" datetime="{{ post.published|date:'c' }}">{{ post.published|date:'M j, Y' }}</time></a>
@@ -28,8 +30,7 @@
 {% endblock %}
 {% block postfooter %}
     <footer class="post-footer">
-        <div class="container">
-        <div class="h-card p-author post-author"><a class="u-url" href="{{ post.author.url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" /><span>{{ post.author.name }}</span></a></div>
+        <div class="container">       
         
     {% if post.tags.all %}
     <div class="postmeta-tags">Tags:
