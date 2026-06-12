@@ -2,7 +2,7 @@
     {% block postheader %}
     <header class="post-header">
         {% include 'feed/_post_header_meta.html' with post=post %}
-        <div class="h-card p-author post-author"><a class="u-url" href="{{ post.author.url }}"><img class="u-photo" src="{{ post.author.photo.url }}" alt="{{ post.author.name }}" /><span>{{ post.author.name }}</span></a></div>
+        <div class="h-card p-author post-author"><a class="u-url" href="{{ post.author.url }}"><img class="u-photo" src="{{ post.author.photo.url }}" /><span>{{ post.author.name }}</span></a></div>
     </header>
     {% endblock %}
     {% block postcontent %}
