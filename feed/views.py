@@ -641,55 +641,20 @@ class ImageIndexView(PermalinkResponseMixin, FeedView):
     canonical_viewname = "feed:images"
     model = Image
     template_name = 'feed/photostream.html'
-    order_field = 'published'
+    order_field = 'created'
     extra_context = {
         'page_title': 'Photostream | Brent Lineberry',
         'feed_title': 'Photostream',
     }
     full_feed = False
-    paginate_by = 3
+    paginate_by = 33
 
-    # def get_obj_order_field(self, obj):
-    #     return obj.id
-
-    # def parse_order_field_str(self, s):
-    #     try:
-    #         return int(s)
-    #     except:
-    #         return None
+    def get_obj_order_field(self, obj):
+        return obj.created
     
-    # def get_obj_order_field_display(self, f):
-    #     return str(f)
-
-    def get_order_field(self):
-        return F(self.order_field)
-    
-    def get_ordering(self):
-        order = self.get_order()
-        return [F(self.order_field) if order == "asc" else F(self.order_field).desc(),]
-
     def get_viewname(self, context)->str:
         return self.get_canonical_viewname(context)
 
-    def get_dt_queryset(self, queryset):
-        filter_args = {}
-
-        if self.before is not None:
-            queryset = queryset.filter(LessThan(F("published"), self.before))
-        if self.after is not None:
-            queryset = queryset.filter(GreaterThan(F("published"), self.after))
-        
-        return queryset
-    
-    def get_previous_qs(self, queryset):
-        filter_args = {}
-
-        if self.order == self.ORDER_ASC:
-            queryset = queryset.filter(LessThanOrEqual(F("published"), self.after))
-        else: 
-            queryset = queryset.filter(GreaterThanOrEqual(F("published"), self.before))
-
-        return queryset.filter(**filter_args)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -710,9 +675,10 @@ class ImageIndexView(PermalinkResponseMixin, FeedView):
         qs = super().get_queryset()
 
         qs = qs.annotate(post_count=Count('posts', filter=Q(posts__published__lte=timezone.now())))
-        qs = qs.annotate(published=Min('posts__published'))
         qs = qs.filter(post_count__gt=0)
-        qs = qs.prefetch_related(Prefetch("posts", queryset=Post.objects.filter(published__lte=timezone.now())))
+        qs = qs.exclude(created__isnull=True)
+        #qs = qs.prefetch_related(Prefetch("postimage_set", queryset=PostImage.objects.filter(post__published__lte=timezone.now())))
+        #qs = qs.prefetch_related(Prefetch("posts", queryset=Post.objects.filter(published__lte=timezone.now())))
         
         return qs
     
