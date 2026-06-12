@@ -12,6 +12,7 @@ class ProfileManager(models.Manager):
 # Create your models here.
 class Profile(models.Model): 
     name = models.CharField(max_length=80)
+    given_name = models.CharField(max_length=80, default="")
     url = models.CharField(max_length=2000)
     url_display = models.CharField(max_length=80, null=True)
     photo = models.ImageField(null=True)
