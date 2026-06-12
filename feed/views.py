@@ -443,7 +443,7 @@ class HomeView(PostIndex):
     def get_queryset(self):
         qs = super().get_queryset()
 
-        qs.exclude(post_type=Post.PostType.LIKE)
+        qs = qs.exclude(post_type=Post.PostType.LIKE)
 
         return qs
     
