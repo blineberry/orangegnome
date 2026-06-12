@@ -790,17 +790,23 @@ a.btn {
     color: var(--light-text-lighten)
 }
 
-.article-content code {
-    font-size: var(--font-small);
-    font-weight: bold;
-  }
+.post-title, .post-summary, .post-content {
+    code {
+        font-size: var(--font-small);
+        font-weight: bold;
+    }
+}
+
+.post-title code {
+    font-size: var(--font-6);
+}
   
-  .article-readmore {
+.article-readmore {
     font-family: var(--ui-font-family);
     display: block;
     margin: var(--space-3) 0;
     font-size: var(--font-small);
-  }
+}
   
 
 .article .tags {
