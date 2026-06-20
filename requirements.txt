@@ -1,6 +1,6 @@
 azure-storage-blob==12.24.0
 beautifulsoup4==4.12.3
-bleach==6.2.0
+bleach==6.4.0
 Django==5.2.14
 django-storages==1.14.4
 django-resized==1.0.3
