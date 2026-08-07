@@ -1,3 +1,5 @@
+> This place is not a place of honor... no highly esteemed deed is commemorated here... nothing valued is here.
+
 # Getting Started
 
 Set up a virtual environment at the root of the project:
